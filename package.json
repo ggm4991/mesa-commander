@@ -1,0 +1,9 @@
+{
+  "name": "mesa-commander",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Contador de vidas y registro de partidas de Magic: The Gathering Commander",
+  "scripts": {
+    "test": "node pruebas/ejecutar.js"
+  }
+}
