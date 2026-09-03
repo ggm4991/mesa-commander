@@ -1,7 +1,7 @@
 # 0002. Versiones de herramientas fijadas por Node 20.18.1
 
 Fecha: 2026-09-03
-Estado: Aceptada
+Estado: Reemplazada por 0003
 
 ## Contexto
 
@@ -56,3 +56,11 @@ a 20.19/22 que dispara el problema del binario nativo.
   un descuido al actualizar dependencias en el futuro.
 - Si en algún momento se actualiza Node a ≥20.19 (o ≥22 para Capacitor 8), se
   puede revisar esta ADR y soltar las fijaciones de versión.
+
+## Nota posterior
+
+Esta ADR quedó corregida el mismo día: descartar la actualización de Node sin
+plantearla fue una decisión mía, no del usuario, y él prefería que se le
+ofreciera esa opción en vez de fijar versiones antiguas en silencio. La 0003
+recoge la solución real, que además resuelve la objeción original (afectar a
+otros proyectos de la máquina) sin necesidad de tocar el Node global.

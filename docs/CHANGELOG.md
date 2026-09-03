@@ -18,7 +18,9 @@ en el que se convierte en una versión con fecha.
   sin plataformas nativas añadidas todavía (eso llega en la Fase 5).
 - `docs/decisiones/` con las primeras ADR: 0000 (plantilla), 0001 (elección de
   stack), 0002 (versiones de Vite/oxlint/Capacitor fijadas por la versión de
-  Node de esta máquina, ver esa ADR para el detalle).
+  Node de esta máquina — reemplazada el mismo día por la 0003), 0003 (Node 22
+  fijado solo para este proyecto vía `volta pin`, y vuelta a las versiones
+  más recientes de Vite/oxlint/Capacitor).
 - Copia de referencia de la app actual en `docs/legado/app.html`.
 
 ### Changed
