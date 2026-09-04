@@ -13,5 +13,6 @@ export default defineConfig({
     include: ['tests/**/*.test.{ts,tsx}'],
     // Fase 0 no porta lógica todavía, así que tests/ está vacío a propósito.
     passWithNoTests: true,
+    setupFiles: ['./tests/configuracion.ts'],
   },
 })

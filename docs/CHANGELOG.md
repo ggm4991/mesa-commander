@@ -8,6 +8,23 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Primer commit de la Fase 3 (UI en React): `src/componentes/icono/` (los 36
+  SVG de `ICONOS` portados literalmente, más el componente `<Icono>`
+  sustituyendo a `ic()`) y `src/componentes/comunes/` (`<Modal>` con
+  `createPortal`, y `<AvisoProvider>`/`useAviso()` sustituyendo a
+  `abrirModal`/`cerrarModal`/`aviso()` — ver `docs/decisiones/0006`).
+- `src/index.css`: variables de diseño, reset base, nav, botones, `.opts` y
+  el CSS de modal/aviso, portados de app.html sección a sección según se
+  necesitan (falta el tablero y las rotaciones de asiento).
+- `index.html` actualizado con el viewport, `theme-color` y las fuentes de
+  Google Fonts (IBM Plex Sans/Spectral) del original.
+- 10 pruebas nuevas con Testing Library (`Icono`, `Modal`, `AvisoProvider`),
+  con `tests/configuracion.ts` registrando la limpieza de RTL entre tests
+  (necesaria porque el proyecto no activa `test.globals` en Vitest).
+- Verificación visual con Chromium real vía Playwright (uso puntual, no
+  añadido como dependencia): nav, icono, apertura/cierre de modal y aviso
+  comprobados con capturas y sin errores de consola.
+
 - `src/almacenamiento/`: adapter pattern para persistencia — interfaz
   `AlmacenPersistente` (mismo contrato que ya cumplía `window.storage`:
   `get(clave)`/`set(clave, valor)`), `adaptadorMemoria` (para tests) y
