@@ -8,6 +8,23 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- `src/almacenamiento/`: adapter pattern para persistencia — interfaz
+  `AlmacenPersistente` (mismo contrato que ya cumplía `window.storage`:
+  `get(clave)`/`set(clave, valor)`), `adaptadorMemoria` (para tests) y
+  `adaptadorCapacitor` (sobre `@capacitor/preferences`, instalado esta fase).
+  El repositorio de dominio (`repositorio.ts`) replica
+  `leer/guardarPartidas`, `leer/guardarPerfiles` (migrando el formato antiguo
+  al leer), `leer/guardarConfig` (con valores por defecto) y
+  `leer/guardarJuego` (que sigue sin persistir `undo`, y al leer lo
+  reinicia junto con `tIni`, igual que hacía el arranque de `app.html`).
+- `tests/almacenamiento/repositorio.test.ts`: 13 pruebas sobre el
+  repositorio con `adaptadorMemoria`, incluyendo un almacén que falla
+  a propósito para comprobar que `leer`/`guardar` devuelven `null`/`false`
+  en vez de lanzar.
+- `docs/decisiones/0005`: por qué `@capacitor/preferences` sin cifrar es
+  aceptable hoy (no guarda nada sensible) y cuándo hay que revisar esa
+  decisión (cuando llegue un token de sesión de Supabase en la Fase 6).
+
 - `src/motor/`: el motor de partida (sección 7 de `app.html`) portado a
   TypeScript puro — `nuevoJugador`, `empezarPartida`, `transcurrido`,
   `alternarPausa`, `elegirInicio`, `pasarTurno`, `cambiarVida`,
