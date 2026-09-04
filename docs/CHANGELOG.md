@@ -8,6 +8,28 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- `src/motor/`: el motor de partida (sección 7 de `app.html`) portado a
+  TypeScript puro — `nuevoJugador`, `empezarPartida`, `transcurrido`,
+  `alternarPausa`, `elegirInicio`, `pasarTurno`, `cambiarVida`,
+  `danoComandante`/`comandantesEnMesa`/`nombreComandante`, `contador`,
+  `retirada`, `revisar`/`comprobarFinal`, `foto`/`deshacer`,
+  `migrarJuego`/`migrarPerfiles`, `calcularJugadores`. Sin DOM, sin
+  `window.storage`, sin pintado — ver `docs/decisiones/0004`.
+- `tests/motor/`: 26 pruebas en Vitest, sin ningún mock de DOM, porteando los
+  casos de `pruebas/dano-comandante.test.js`, `cronometro.test.js`,
+  `inicio-partida.test.js` (la parte de turnos, no el desplegable) y la
+  migración de `perfiles-y-copia.test.js`; más pruebas nuevas para
+  `comprobarFinal` y `calcularJugadores`, que no tenían archivo propio antes.
+- `docs/decisiones/0004`: por qué el motor son funciones puras con *object
+  spread* y sin Immer, y por qué `foto()`/el agrupamiento del registro de
+  `cambiarVida` pasan a ser responsabilidad del store de la Fase 3.
+
+### Fixed
+
+- El *lint* de `oxlint` señaló una variable sin usar real en
+  `src/motor/deshacer.ts` (`log` desestructurada solo para excluirla del
+  snapshot); se corrigió renombrándola a `_log`, como pide la propia regla.
+
 - Scaffold de Vite + React + TypeScript sobre el proyecto existente, sin tocar
   `app.html` ni `pruebas/` (Fase 0 del plan de migración).
 - Vitest configurado (`vitest.config.ts`), con entorno `node` por defecto y
