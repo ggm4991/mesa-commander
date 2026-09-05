@@ -8,6 +8,23 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Octavo commit de la Fase 4: la rejilla del cuadrado de daño se calcula
+  ahora por número de *jugadores*, no de comandantes — una mesa de 4 sigue
+  dando siempre 2×2 tenga o no compañeros, en vez de descuadrarse a un 3×2
+  con un hueco vacío en cuanto alguien lleva compañero. Cada hueco general
+  se reparte en dos solo para el jugador que de verdad lo tiene. El
+  cuadrado crece de 108 a 128px, y se corrige un fallo real de orden de
+  declaraciones CSS que dejaba descuadradas las mitades de sumar/restar
+  (la misma familia de bug que ya documentó la ADR 0015).
+- `comandantesAgrupadosPorJugador()` en `motor/vida.ts`.
+- `docs/decisiones/0019`: el porqué de agrupar por jugador, y el detalle
+  del fallo de CSS de las mitades.
+- 2 pruebas nuevas, más verificación con un navegador real en una mesa de
+  4 con un jugador de dos comandantes: los cuatro asientos muestran la
+  misma rejilla 2×2, con el hueco de ese jugador partido en dos sin
+  alterar los otros tres, y las mitades de sumar/restar salen alineadas —
+  sin errores de consola.
+
 - Séptimo commit de la Fase 4: el compañero de un mazo tiene ahora su propia
   imagen fijable (antes solo el comandante principal la tenía; el daño del
   compañero ya se apuntaba, pero todos los sectores del mismo jugador

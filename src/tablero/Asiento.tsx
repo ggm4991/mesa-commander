@@ -1,6 +1,6 @@
 import { Icono } from '../componentes/icono/Icono'
 import { fondoAsiento } from '../componentes/comunes/fondo'
-import { CONTADORES, comandantesEnMesa } from '../motor/vida'
+import { CONTADORES, comandantesAgrupadosPorJugador } from '../motor/vida'
 import { dosComandantes } from '../motor/utilidades'
 import { useImagenComandante } from '../red/scryfall/useImagenComandante'
 import type { Juego } from '../motor/tipos'
@@ -47,12 +47,14 @@ export function Asiento({
   const j = juego.j[indice]
   const esTurno = indice === juego.turno && !j.out
   const esperandoInicio = juego.turno == null && !j.out
-  const fuentesDano = comandantesEnMesa(juego)
-  // Un cuadrado, no una fila: para las 3-4 fuentes de un pod normal de 4 jugadores
-  // (sqrt da 2 columnas) sale una rejilla de 2x2; con más fuentes (compañeros,
-  // mesas grandes) se ensancha en vez de desbordar hacia un lado.
-  const columnasDano = Math.max(1, Math.ceil(Math.sqrt(fuentesDano.length)))
-  const filasDano = Math.max(1, Math.ceil(fuentesDano.length / columnasDano))
+  // Un cuadrado general por jugador (no por comandante): un compañero parte en dos
+  // el hueco de quien lo lleva, pero no cambia el número de huecos generales — así
+  // la rejilla sale siempre igual de cuadrada tenga o no compañeros la mesa (ver
+  // ADR 0019). Para los 4 jugadores de un pod normal, sqrt dos columnas da la
+  // rejilla de 2x2 con la que se pensó el diseño.
+  const gruposDano = comandantesAgrupadosPorJugador(juego)
+  const columnasDano = Math.max(1, Math.ceil(Math.sqrt(gruposDano.length)))
+  const filasDano = Math.max(1, Math.ceil(gruposDano.length / columnasDano))
 
   const menosVida = useMantenerPulsado(() => onCambiarVida(-1))
   const masVida = useMantenerPulsado(() => onCambiarVida(1))
@@ -134,15 +136,19 @@ export function Asiento({
               className="dano-cuadrado"
               style={{ gridTemplateColumns: `repeat(${columnasDano}, 1fr)`, gridTemplateRows: `repeat(${filasDano}, 1fr)` }}
             >
-              {fuentesDano.map((c) => (
-                <IconoDanoComandante
-                  key={c.clave}
-                  fuente={c}
-                  esPropio={c.k === indice}
-                  valor={j.dmg[c.clave] || 0}
-                  onSumar={() => onCambiarDano(c.clave, 1)}
-                  onRestar={() => onCambiarDano(c.clave, -1)}
-                />
+              {gruposDano.map((grupo, k) => (
+                <div key={k} className="dano-grupo">
+                  {grupo.map((c) => (
+                    <IconoDanoComandante
+                      key={c.clave}
+                      fuente={c}
+                      esPropio={c.k === indice}
+                      valor={j.dmg[c.clave] || 0}
+                      onSumar={() => onCambiarDano(c.clave, 1)}
+                      onRestar={() => onCambiarDano(c.clave, -1)}
+                    />
+                  ))}
+                </div>
               ))}
             </div>
           </div>

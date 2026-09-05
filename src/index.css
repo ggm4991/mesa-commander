@@ -1403,16 +1403,27 @@ textarea {
 .dano-cuadrado {
   display: grid;
   gap: 3px;
-  width: 108px;
-  height: 108px;
+  width: 128px;
+  height: 128px;
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.22);
   background: rgba(255, 255, 255, 0.22);
   flex: none;
 }
+/* Un hueco general por jugador; si lleva compañero, se reparte en dos sin cambiar
+   el número de huecos generales (ver ADR 0019) — por eso el hueco es un `flex`
+   sencillo, no otra rejilla anidada. */
+.dano-grupo {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+}
 .dano-cmd {
   position: relative;
+  flex: 1;
+  min-width: 0;
   background-color: rgba(0, 0, 0, 0.42);
   background-size: cover;
   background-position: center;
@@ -1471,7 +1482,8 @@ textarea {
    usarlas (ver ADR 0018). */
 .dano-mitad {
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
   width: 50%;
   border: 0;
   cursor: pointer;
@@ -1487,13 +1499,13 @@ textarea {
   background: rgba(194, 96, 78, 0.55);
 }
 .dano-sumar {
-  left: 50%;
+  right: 0;
   background: rgba(99, 180, 143, 0.5);
 }
 @container (max-height: 210px) {
   .dano-cuadrado {
-    width: 76px;
-    height: 76px;
+    width: 92px;
+    height: 92px;
   }
   .dano-valor {
     min-width: 14px;

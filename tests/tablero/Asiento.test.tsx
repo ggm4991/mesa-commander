@@ -186,6 +186,15 @@ describe('Asiento', () => {
     expect(document.querySelectorAll('.dano-cmd')).toHaveLength(3)
   })
 
+  it('el cuadrado tiene un hueco general por jugador, no por comandante: un compañero no añade uno nuevo', () => {
+    renderAsiento(props())
+    // 2 jugadores (Ana y Beto) = 2 huecos generales, aunque Ana lleve 2 comandantes
+    const grupos = document.querySelectorAll('.dano-grupo')
+    expect(grupos).toHaveLength(2)
+    expect(grupos[0].querySelectorAll('.dano-cmd')).toHaveLength(2) // el hueco de Ana se parte en dos
+    expect(grupos[1].querySelectorAll('.dano-cmd')).toHaveLength(1) // el de Beto se queda entero
+  })
+
   it('sin comandante en Scryfall (o sin red), el fondo se queda en el degradado de color', async () => {
     renderAsiento(props())
     await new Promise((resolve) => setTimeout(resolve, 0))

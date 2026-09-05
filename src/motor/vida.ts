@@ -33,6 +33,18 @@ export function nombreComandante(juego: Juego, clave: string): string {
   return c ? c.nombre : 'Comandante'
 }
 
+/**
+ * Las fuentes de daño agrupadas por jugador (un grupo por asiento, nunca vacío: al
+ * menos su propio comandante) en vez de una lista plana. El cuadrado de daño del
+ * tablero reparte el espacio general según el número de *jugadores*, no de
+ * comandantes — así un compañero no descuadra la rejilla general, solo parte en dos
+ * el hueco de quien lo lleva (ver ADR 0019).
+ */
+export function comandantesAgrupadosPorJugador(juego: Juego): ComandanteEnMesa[][] {
+  const plana = comandantesEnMesa(juego)
+  return juego.j.map((_, k) => plana.filter((c) => c.k === k))
+}
+
 export function revisar(juego: Juego, i: number, ahora: number = Date.now()): Juego {
   const j = juego.j[i]
   const letalCmd = Object.values(j.dmg).some((v) => v >= DANO_COMANDANTE_LETAL)

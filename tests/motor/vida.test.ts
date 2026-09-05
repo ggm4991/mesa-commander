@@ -10,6 +10,7 @@ import {
   alternarBendicion,
   alternarFueraDeJuego,
   cambiarVida,
+  comandantesAgrupadosPorJugador,
   comandantesEnMesa,
   comprobarFinal,
   contador,
@@ -66,6 +67,15 @@ describe('daño de comandante (regla 903.10a)', () => {
     let juego = partidaDePrueba()
     juego = danoComandante(juego, 0, '0:0', 21)
     expect(juego.j[0].out).toBe(true)
+  })
+})
+
+describe('comandantesAgrupadosPorJugador', () => {
+  it('un grupo por jugador, no por comandante: un compañero no añade un grupo nuevo', () => {
+    const grupos = comandantesAgrupadosPorJugador(partidaDePrueba())
+    expect(grupos).toHaveLength(2) // Ana y Beto, aunque Ana lleve dos comandantes
+    expect(grupos[0]).toHaveLength(2) // el grupo de Ana lleva sus dos comandantes
+    expect(grupos[1]).toHaveLength(1) // el de Beto, solo el suyo
   })
 })
 
