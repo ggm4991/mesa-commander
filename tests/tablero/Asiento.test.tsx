@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
@@ -13,7 +13,10 @@ import { ProveedorQueryDePrueba } from '../ayudantes/queryDePrueba'
 // imagen, no dependen de qué responda la red.
 const servidor = setupServer(http.get('https://api.scryfall.com/cards/named', () => new HttpResponse(null, { status: 404 })))
 beforeAll(() => servidor.listen({ onUnhandledRequest: 'error' }))
-afterEach(() => servidor.resetHandlers())
+afterEach(() => {
+  servidor.resetHandlers()
+  vi.useRealTimers()
+})
 afterAll(() => servidor.close())
 
 function juegoDePrueba(): Juego {
@@ -152,21 +155,29 @@ describe('Asiento', () => {
     expect(onAbrirMenu).toHaveBeenCalledOnce()
   })
 
-  it('tocar el icono de un comandante suma daño; mantener pulsado lo resta', () => {
+  it('tocar el sector de un comandante suma daño directamente', () => {
+    const onCambiarDano = vi.fn()
+    renderAsiento(props({ onCambiarDano }))
+    const toque = document.querySelector('.dano-cmd .dano-toque') as Element
+
+    fireEvent.pointerDown(toque)
+    fireEvent.pointerUp(toque)
+    expect(onCambiarDano).toHaveBeenCalledWith('0:0', 1)
+  })
+
+  it('mantener pulsado un sector lo abre en dos mitades; tocar restar quita un punto', () => {
     vi.useFakeTimers()
     const onCambiarDano = vi.fn()
     renderAsiento(props({ onCambiarDano }))
-    const icono = document.querySelector('.dano-cmd') as Element
+    const sector = document.querySelector('.dano-cmd') as Element
+    const toque = sector.querySelector('.dano-toque') as Element
 
-    fireEvent.pointerDown(icono)
-    fireEvent.pointerUp(icono)
-    expect(onCambiarDano).toHaveBeenCalledWith('0:0', 1)
+    fireEvent.pointerDown(toque)
+    act(() => vi.advanceTimersByTime(500))
+    expect(onCambiarDano).not.toHaveBeenCalled()
 
-    fireEvent.pointerDown(icono)
-    vi.advanceTimersByTime(500)
-    fireEvent.pointerUp(icono)
+    fireEvent.click(sector.querySelector('.dano-restar') as Element)
     expect(onCambiarDano).toHaveBeenCalledWith('0:0', -1)
-    vi.useRealTimers()
   })
 
   it('hay un icono por cada comandante en la mesa, propio incluido por si se lo roban', () => {

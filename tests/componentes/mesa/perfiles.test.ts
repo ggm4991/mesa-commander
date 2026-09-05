@@ -7,13 +7,20 @@ const perfil: Perfil = {
   nombre: 'Marta',
   ultimo: 'm2',
   mazos: [
-    { id: 'm1', c: 'Muldrotha, the Gravetide', c2: '', col: 'UBG', imagenId: '' },
-    { id: 'm2', c: 'Thrasios, Triton Hero', c2: 'Kydele, Chosen of Kruphix', col: 'GU', imagenId: 'edicion-1' },
+    { id: 'm1', c: 'Muldrotha, the Gravetide', c2: '', col: 'UBG', imagenId: '', imagenId2: '' },
+    {
+      id: 'm2',
+      c: 'Thrasios, Triton Hero',
+      c2: 'Kydele, Chosen of Kruphix',
+      col: 'GU',
+      imagenId: 'edicion-1',
+      imagenId2: 'edicion-2',
+    },
   ],
 }
 
 describe('asientoDesde', () => {
-  it('arrastra los dos comandantes, los colores y la edición fijada del mazo', () => {
+  it('arrastra los dos comandantes, los colores y las ediciones fijadas del mazo', () => {
     const asiento = asientoDesde(perfil, perfil.mazos[1])
     expect(asiento).toEqual({
       nombre: 'Marta',
@@ -21,11 +28,19 @@ describe('asientoDesde', () => {
       comandante2: 'Kydele, Chosen of Kruphix',
       colores: 'GU',
       imagenId: 'edicion-1',
+      imagenId2: 'edicion-2',
     })
   })
 
   it('sin mazo, deja el nombre solo', () => {
-    expect(asientoDesde(perfil, null)).toEqual({ nombre: 'Marta', comandante: '', comandante2: '', colores: '', imagenId: '' })
+    expect(asientoDesde(perfil, null)).toEqual({
+      nombre: 'Marta',
+      comandante: '',
+      comandante2: '',
+      colores: '',
+      imagenId: '',
+      imagenId2: '',
+    })
   })
 })
 

@@ -105,7 +105,7 @@ const DEMO_SIN_ID: Omit<Partida, 'id'>[] = [
   },
 ].map((p) => ({ ...p, seats: p.seats as AsientoPartida[] }))
 
-const mazo = (c: string, col: string, c2?: string): Mazo => ({ id: uid(), c, c2: c2 || '', col, imagenId: '' })
+const mazo = (c: string, col: string, c2?: string): Mazo => ({ id: uid(), c, c2: c2 || '', col, imagenId: '', imagenId2: '' })
 const conMazos = (nombre: string, ...mazos: Mazo[]): Perfil => ({
   id: uid(),
   nombre,

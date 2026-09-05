@@ -23,7 +23,7 @@ function mezclarIdentidad(actual: string, nueva: string): string {
 /** Sustituye a `editorMazo()` en app.html: comandante, compañero opcional e
  * identidad de color de un mazo concreto dentro de un perfil. */
 export function EditorMazo({ mazo, onGuardar, onCancelar }: Props) {
-  const [borrador, setBorrador] = useState<Mazo>(() => mazo ?? { id: uid(), c: '', c2: '', col: '', imagenId: '' })
+  const [borrador, setBorrador] = useState<Mazo>(() => mazo ?? { id: uid(), c: '', c2: '', col: '', imagenId: '', imagenId2: '' })
   const [error, setError] = useState<string | null>(null)
 
   const alternarColor = (color: string) => {
@@ -79,11 +79,18 @@ export function EditorMazo({ mazo, onGuardar, onCancelar }: Props) {
         etiqueta="Compañero (opcional)"
         valor={borrador.c2}
         placeholder="Solo si el mazo lleva dos comandantes"
-        onCambiar={(c2) => setBorrador((m) => ({ ...m, c2 }))}
+        onCambiar={(c2) => setBorrador((m) => ({ ...m, c2, imagenId2: '' }))}
         onElegirSugerencia={(c2, identidad) =>
-          setBorrador((m) => ({ ...m, c2, col: identidad ? mezclarIdentidad(m.col, identidad) : m.col }))
+          setBorrador((m) => ({ ...m, c2, imagenId2: '', col: identidad ? mezclarIdentidad(m.col, identidad) : m.col }))
         }
       />
+      {borrador.c2.trim() && (
+        <SelectorImagenComandante
+          nombre={borrador.c2}
+          imagenId={borrador.imagenId2}
+          onElegirImagen={(imagenId2) => setBorrador((m) => ({ ...m, imagenId2 }))}
+        />
+      )}
       <div className="field" style={{ margin: 0 }}>
         <label>Identidad de color</label>
         <div className="colors">

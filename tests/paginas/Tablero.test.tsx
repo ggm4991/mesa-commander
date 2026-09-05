@@ -136,30 +136,34 @@ describe('Tablero', () => {
     // con 3 jugadores: si solo hubiera 2, eliminar a Ana terminaría la partida
     // sola (comprobarFinal) y el hub pasaría a ofrecer terminar la partida.
     renderTablero(juegoDePrueba(3))
-    // dentro del primer asiento (Ana), el segundo icono de daño es el de Beto
+    // dentro del primer asiento (Ana), el segundo sector de daño es el de Beto
     // (el primero es el suyo propio, por si se lo roban)
     const primerAsiento = document.querySelectorAll('.seat')[0]
-    const iconoDeBeto = primerAsiento.querySelectorAll('.dano-cmd')[1] as HTMLElement
+    const toqueDeBeto = primerAsiento.querySelectorAll('.dano-cmd')[1].querySelector('.dano-toque') as HTMLElement
     for (let i = 0; i < 21; i++) {
-      fireEvent.pointerDown(iconoDeBeto)
-      fireEvent.pointerUp(iconoDeBeto)
+      fireEvent.pointerDown(toqueDeBeto)
+      fireEvent.pointerUp(toqueDeBeto)
     }
     expect(screen.getByText('Fuera')).toBeInTheDocument()
     expect(screen.getByText('19')).toBeInTheDocument() // 40 de vida - 21 de daño
   })
 
-  it('mantener pulsado un icono de daño lo resta en vez de sumarlo', () => {
+  it('mantener pulsado un sector de daño lo abre en dos mitades; restar lo quita', () => {
     renderTablero(juegoDePrueba(3))
-    const primerAsiento = document.querySelectorAll('.seat')[0]
-    const iconoDeBeto = primerAsiento.querySelectorAll('.dano-cmd')[1] as HTMLElement
-    fireEvent.pointerDown(iconoDeBeto)
-    fireEvent.pointerUp(iconoDeBeto)
-    expect(iconoDeBeto.querySelector('.dano-valor')).toHaveTextContent('1')
+    const sectorDeBeto = document.querySelectorAll('.seat')[0].querySelectorAll('.dano-cmd')[1] as HTMLElement
+    const toque = sectorDeBeto.querySelector('.dano-toque') as HTMLElement
 
-    fireEvent.pointerDown(iconoDeBeto)
+    fireEvent.pointerDown(toque)
+    fireEvent.pointerUp(toque)
+    expect(sectorDeBeto.querySelector('.dano-valor')).toHaveTextContent('1')
+
+    fireEvent.pointerDown(toque)
     act(() => vi.advanceTimersByTime(500))
-    fireEvent.pointerUp(iconoDeBeto)
-    expect(iconoDeBeto.querySelector('.dano-valor')).toBeNull()
+    expect(sectorDeBeto).toHaveClass('abierto')
+
+    fireEvent.click(sectorDeBeto.querySelector('.dano-restar') as Element)
+    expect(sectorDeBeto.querySelector('.dano-valor')).toBeNull()
+    expect(sectorDeBeto).not.toHaveClass('abierto')
   })
 
   it('salir sin terminar no borra la partida guardada', async () => {

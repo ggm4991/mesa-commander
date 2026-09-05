@@ -56,7 +56,12 @@ describe('perfiles', () => {
 
   it('guarda y relee sin perder los mazos', async () => {
     const almacen = crearAlmacenMemoria()
-    const perfil = { id: 'p2', nombre: 'Marta', ultimo: 'm1', mazos: [{ id: 'm1', c: 'X', c2: '', col: 'U', imagenId: '' }] }
+    const perfil = {
+      id: 'p2',
+      nombre: 'Marta',
+      ultimo: 'm1',
+      mazos: [{ id: 'm1', c: 'X', c2: '', col: 'U', imagenId: '', imagenId2: '' }],
+    }
     await guardarPerfiles(almacen, [perfil])
     expect(await leerPerfiles(almacen)).toEqual([perfil])
   })

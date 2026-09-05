@@ -224,4 +224,53 @@ describe('EditorMazo — imagen del comandante', () => {
     fireEvent.click(screen.getByText('Guardar mazo'))
     expect(onGuardar).toHaveBeenCalledWith(expect.objectContaining({ c: 'Krenko, Mob Boss', imagenId: '' }))
   })
+
+  it('con un mazo de dos comandantes, el compañero también tiene su propio selector de imagen', async () => {
+    servidor.use(
+      http.get('https://api.scryfall.com/cards/search', ({ request }) => {
+        const q = new URL(request.url).searchParams.get('q')
+        return HttpResponse.json({
+          data:
+            q === '!"Silas Renn, Seeker Adept"'
+              ? [{ id: 'edicion-silas', set_name: 'Commander 2018', image_uris: { small: 'https://cards.scryfall.io/small/silas.jpg' } }]
+              : [{ id: 'edicion-ishai', set_name: 'Commander 2018', image_uris: { small: 'https://cards.scryfall.io/small/ishai.jpg' } }],
+        })
+      }),
+    )
+    const onGuardar = vi.fn()
+    renderEditorMazo({
+      mazo: { id: 'm1', c: 'Ishai, Ojutai Dragonspeaker', c2: 'Silas Renn, Seeker Adept', col: 'WU', imagenId: '', imagenId2: '' },
+      onGuardar,
+      onCancelar: () => {},
+    })
+
+    const botones = screen.getAllByText('Cambiar imagen')
+    expect(botones).toHaveLength(2)
+
+    // el segundo "Cambiar imagen" es el del compañero
+    fireEvent.click(botones[1])
+    fireEvent.click(await screen.findByText('Commander 2018'))
+    fireEvent.click(screen.getByText('Guardar mazo'))
+
+    expect(onGuardar).toHaveBeenCalledWith(expect.objectContaining({ imagenId: '', imagenId2: 'edicion-silas' }))
+  })
+
+  it('cambiar el nombre del compañero limpia la edición fijada del compañero, no la del principal', () => {
+    const onGuardar = vi.fn()
+    renderEditorMazo({
+      mazo: {
+        id: 'm1',
+        c: 'Ishai, Ojutai Dragonspeaker',
+        c2: 'Silas Renn, Seeker Adept',
+        col: 'WU',
+        imagenId: 'edicion-ishai',
+        imagenId2: 'edicion-silas',
+      },
+      onGuardar,
+      onCancelar: () => {},
+    })
+    fireEvent.change(screen.getByLabelText('Compañero (opcional)'), { target: { value: 'Otro comandante' } })
+    fireEvent.click(screen.getByText('Guardar mazo'))
+    expect(onGuardar).toHaveBeenCalledWith(expect.objectContaining({ imagenId: 'edicion-ishai', imagenId2: '' }))
+  })
 })

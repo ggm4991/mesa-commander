@@ -8,6 +8,26 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Séptimo commit de la Fase 4: el compañero de un mazo tiene ahora su propia
+  imagen fijable (antes solo el comandante principal la tenía; el daño del
+  compañero ya se apuntaba, pero todos los sectores del mismo jugador
+  buscaban la imagen por el nombre principal, sin distinguir cuál era cuál).
+  El cuadrado de sectores crece de 76 a 108px, y mantener pulsado un sector
+  ya no resta a ciegas: lo abre en dos mitades (roja para restar, verde
+  para sumar) que se cierran solas al tocar fuera o a los 3 segundos.
+- `Mazo`/`Asiento`/`Jugador` llevan ahora `imagenId` (comandante principal)
+  e `imagenId2` (compañero) por separado; `EditorMazo` muestra un selector
+  de imagen por cada uno de los dos.
+- `docs/decisiones/0018`: por qué el problema real era una imagen
+  compartida entre las dos cartas, no que faltara poder apuntar el daño del
+  compañero (que ya funcionaba); y por qué el sector se abre en vez de
+  restar directamente.
+- 6 pruebas nuevas, más verificación con un navegador real: un mazo de
+  "Thrasios, Triton Hero" + "Tymna the Weaver" con dos botones "Cambiar
+  imagen" independientes, daño al compañero sin tocar el principal, y el
+  sector abriéndose en sus dos mitades al mantenerlo pulsado — sin errores
+  de consola.
+
 - Sexto commit de la Fase 4: los iconos de daño de comandante pasan de una
   fila de círculos a un único cuadrado partido en sectores (una rejilla de
   2×2 en el caso más común, una mesa de 4 sin compañeros), y el botón de

@@ -14,13 +14,16 @@ export interface ComandanteEnMesa {
   dueno: string
   k: number
   col: string
+  /** La edición fijada a mano para *esta* carta en concreto — `x.imagenId` para el
+   * hueco 0 (principal), `x.imagenId2` para el 1 (compañero). */
+  imagenId: string
 }
 
 export function comandantesEnMesa(juego: Juego): ComandanteEnMesa[] {
   const lista: ComandanteEnMesa[] = []
   juego.j.forEach((x, k) => {
-    lista.push({ clave: `${k}:0`, nombre: x.c || 'Comandante sin nombre', dueno: x.n, k, col: x.col })
-    if (x.c2) lista.push({ clave: `${k}:1`, nombre: x.c2, dueno: x.n, k, col: x.col })
+    lista.push({ clave: `${k}:0`, nombre: x.c || 'Comandante sin nombre', dueno: x.n, k, col: x.col, imagenId: x.imagenId })
+    if (x.c2) lista.push({ clave: `${k}:1`, nombre: x.c2, dueno: x.n, k, col: x.col, imagenId: x.imagenId2 })
   })
   return lista
 }

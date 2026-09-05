@@ -14,7 +14,9 @@ export function migrarJuego(g: Record<string, unknown>): Juego {
     for (const [k, v] of Object.entries((p.dmg as Record<string, number>) || {})) {
       dmg[String(k).includes(':') ? k : `${k}:0`] = v
     }
-    return { ...p, c2, mana, dmg }
+    const imagenId = (p.imagenId as string) || ''
+    const imagenId2 = (p.imagenId2 as string) || ''
+    return { ...p, c2, mana, dmg, imagenId, imagenId2 }
   })
   return { ...g, j: jugadores } as Juego
 }
@@ -34,6 +36,7 @@ export function migrarPerfiles(lista: Record<string, unknown>[] | undefined): Pe
             c2: (m.c2 as string) || '',
             col: (m.col as string) || '',
             imagenId: (m.imagenId as string) || '',
+            imagenId2: (m.imagenId2 as string) || '',
           }),
         ),
       }
@@ -44,6 +47,7 @@ export function migrarPerfiles(lista: Record<string, unknown>[] | undefined): Pe
       c2: (p.comandante2 as string) || '',
       col: (p.colores as string) || '',
       imagenId: '',
+      imagenId2: '',
     }
     const tiene = m.c || m.col
     return {
