@@ -27,11 +27,25 @@ describe('migrarPerfiles', () => {
         ultimo: 'm2',
         mazos: [
           { id: 'm1', c: 'Muldrotha, the Gravetide', col: 'UBG' },
-          { id: 'm2', c: 'Thrasios, Triton Hero', c2: 'Kydele, Chosen of Kruphix', col: 'GU' },
+          { id: 'm2', c: 'Thrasios, Triton Hero', c2: 'Kydele, Chosen of Kruphix', col: 'GU', imagenId: 'edicion-1' },
         ],
       },
     ])
     expect(p.mazos).toHaveLength(2)
     expect(p.ultimo).toBe('m2')
+  })
+
+  it('un mazo sin edición fijada (formato anterior a la Fase 4) se rellena con una vacía', () => {
+    const [p] = migrarPerfiles([
+      { id: 'p1', nombre: 'Gonzalo', mazos: [{ id: 'm1', c: 'Edgar Markov', col: 'WBR' }] },
+    ])
+    expect(p.mazos[0].imagenId).toBe('')
+  })
+
+  it('un mazo con edición fijada la conserva', () => {
+    const [p] = migrarPerfiles([
+      { id: 'p1', nombre: 'Gonzalo', mazos: [{ id: 'm1', c: 'Edgar Markov', col: 'WBR', imagenId: 'edicion-1' }] },
+    ])
+    expect(p.mazos[0].imagenId).toBe('edicion-1')
   })
 })

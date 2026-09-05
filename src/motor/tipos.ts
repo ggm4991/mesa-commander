@@ -10,6 +10,9 @@ export interface Asiento {
   comandante?: string
   comandante2?: string
   colores?: string
+  /** Edición de Scryfall fijada a mano para la ilustración del comandante (ver
+   * `red/scryfall/buscarImpresiones`); sin ella, se usa la de referencia del nombre. */
+  imagenId?: string
 }
 
 export type ContadorClave = 'ven' | 'exp' | 'ene' | 'tax' | 'tes' | 'tor'
@@ -19,6 +22,8 @@ export interface Jugador {
   c: string
   c2: string
   col: string
+  /** Igual que `Asiento.imagenId`: '' si no se fijó ninguna a mano. */
+  imagenId: string
   vida: number
   /** Daño de comandante por comandante, no por jugador (regla 903.10a). Clave "asiento:hueco". */
   dmg: Record<string, number>
@@ -73,6 +78,8 @@ export interface Mazo {
   c: string
   c2: string
   col: string
+  /** Igual que `Asiento.imagenId`: '' si no se fijó ninguna a mano. */
+  imagenId: string
 }
 
 export interface Perfil {

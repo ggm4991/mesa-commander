@@ -3,6 +3,7 @@ import { Modal } from '../comunes/Modal'
 import type { Mazo } from '../../motor/tipos'
 import { uid } from '../../motor/utilidades'
 import { CampoComandante } from './CampoComandante'
+import { SelectorImagenComandante } from './SelectorImagenComandante'
 import { COLORES } from './colores'
 
 interface Props {
@@ -22,7 +23,7 @@ function mezclarIdentidad(actual: string, nueva: string): string {
 /** Sustituye a `editorMazo()` en app.html: comandante, compañero opcional e
  * identidad de color de un mazo concreto dentro de un perfil. */
 export function EditorMazo({ mazo, onGuardar, onCancelar }: Props) {
-  const [borrador, setBorrador] = useState<Mazo>(() => mazo ?? { id: uid(), c: '', c2: '', col: '' })
+  const [borrador, setBorrador] = useState<Mazo>(() => mazo ?? { id: uid(), c: '', c2: '', col: '', imagenId: '' })
   const [error, setError] = useState<string | null>(null)
 
   const alternarColor = (color: string) => {
@@ -63,10 +64,15 @@ export function EditorMazo({ mazo, onGuardar, onCancelar }: Props) {
         etiqueta="Comandante"
         valor={borrador.c}
         placeholder="Nombre en inglés"
-        onCambiar={(c) => setBorrador((m) => ({ ...m, c }))}
+        onCambiar={(c) => setBorrador((m) => ({ ...m, c, imagenId: '' }))}
         onElegirSugerencia={(c, identidad) =>
-          setBorrador((m) => ({ ...m, c, col: identidad ? mezclarIdentidad(m.col, identidad) : m.col }))
+          setBorrador((m) => ({ ...m, c, imagenId: '', col: identidad ? mezclarIdentidad(m.col, identidad) : m.col }))
         }
+      />
+      <SelectorImagenComandante
+        nombre={borrador.c}
+        imagenId={borrador.imagenId}
+        onElegirImagen={(imagenId) => setBorrador((m) => ({ ...m, imagenId }))}
       />
       <CampoComandante
         id="m-c2"

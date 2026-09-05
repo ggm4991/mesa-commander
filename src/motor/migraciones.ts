@@ -33,6 +33,7 @@ export function migrarPerfiles(lista: Record<string, unknown>[] | undefined): Pe
             c: (m.c as string) || '',
             c2: (m.c2 as string) || '',
             col: (m.col as string) || '',
+            imagenId: (m.imagenId as string) || '',
           }),
         ),
       }
@@ -42,6 +43,7 @@ export function migrarPerfiles(lista: Record<string, unknown>[] | undefined): Pe
       c: (p.comandante as string) || '',
       c2: (p.comandante2 as string) || '',
       col: (p.colores as string) || '',
+      imagenId: '',
     }
     const tiene = m.c || m.col
     return {

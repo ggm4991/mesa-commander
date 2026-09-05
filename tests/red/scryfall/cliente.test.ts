@@ -1,7 +1,7 @@
 import { HttpResponse, http, delay } from 'msw'
 import { setupServer } from 'msw/node'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
-import { buscarNombres, buscarPorNombreExacto } from '../../../src/red/scryfall/cliente'
+import { buscarImpresiones, buscarNombres, buscarPorId, buscarPorNombreExacto } from '../../../src/red/scryfall/cliente'
 
 const servidor = setupServer()
 
@@ -95,5 +95,74 @@ describe('buscarPorNombreExacto', () => {
   it('sin red, se propaga como excepción', async () => {
     servidor.use(http.get('https://api.scryfall.com/cards/named', () => HttpResponse.error()))
     await expect(buscarPorNombreExacto('Edgar Markov')).rejects.toThrow()
+  })
+})
+
+describe('buscarPorId', () => {
+  it('devuelve la identidad e ilustración de esa edición concreta', async () => {
+    servidor.use(
+      http.get('https://api.scryfall.com/cards/:id', ({ params }) => {
+        expect(params.id).toBe('abc-123')
+        return HttpResponse.json({
+          name: 'Edgar Markov',
+          color_identity: ['R', 'W', 'B'],
+          image_uris: { art_crop: 'https://cards.scryfall.io/art_crop/edicion-especial.jpg' },
+        })
+      }),
+    )
+    expect(await buscarPorId('abc-123')).toEqual({
+      nombre: 'Edgar Markov',
+      identidad: 'WBR',
+      imagen: 'https://cards.scryfall.io/art_crop/edicion-especial.jpg',
+    })
+  })
+
+  it('un id que no existe devuelve null', async () => {
+    servidor.use(http.get('https://api.scryfall.com/cards/:id', () => new HttpResponse(null, { status: 404 })))
+    expect(await buscarPorId('no-existe')).toBeNull()
+  })
+
+  it('un error de servidor se propaga como excepción', async () => {
+    servidor.use(http.get('https://api.scryfall.com/cards/:id', () => new HttpResponse(null, { status: 500 })))
+    await expect(buscarPorId('abc-123')).rejects.toThrow('500')
+  })
+})
+
+describe('buscarImpresiones', () => {
+  it('devuelve una edición por carta, con su miniatura e ilustración', async () => {
+    servidor.use(
+      http.get('https://api.scryfall.com/cards/search', ({ request }) => {
+        const q = new URL(request.url).searchParams.get('q')
+        expect(q).toBe('!"Edgar Markov"')
+        return HttpResponse.json({
+          data: [
+            {
+              id: 'edicion-1',
+              set_name: 'Commander 2017',
+              image_uris: { art_crop: 'https://cards.scryfall.io/art_crop/c17.jpg', small: 'https://cards.scryfall.io/small/c17.jpg' },
+            },
+            {
+              id: 'edicion-2',
+              set_name: 'Secret Lair Drop',
+              image_uris: { art_crop: 'https://cards.scryfall.io/art_crop/sld.jpg', small: 'https://cards.scryfall.io/small/sld.jpg' },
+            },
+          ],
+        })
+      }),
+    )
+    expect(await buscarImpresiones('Edgar Markov')).toEqual([
+      { id: 'edicion-1', edicion: 'Commander 2017', imagen: 'https://cards.scryfall.io/art_crop/c17.jpg', miniatura: 'https://cards.scryfall.io/small/c17.jpg' },
+      { id: 'edicion-2', edicion: 'Secret Lair Drop', imagen: 'https://cards.scryfall.io/art_crop/sld.jpg', miniatura: 'https://cards.scryfall.io/small/sld.jpg' },
+    ])
+  })
+
+  it('sin ninguna impresión, devuelve una lista vacía', async () => {
+    servidor.use(http.get('https://api.scryfall.com/cards/search', () => new HttpResponse(null, { status: 404 })))
+    expect(await buscarImpresiones('Carta Que No Existe')).toEqual([])
+  })
+
+  it('un error de servidor se propaga como excepción', async () => {
+    servidor.use(http.get('https://api.scryfall.com/cards/search', () => new HttpResponse(null, { status: 500 })))
+    await expect(buscarImpresiones('Edgar Markov')).rejects.toThrow('500')
   })
 })

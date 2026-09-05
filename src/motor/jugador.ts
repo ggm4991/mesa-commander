@@ -6,6 +6,7 @@ export function nuevoJugador(asiento: Asiento, vida: number): Jugador {
     c: asiento.comandante || '',
     c2: asiento.comandante2 || '',
     col: asiento.colores || '',
+    imagenId: asiento.imagenId || '',
     vida,
     dmg: {},
     ven: 0,

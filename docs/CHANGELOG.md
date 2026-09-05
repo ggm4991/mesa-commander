@@ -8,6 +8,32 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Cuarto commit de la Fase 4: elegir qué edición de un comandante se usa
+  como ilustración, y orientarla hacia el jugador. `EditorMazo` muestra una
+  miniatura de la ilustración junto al nombre, con un botón "Cambiar
+  imagen" que abre un selector con todas las ediciones impresas de esa
+  carta (`buscarImpresiones`); elegir una la fija (`imagenId`, que viaja
+  desde el mazo hasta el asiento en juego igual que el nombre o los
+  colores), y cambiar el nombre del comandante la limpia, para no dejar el
+  arte de una carta puesto en otra.
+- `src/red/scryfall/cliente.ts` añade `buscarImpresiones()` y
+  `buscarPorId()`; `useImagenComandante` consulta por `imagenId` si lo hay,
+  y si no, por nombre exacto como hasta ahora.
+- `src/componentes/mesa/SelectorImagenComandante.tsx` y
+  `ModalElegirImpresion.tsx`.
+- El fondo del asiento (`.bg`) ahora gira con las mismas reglas CSS que ya
+  giraban su contenido: antes la ilustración se quedaba siempre "de pie"
+  en asientos rotados 90°/180°/270°, mientras el nombre y la vida sí
+  giraban hacia el jugador.
+- `docs/decisiones/0015`: el porqué de las dos correcciones de arriba,
+  pedidas tras probar la app de verdad — incluida una nota sobre un fallo
+  real de orden de declaraciones CSS (`inset: auto` después de `top`/`left`
+  en la misma regla) que solo se vio en un navegador real, no en los tests.
+- 20 pruebas nuevas (cliente, hook, editor de mazos), más verificación con
+  un navegador real: 7 ediciones distintas encontradas para Edgar Markov,
+  elegir una, sentarlo, girar su asiento 90° y comprobar que la ilustración
+  gira con el resto del contenido — sin errores de consola.
+
 - Tercer commit de la Fase 4: la ilustración del comandante como fondo de su
   asiento en el tablero (`Asiento.tsx`), sustituyendo al degradado de color
   de siempre cuando Scryfall la trae. Se pide el recorte `art_crop` (solo la

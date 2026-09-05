@@ -50,7 +50,7 @@ export function Asiento({
 
   const menosVida = useMantenerPulsado(() => onCambiarVida(-1))
   const masVida = useMantenerPulsado(() => onCambiarVida(1))
-  const imagenComandante = useImagenComandante(j.c)
+  const imagenComandante = useImagenComandante(j.c, j.imagenId)
 
   return (
     <div

@@ -7,6 +7,7 @@ export function asientoDesde(perfil: Perfil, mazo: Mazo | null): Asiento {
     comandante: mazo ? mazo.c : '',
     comandante2: mazo ? mazo.c2 : '',
     colores: mazo ? mazo.col : '',
+    imagenId: mazo ? mazo.imagenId : '',
   }
 }
 

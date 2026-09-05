@@ -7,7 +7,13 @@ import { EditorMazo } from '../../../src/componentes/mesa/EditorMazo'
 import { AvisoProvider } from '../../../src/componentes/comunes/AvisoProvider'
 import { ProveedorQueryDePrueba } from '../../ayudantes/queryDePrueba'
 
-const servidor = setupServer()
+// Sin imagen por defecto: la miniatura de `SelectorImagenComandante` pide la
+// carta (por nombre o, si el mazo ya trae una edición fijada, por id) en cuanto
+// hay un nombre, y la mayoría de estas pruebas no son sobre eso.
+const servidor = setupServer(
+  http.get('https://api.scryfall.com/cards/named', () => new HttpResponse(null, { status: 404 })),
+  http.get('https://api.scryfall.com/cards/:id', () => new HttpResponse(null, { status: 404 })),
+)
 beforeAll(() => servidor.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => servidor.resetHandlers())
 afterAll(() => servidor.close())
@@ -158,5 +164,64 @@ describe('EditorMazo', () => {
     expect(await screen.findByText('No se pudo consultar Scryfall: rellena la identidad de color a mano')).toBeInTheDocument()
     expect(screen.getByLabelText('Comandante')).toHaveValue('Edgar Markov')
     expect(screen.getByLabelText('Color W')).toHaveAttribute('aria-pressed', 'false')
+  })
+})
+
+describe('EditorMazo — imagen del comandante', () => {
+  it('sin comandante todavía, no muestra el selector de imagen', () => {
+    renderEditorMazo({ mazo: null, onGuardar: () => {}, onCancelar: () => {} })
+    expect(screen.queryByText('Cambiar imagen')).toBeNull()
+  })
+
+  it('con un comandante reconocido, muestra su miniatura', async () => {
+    servidor.use(
+      http.get('https://api.scryfall.com/cards/named', () =>
+        HttpResponse.json({ name: 'Edgar Markov', color_identity: ['W', 'B', 'R'], image_uris: { art_crop: 'https://cards.scryfall.io/art_crop/edgar.jpg' } }),
+      ),
+    )
+    renderEditorMazo({ mazo: { id: 'm1', c: 'Edgar Markov', c2: '', col: 'WBR', imagenId: '' }, onGuardar: () => {}, onCancelar: () => {} })
+    const miniatura = await screen.findByAltText('Edgar Markov')
+    expect(miniatura).toHaveAttribute('src', 'https://cards.scryfall.io/art_crop/edgar.jpg')
+  })
+
+  it('cambiar imagen lista las ediciones y elegir una la fija en el mazo', async () => {
+    servidor.use(
+      http.get('https://api.scryfall.com/cards/search', ({ request }) => {
+        expect(new URL(request.url).searchParams.get('q')).toBe('!"Edgar Markov"')
+        return HttpResponse.json({
+          data: [
+            { id: 'edicion-1', set_name: 'Commander 2017', image_uris: { small: 'https://cards.scryfall.io/small/c17.jpg' } },
+            { id: 'edicion-2', set_name: 'Secret Lair Drop', image_uris: { small: 'https://cards.scryfall.io/small/sld.jpg' } },
+          ],
+        })
+      }),
+    )
+    const onGuardar = vi.fn()
+    renderEditorMazo({ mazo: { id: 'm1', c: 'Edgar Markov', c2: '', col: 'WBR', imagenId: '' }, onGuardar, onCancelar: () => {} })
+    fireEvent.click(await screen.findByText('Cambiar imagen'))
+    fireEvent.click(await screen.findByText('Secret Lair Drop'))
+    expect(screen.queryByText('Elegir imagen de Edgar Markov')).toBeNull()
+
+    fireEvent.click(screen.getByText('Guardar mazo'))
+    expect(onGuardar).toHaveBeenCalledWith(expect.objectContaining({ imagenId: 'edicion-2' }))
+  })
+
+  it('"Usar la edición de referencia" limpia la fijación', async () => {
+    servidor.use(http.get('https://api.scryfall.com/cards/search', () => HttpResponse.json({ data: [] })))
+    const onGuardar = vi.fn()
+    renderEditorMazo({ mazo: { id: 'm1', c: 'Edgar Markov', c2: '', col: 'WBR', imagenId: 'edicion-2' }, onGuardar, onCancelar: () => {} })
+    fireEvent.click(await screen.findByText('Cambiar imagen'))
+    fireEvent.click(await screen.findByText('Usar la edición de referencia'))
+
+    fireEvent.click(screen.getByText('Guardar mazo'))
+    expect(onGuardar).toHaveBeenCalledWith(expect.objectContaining({ imagenId: '' }))
+  })
+
+  it('cambiar el nombre del comandante limpia la edición fijada anteriormente', async () => {
+    const onGuardar = vi.fn()
+    renderEditorMazo({ mazo: { id: 'm1', c: 'Edgar Markov', c2: '', col: 'WBR', imagenId: 'edicion-2' }, onGuardar, onCancelar: () => {} })
+    fireEvent.change(screen.getByLabelText('Comandante'), { target: { value: 'Krenko, Mob Boss' } })
+    fireEvent.click(screen.getByText('Guardar mazo'))
+    expect(onGuardar).toHaveBeenCalledWith(expect.objectContaining({ c: 'Krenko, Mob Boss', imagenId: '' }))
   })
 })
