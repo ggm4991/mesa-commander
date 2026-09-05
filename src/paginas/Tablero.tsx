@@ -36,7 +36,6 @@ import { Hub } from '../tablero/Hub'
 import { dispoTablero } from '../tablero/layouts'
 import { ModalElegirJugador, ModalMenuPartida, ModalTerminarPartida, ModalVerLog } from '../tablero/ModalesPartida'
 import { ModalMenuAsiento } from '../tablero/ModalMenuAsiento'
-import { ModalPanelDano } from '../tablero/ModalPanelDano'
 import { estadoReloj } from '../tablero/reloj'
 import { despertarAudio, sonarAlarma } from '../tablero/sonido'
 import { useArrastrarCorona } from '../tablero/useArrastrarCorona'
@@ -45,7 +44,6 @@ import { useJuegoEnCurso } from '../tablero/useJuegoEnCurso'
 
 type EstadoModal =
   | { tipo: 'menuAsiento'; indice: number }
-  | { tipo: 'panelDano'; indice: number }
   | { tipo: 'menuPartida' }
   | { tipo: 'elegirJugador'; titulo: string; alElegir: (indice: number | null) => void }
   | { tipo: 'verLog' }
@@ -191,7 +189,7 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
             esDestinoDeCorona={arrastre != null && arrastre.destino === i && arrastre.desde !== i}
             onCambiarVida={(d) => alCambiarVida(i, d)}
             onAbrirMenu={() => setModal({ tipo: 'menuAsiento', indice: i })}
-            onAbrirDano={() => setModal({ tipo: 'panelDano', indice: i })}
+            onCambiarDano={(clave, delta) => mutar((j) => danoComandante(j, i, clave, delta))}
             onElegirInicio={() => mutarSinFoto((j) => elegirInicio(j, i))}
             onRetirada={() => mutar((j) => retirada(j, i, 1))}
             onEmpezarArrastreCorona={(e) => empezarArrastreCorona(i, e)}
@@ -231,15 +229,6 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
             setModal(null)
           }}
           onEditar={(cambios) => mutarSinFoto((j) => editarJugador(j, modal.indice, cambios))}
-          onCerrar={() => setModal(null)}
-        />
-      )}
-
-      {modal?.tipo === 'panelDano' && (
-        <ModalPanelDano
-          juego={juego}
-          indice={modal.indice}
-          onCambiar={(clave, d) => mutar((j) => danoComandante(j, modal.indice, clave, d))}
           onCerrar={() => setModal(null)}
         />
       )}

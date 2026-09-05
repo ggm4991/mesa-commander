@@ -8,6 +8,21 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Quinto commit de la Fase 4: el daño de comandante se apunta con un icono
+  tocable por cada comandante en la mesa (su ilustración si Scryfall la
+  tiene, o su identidad de color si no), en vez de abrir un panel aparte —
+  al estilo de LifeTap, a petición del usuario. Un toque suma un punto;
+  mantener pulsado resta uno. Se retira `ModalPanelDano`, sustituido por
+  completo por este flujo.
+- `src/tablero/IconoDanoComandante.tsx` y `useTocarYMantener.ts` (toca para
+  una acción, mantén pulsado para la contraria — distinto de
+  `useMantenerPulsado`, que repite la misma acción mientras se mantiene).
+- `docs/decisiones/0016`: el porqué del gesto y de retirar el panel en vez
+  de mantener las dos formas de apuntar lo mismo.
+- 12 pruebas nuevas, más verificación con un navegador real en una mesa de
+  4: los iconos caben junto al resto de la fila sin apretarla, y tocar/
+  mantener pulsado suman y restan como se espera — sin errores de consola.
+
 - Cuarto commit de la Fase 4: elegir qué edición de un comandante se usa
   como ilustración, y orientarla hacia el jugador. `EditorMazo` muestra una
   miniatura de la ilustración junto al nombre, con un botón "Cambiar

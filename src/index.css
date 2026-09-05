@@ -1395,6 +1395,72 @@ textarea {
   justify-content: center;
 }
 
+/* ============ daño de comandante: un toque por fuente ============ */
+.danos-comandante {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.dano-cmd {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background-color: rgba(0, 0, 0, 0.42);
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  touch-action: manipulation;
+  flex: none;
+  color: inherit;
+}
+.dano-cmd.activo {
+  border-color: var(--brass);
+}
+.dano-cmd.letal {
+  border-color: var(--rust);
+}
+.dano-cmd .dano-valor {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 3px;
+  border-radius: 99px;
+  background: var(--brass);
+  color: #241b12;
+  font-size: 10.5px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+.dano-cmd.letal .dano-valor {
+  background: var(--rust);
+  color: #fff;
+}
+.dano-cmd .pips {
+  pointer-events: none;
+}
+@container (max-height: 210px) {
+  .dano-cmd {
+    width: 26px;
+    height: 26px;
+  }
+  .dano-cmd .dano-valor {
+    min-width: 14px;
+    height: 14px;
+    font-size: 9px;
+  }
+}
+
 .hub {
   position: absolute;
   left: 50%;

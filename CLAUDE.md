@@ -103,9 +103,11 @@ Específico de cada app:
    sustituible en tests), `usePerfiles`, `useConfig`.
 5. **`tablero/`** — todo lo del tablero de juego: `useJuegoEnCurso` (el store,
    ver ADR 0008), `useArrastrarCorona`, `useMantenerPulsado`,
-   `useBordesAsientos` (ver ADR 0009), `bordes.ts`, `reloj.ts`, `sonido.ts`,
-   `layouts.ts`, `constantesUI.ts`, y los componentes `Asiento`, `Hub`,
-   `ModalPanelDano`, `ModalMenuAsiento`, `ModalesPartida`.
+   `useTocarYMantener` (toca para sumar daño de comandante, mantén pulsado
+   para restar — ver ADR 0016), `useBordesAsientos` (ver ADR 0009),
+   `bordes.ts`, `reloj.ts`, `sonido.ts`, `layouts.ts`, `constantesUI.ts`, y
+   los componentes `Asiento`, `IconoDanoComandante`, `Hub`, `ModalMenuAsiento`,
+   `ModalesPartida`.
 6. **`registro/`** — `validar.ts`, `construirPartida.ts`, `calcularJugadores.ts`
    (clasificación derivada), `filtrarPartidas.ts` (búsqueda de la ficha),
    `copiaSeguridad.ts`, `datosDemo.ts` (las partidas y perfiles de ejemplo),

@@ -1,11 +1,12 @@
 import { Icono } from '../componentes/icono/Icono'
 import { fondoAsiento } from '../componentes/comunes/fondo'
-import { CONTADORES, nombreComandante } from '../motor/vida'
+import { CONTADORES, comandantesEnMesa } from '../motor/vida'
 import { dosComandantes } from '../motor/utilidades'
 import { useImagenComandante } from '../red/scryfall/useImagenComandante'
 import type { Juego } from '../motor/tipos'
 import { type BordeAsiento, estiloBotonEnFila, estiloFila } from './bordes'
 import { ICONO_CONTADOR, MANA } from './constantesUI'
+import { IconoDanoComandante } from './IconoDanoComandante'
 import { useMantenerPulsado } from './useMantenerPulsado'
 
 interface Props {
@@ -18,7 +19,7 @@ interface Props {
   esDestinoDeCorona: boolean
   onCambiarVida: (delta: number) => void
   onAbrirMenu: () => void
-  onAbrirDano: () => void
+  onCambiarDano: (clave: string, delta: number) => void
   onElegirInicio: () => void
   onRetirada: () => void
   onEmpezarArrastreCorona: (e: React.PointerEvent) => void
@@ -37,7 +38,7 @@ export function Asiento({
   esDestinoDeCorona,
   onCambiarVida,
   onAbrirMenu,
-  onAbrirDano,
+  onCambiarDano,
   onElegirInicio,
   onRetirada,
   onEmpezarArrastreCorona,
@@ -46,7 +47,6 @@ export function Asiento({
   const j = juego.j[indice]
   const esTurno = indice === juego.turno && !j.out
   const esperandoInicio = juego.turno == null && !j.out
-  const recibido = Object.entries(j.dmg || {}).filter(([, v]) => v > 0)
 
   const menosVida = useMantenerPulsado(() => onCambiarVida(-1))
   const masVida = useMantenerPulsado(() => onCambiarVida(1))
@@ -128,14 +128,18 @@ export function Asiento({
             <Icono nombre="retirada" tamano={17} /> {j.rehacer}
           </button>
           {juego.j.length > 1 && (
-            <button className="more" onClick={onAbrirDano}>
-              <Icono nombre="espadas" tamano={17} />
-              {recibido.length > 0 &&
-                ' ' +
-                  recibido
-                    .map(([clave, valor]) => `${nombreComandante(juego, clave).split(/[ ,]/)[0]} ${valor}`)
-                    .join(' · ')}
-            </button>
+            <div className="danos-comandante">
+              {comandantesEnMesa(juego).map((c) => (
+                <IconoDanoComandante
+                  key={c.clave}
+                  fuente={c}
+                  esPropio={c.k === indice}
+                  valor={j.dmg[c.clave] || 0}
+                  onSumar={() => onCambiarDano(c.clave, 1)}
+                  onRestar={() => onCambiarDano(c.clave, -1)}
+                />
+              ))}
+            </div>
           )}
           {CONTADORES.filter((c) => j[c.clave] > 0).map((c) => (
             <span key={c.clave} className={`ctr${c.letal && j[c.clave] >= c.letal ? ' warn' : ''}`} title={c.nombre}>

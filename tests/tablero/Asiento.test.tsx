@@ -47,7 +47,7 @@ const props = (over: Record<string, unknown> = {}) => ({
   esDestinoDeCorona: false,
   onCambiarVida: vi.fn(),
   onAbrirMenu: vi.fn(),
-  onAbrirDano: vi.fn(),
+  onCambiarDano: vi.fn(),
   onElegirInicio: vi.fn(),
   onRetirada: vi.fn(),
   onEmpezarArrastreCorona: vi.fn(),
@@ -128,12 +128,11 @@ describe('Asiento', () => {
     expect(props().onElegirInicio).toBeDefined()
   })
 
-  it('el botón de daño no aparece en partidas de un solo jugador', () => {
+  it('no hay iconos de daño de comandante en partidas de un solo jugador', () => {
     const juego = juegoDePrueba()
     juego.j = [juego.j[0]]
     renderAsiento(props({ juego }))
-    // en un juego de 2+ hay dos ".more" en seat-bot (retirada y daño); a solas, solo uno
-    expect(document.querySelectorAll('.seat-bot .more')).toHaveLength(1)
+    expect(document.querySelectorAll('.dano-cmd')).toHaveLength(0)
   })
 
   it('muestra los contadores activos y los oculta cuando están a cero', () => {
@@ -146,14 +145,34 @@ describe('Asiento', () => {
     expect(screen.queryByText('3')).toBeNull()
   })
 
-  it('abrir menú y daño llaman a sus callbacks', () => {
+  it('abrir menú llama a su callback', () => {
     const onAbrirMenu = vi.fn()
-    const onAbrirDano = vi.fn()
-    renderAsiento(props({ onAbrirMenu, onAbrirDano }))
+    renderAsiento(props({ onAbrirMenu }))
     fireEvent.click(screen.getByLabelText('Opciones de Ana'))
     expect(onAbrirMenu).toHaveBeenCalledOnce()
-    fireEvent.click(document.querySelector('.seat-bot .more:nth-of-type(2)') as Element)
-    expect(onAbrirDano).toHaveBeenCalledOnce()
+  })
+
+  it('tocar el icono de un comandante suma daño; mantener pulsado lo resta', () => {
+    vi.useFakeTimers()
+    const onCambiarDano = vi.fn()
+    renderAsiento(props({ onCambiarDano }))
+    const icono = document.querySelector('.dano-cmd') as Element
+
+    fireEvent.pointerDown(icono)
+    fireEvent.pointerUp(icono)
+    expect(onCambiarDano).toHaveBeenCalledWith('0:0', 1)
+
+    fireEvent.pointerDown(icono)
+    vi.advanceTimersByTime(500)
+    fireEvent.pointerUp(icono)
+    expect(onCambiarDano).toHaveBeenCalledWith('0:0', -1)
+    vi.useRealTimers()
+  })
+
+  it('hay un icono por cada comandante en la mesa, propio incluido por si se lo roban', () => {
+    renderAsiento(props())
+    // Ana (2 comandantes) + Beto (1, sin nombre) = 3 fuentes de daño posibles
+    expect(document.querySelectorAll('.dano-cmd')).toHaveLength(3)
   })
 
   it('sin comandante en Scryfall (o sin red), el fondo se queda en el degradado de color', async () => {

@@ -134,18 +134,32 @@ describe('Tablero', () => {
 
   it('el daño de comandante resta vida y queda fuera a partir de 21', () => {
     // con 3 jugadores: si solo hubiera 2, eliminar a Ana terminaría la partida
-    // sola (comprobarFinal) y el modal de daño se sustituiría por el de terminar.
+    // sola (comprobarFinal) y el hub pasaría a ofrecer terminar la partida.
     renderTablero(juegoDePrueba(3))
-    // el segundo ".more" de cada asiento es el de daño (el primero es "retirada");
-    // el índice 1 en el documento es, por tanto, el del primer asiento (Ana)
-    fireEvent.click(document.querySelectorAll('.seat-bot .more')[1])
-    // el "+" del stepper del modal, no el de "sumar vida" del asiento (ambos son "+");
-    // la primera fila es el comandante de Beto, la primera fuente ajena de daño de Ana
-    const masDelStepper = document.querySelector('.stepper button:last-child') as Element
-    for (let i = 0; i < 21; i++) fireEvent.click(masDelStepper)
-    fireEvent.click(screen.getByText('Listo'))
+    // dentro del primer asiento (Ana), el segundo icono de daño es el de Beto
+    // (el primero es el suyo propio, por si se lo roban)
+    const primerAsiento = document.querySelectorAll('.seat')[0]
+    const iconoDeBeto = primerAsiento.querySelectorAll('.dano-cmd')[1] as HTMLElement
+    for (let i = 0; i < 21; i++) {
+      fireEvent.pointerDown(iconoDeBeto)
+      fireEvent.pointerUp(iconoDeBeto)
+    }
     expect(screen.getByText('Fuera')).toBeInTheDocument()
     expect(screen.getByText('19')).toBeInTheDocument() // 40 de vida - 21 de daño
+  })
+
+  it('mantener pulsado un icono de daño lo resta en vez de sumarlo', () => {
+    renderTablero(juegoDePrueba(3))
+    const primerAsiento = document.querySelectorAll('.seat')[0]
+    const iconoDeBeto = primerAsiento.querySelectorAll('.dano-cmd')[1] as HTMLElement
+    fireEvent.pointerDown(iconoDeBeto)
+    fireEvent.pointerUp(iconoDeBeto)
+    expect(iconoDeBeto.querySelector('.dano-valor')).toHaveTextContent('1')
+
+    fireEvent.pointerDown(iconoDeBeto)
+    act(() => vi.advanceTimersByTime(500))
+    fireEvent.pointerUp(iconoDeBeto)
+    expect(iconoDeBeto.querySelector('.dano-valor')).toBeNull()
   })
 
   it('salir sin terminar no borra la partida guardada', async () => {
