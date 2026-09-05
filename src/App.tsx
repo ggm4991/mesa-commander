@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { AvisoProvider } from './componentes/comunes/AvisoProvider'
 import { Previa } from './paginas/Previa'
+import { Registro } from './paginas/Registro'
 import { Tablero } from './paginas/Tablero'
 import type { Juego } from './motor/tipos'
 
-type Pantalla = { nombre: 'previa' } | { nombre: 'tablero'; juego: Juego }
+type Pantalla = { nombre: 'previa' } | { nombre: 'registro' } | { nombre: 'tablero'; juego: Juego }
 
 function Contenido() {
   const [pantalla, setPantalla] = useState<Pantalla>({ nombre: 'previa' })
@@ -16,7 +17,7 @@ function Contenido() {
       <Tablero
         juegoInicial={pantalla.juego}
         onSalir={() => setPantalla({ nombre: 'previa' })}
-        onPartidaRegistrada={() => setPantalla({ nombre: 'previa' })}
+        onPartidaRegistrada={() => setPantalla({ nombre: 'registro' })}
       />
     )
   }
@@ -25,14 +26,18 @@ function Contenido() {
     <>
       <nav className="nav">
         <span className="brand">Mesa Commander</span>
-        <button className="tab" aria-selected="true">
+        <button className="tab" aria-selected={pantalla.nombre === 'previa'} onClick={() => setPantalla({ nombre: 'previa' })}>
           Inicio
         </button>
-        <button className="tab" aria-selected="false" disabled>
+        <button className="tab" aria-selected={pantalla.nombre === 'registro'} onClick={() => setPantalla({ nombre: 'registro' })}>
           Registro
         </button>
       </nav>
-      <Previa onIrAlTablero={(juego) => setPantalla({ nombre: 'tablero', juego })} />
+      {pantalla.nombre === 'registro' ? (
+        <Registro />
+      ) : (
+        <Previa onIrAlTablero={(juego) => setPantalla({ nombre: 'tablero', juego })} />
+      )}
     </>
   )
 }

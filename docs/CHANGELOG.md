@@ -8,6 +8,45 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Cuarto y último commit de la Fase 3: el registro completo (sección 10 de
+  app.html) — clasificación siempre recalculada desde las partidas, ficha por
+  jugador con historial filtrable, alta/edición/borrado manual con la misma
+  validación que usa el tablero al terminar una partida de verdad, cambiar el
+  nombre de un jugador en todas sus partidas, y la copia de seguridad de toda
+  la app (descargar, copiar, abrir un archivo, reemplazar todo o combinar, y
+  restaurar los datos de ejemplo) — 100% local, sin llamada de red alguna.
+  Con esto la app vuelve a ser funcionalmente equivalente a `app.html`; el
+  `CLAUDE.md` del proyecto se reescribe con la nueva estructura en este mismo
+  commit.
+- `src/registro/`: `calcularJugadores` (clasificación derivada, nunca
+  guardada — ver invariante en CLAUDE.md), `filtrarPartidas` (búsqueda de la
+  ficha), `copiaSeguridad` (paquete y validación al importar), `datosDemo`
+  (las doce partidas y seis perfiles de ejemplo, antes solo en app.html),
+  `constantes.ts` (`RES`), y los componentes `Ranking`, `Ficha`,
+  `ModalFormularioPartida` y `ModalCopiaSeguridad`.
+- `src/paginas/Registro.tsx`, con su propio `EstadoModal` (ver ADR 0007) para
+  el alta/edición, el borrado, el renombrado y la copia de seguridad.
+- La pestaña "Registro" de la navegación deja de estar deshabilitada; App.tsx
+  pasa a llevar tres pantallas (`previa`/`registro`/`tablero`) y, al terminar
+  una partida desde el tablero, navega a "Registro" en vez de a "Inicio",
+  igual que hacía `guardarComoPartida()` en el original.
+- `docs/decisiones/0010`: por qué la vista inválida (ficha de un jugador que
+  ya no existe) se corrige durante el render en vez de en un `useEffect`.
+- `docs/decisiones/0011`: por qué el aviso de "sin almacenamiento" del pie de
+  página es un estado local del Registro y no un flag global como en el
+  original.
+- Resto del CSS del registro (tabla de clasificación, ficha, tarjetas,
+  historial de partidas y formulario de alta manual) portado a
+  `src/index.css`, incluidas las dos reglas `@media` que faltaban
+  (pantallas estrechas y `prefers-reduced-motion`).
+- 51 pruebas nuevas (funciones puras del registro y una integración completa
+  de la pantalla), más verificación visual con Chromium real: clasificación,
+  ordenar por columna, ficha con búsqueda, editar y eliminar una partida, y
+  restaurar los datos de ejemplo desde la copia de seguridad — sin errores de
+  consola.
+
+### Added
+
 - Tercer commit de la Fase 3: el tablero de juego completo (sección 8 y parte
   de la 9 de app.html) — grid de asientos con rotación y reparto de emergencia
   (`LAYOUTS`) si la disposición guardada no es válida, vidas con pulsación
