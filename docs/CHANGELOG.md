@@ -8,6 +8,24 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Primer commit de la Fase 4 (Scryfall + offline-first): `src/red/scryfall/cliente.ts`
+  (`buscarNombres` para el autocompletado, `buscarPorNombreExacto` para la
+  identidad de color y la imagen — sin credenciales, sin caché propia) y
+  `src/red/queryClient.ts` (TanStack Query, `staleTime` de un día). Todavía
+  sin usar desde ninguna pantalla: llega en el siguiente commit.
+- `@tanstack/react-query` como dependencia; `msw` como dependencia de
+  desarrollo, solo para simular Scryfall en los tests.
+- `.oxlintrc.json` añade un `overrides` que prohíbe importar nada de
+  `src/red/` desde `src/motor/` o `src/almacenamiento/`, con
+  `no-restricted-imports` — la base técnica del offline-first: el motor y el
+  almacenamiento local nunca dependen de la red.
+- `docs/decisiones/0012`: por qué el cliente distingue "no se encontró" (null)
+  de "falló de verdad" (excepción), por qué la caché es cosa de TanStack
+  Query y no del cliente, y por qué los tests usan `msw` en vez de mockear
+  `fetch` a mano.
+- 10 pruebas nuevas con `msw` cubriendo éxito, 404, error de servidor, sin
+  red y cancelación con `AbortSignal`.
+
 - Cuarto y último commit de la Fase 3: el registro completo (sección 10 de
   app.html) — clasificación siempre recalculada desde las partidas, ficha por
   jugador con historial filtrable, alta/edición/borrado manual con la misma
