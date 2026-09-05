@@ -8,6 +8,20 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Sexto commit de la Fase 4: los iconos de daño de comandante pasan de una
+  fila de círculos a un único cuadrado partido en sectores (una rejilla de
+  2×2 en el caso más común, una mesa de 4 sin compañeros), y el botón de
+  jugadas retiradas se saca de esa fila a una esquina fija del asiento
+  (gira con el resto del contenido en los asientos rotados). Mismo gesto de
+  siempre por sector: toca para sumar, mantén pulsado para restar.
+- `docs/decisiones/0017`: por qué la rejilla se calcula con `ceil(sqrt(n))`
+  en vez de fijarla siempre a 2 columnas, y por qué la esquina de la
+  retirada es relativa al asiento, no a la pantalla.
+- Verificado con un navegador real en una mesa de 4: la rejilla 2×2 sale
+  centrada abajo, la retirada no se solapa con nada, y se comprobó
+  explícitamente que mantener pulsado un sector quita un punto de daño ya
+  puesto — sin errores de consola.
+
 - Quinto commit de la Fase 4: el daño de comandante se apunta con un icono
   tocable por cada comandante en la mesa (su ilustración si Scryfall la
   tiene, o su identidad de color si no), en vez de abrir un panel aparte —

@@ -1395,19 +1395,25 @@ textarea {
   justify-content: center;
 }
 
-/* ============ daño de comandante: un toque por fuente ============ */
-.danos-comandante {
+/* ============ daño de comandante: un cuadrado partido en sectores ============ */
+.fila-dano {
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  align-items: center;
+  justify-content: center;
+}
+.dano-cuadrado {
+  display: grid;
+  gap: 2px;
+  width: 76px;
+  height: 76px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.22);
+  flex: none;
 }
 .dano-cmd {
   position: relative;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 0;
   background-color: rgba(0, 0, 0, 0.42);
   background-size: cover;
   background-position: center;
@@ -1416,21 +1422,24 @@ textarea {
   display: grid;
   place-items: center;
   touch-action: manipulation;
-  flex: none;
   color: inherit;
 }
 .dano-cmd.activo {
-  border-color: var(--brass);
+  outline: 2px solid var(--brass);
+  outline-offset: -2px;
+  z-index: 1;
 }
 .dano-cmd.letal {
-  border-color: var(--rust);
+  outline: 2px solid var(--rust);
+  outline-offset: -2px;
+  z-index: 1;
 }
 .dano-cmd .dano-valor {
   position: absolute;
-  right: -4px;
-  bottom: -4px;
-  min-width: 17px;
-  height: 17px;
+  right: 2px;
+  bottom: 2px;
+  min-width: 16px;
+  height: 16px;
   padding: 0 3px;
   border-radius: 99px;
   background: var(--brass);
@@ -1450,15 +1459,44 @@ textarea {
   pointer-events: none;
 }
 @container (max-height: 210px) {
-  .dano-cmd {
-    width: 26px;
-    height: 26px;
+  .dano-cuadrado {
+    width: 56px;
+    height: 56px;
   }
   .dano-cmd .dano-valor {
-    min-width: 14px;
-    height: 14px;
+    min-width: 13px;
+    height: 13px;
     font-size: 9px;
   }
+}
+@container (max-height: 150px) {
+  .fila-dano {
+    display: none;
+  }
+}
+
+/* El botón de jugadas retiradas se fija en una esquina en vez de compartir fila
+   con los contadores: gira con el resto del contenido (es hijo de `.inner`). */
+.retirada-esquina {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 99px;
+  font-size: 12px;
+  padding: 6px 10px;
+  min-height: 32px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  touch-action: manipulation;
+}
+.retirada-esquina:active {
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .hub {

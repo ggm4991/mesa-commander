@@ -47,6 +47,12 @@ export function Asiento({
   const j = juego.j[indice]
   const esTurno = indice === juego.turno && !j.out
   const esperandoInicio = juego.turno == null && !j.out
+  const fuentesDano = comandantesEnMesa(juego)
+  // Un cuadrado, no una fila: para las 3-4 fuentes de un pod normal de 4 jugadores
+  // (sqrt da 2 columnas) sale una rejilla de 2x2; con más fuentes (compañeros,
+  // mesas grandes) se ensancha en vez de desbordar hacia un lado.
+  const columnasDano = Math.max(1, Math.ceil(Math.sqrt(fuentesDano.length)))
+  const filasDano = Math.max(1, Math.ceil(fuentesDano.length / columnasDano))
 
   const menosVida = useMantenerPulsado(() => onCambiarVida(-1))
   const masVida = useMantenerPulsado(() => onCambiarVida(1))
@@ -118,18 +124,17 @@ export function Asiento({
           </button>
         )}
 
-        <div className="seat-bot" style={estiloFila(borde?.abajo ?? null, borde?.hueco ?? '')}>
-          <button
-            className="more"
-            style={estiloBotonEnFila(borde?.abajo ?? null)}
-            title="Retiró una jugada y la rehízo"
-            onClick={onRetirada}
-          >
-            <Icono nombre="retirada" tamano={17} /> {j.rehacer}
-          </button>
-          {juego.j.length > 1 && (
-            <div className="danos-comandante">
-              {comandantesEnMesa(juego).map((c) => (
+        <button className="retirada-esquina" title="Retiró una jugada y la rehízo" onClick={onRetirada}>
+          <Icono nombre="retirada" tamano={16} /> {j.rehacer}
+        </button>
+
+        {juego.j.length > 1 && (
+          <div className="fila-dano">
+            <div
+              className="dano-cuadrado"
+              style={{ gridTemplateColumns: `repeat(${columnasDano}, 1fr)`, gridTemplateRows: `repeat(${filasDano}, 1fr)` }}
+            >
+              {fuentesDano.map((c) => (
                 <IconoDanoComandante
                   key={c.clave}
                   fuente={c}
@@ -140,7 +145,10 @@ export function Asiento({
                 />
               ))}
             </div>
-          )}
+          </div>
+        )}
+
+        <div className="seat-bot" style={estiloFila(borde?.abajo ?? null, borde?.hueco ?? '')}>
           {CONTADORES.filter((c) => j[c.clave] > 0).map((c) => (
             <span key={c.clave} className={`ctr${c.letal && j[c.clave] >= c.letal ? ' warn' : ''}`} title={c.nombre}>
               <Icono nombre={ICONO_CONTADOR[c.clave]} tamano={16} /> {j[c.clave]}
