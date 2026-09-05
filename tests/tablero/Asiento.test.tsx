@@ -77,11 +77,13 @@ function renderAsiento(p: ReturnType<typeof props>) {
 }
 
 describe('Asiento', () => {
-  it('muestra el nombre, los dos comandantes y la vida', () => {
+  it('muestra la vida, sin el nombre ni el comandante en pantalla (solo como accesibilidad)', () => {
     renderAsiento(props())
-    expect(screen.getByText('Ana')).toBeInTheDocument()
-    expect(screen.getByText('Edgar Markov + Kydele, Chosen of Kruphix')).toBeInTheDocument()
     expect(screen.getByText('40')).toBeInTheDocument()
+    expect(screen.queryByText('Ana')).toBeNull()
+    expect(screen.queryByText('Edgar Markov + Kydele, Chosen of Kruphix')).toBeNull()
+    // el nombre sigue disponible para quien usa un lector de pantalla
+    expect(screen.getByLabelText('Opciones de Ana')).toBeInTheDocument()
   })
 
   it('marca "Su turno" solo a quien le toca y no está fuera', () => {
@@ -195,7 +197,7 @@ describe('Asiento', () => {
     expect(onCambiarDano).toHaveBeenCalledWith('0:0', 1)
   })
 
-  it('mantener pulsado un sector cubre el cuadrado entero; tocar restar quita un punto', () => {
+  it('mantener pulsado un sector cubre el cuadrado entero; restar no lo cierra, se puede seguir usando', () => {
     vi.useFakeTimers()
     const onCambiarDano = vi.fn()
     renderAsiento(props({ onCambiarDano }))
@@ -209,6 +211,23 @@ describe('Asiento', () => {
 
     fireEvent.click(cuadrado.querySelector('.dano-restar') as Element)
     expect(onCambiarDano).toHaveBeenCalledWith('0:0', -1)
+    expect(cuadrado.querySelector('.dano-expandido')).not.toBeNull() // sigue abierto
+
+    fireEvent.click(cuadrado.querySelector('.dano-restar') as Element)
+    expect(onCambiarDano).toHaveBeenCalledTimes(2)
+  })
+
+  it('el cuadrado expandido se cierra solo pasados unos segundos sin tocarlo', () => {
+    vi.useFakeTimers()
+    renderAsiento(props())
+    const cuadrado = document.querySelector('.dano-cuadrado') as Element
+    const toque = cuadrado.querySelector('.dano-cmd .dano-toque') as Element
+
+    fireEvent.pointerDown(toque)
+    act(() => vi.advanceTimersByTime(500))
+    expect(cuadrado.querySelector('.dano-expandido')).not.toBeNull()
+
+    act(() => vi.advanceTimersByTime(3000))
     expect(cuadrado.querySelector('.dano-expandido')).toBeNull()
   })
 
@@ -246,7 +265,7 @@ describe('Asiento', () => {
       ),
     )
     renderAsiento(props())
-    await screen.findByText('Ana')
+    await screen.findByText('40')
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(document.querySelector('.bg')?.getAttribute('style')).toContain(
       'url("https://cards.scryfall.io/art_crop/edgar-markov.jpg")',

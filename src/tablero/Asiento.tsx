@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react'
 import { Icono } from '../componentes/icono/Icono'
 import { fondoAsiento } from '../componentes/comunes/fondo'
 import { CONTADORES, comandantesAgrupadosPorJugador } from '../motor/vida'
-import { dosComandantes } from '../motor/utilidades'
 import { useImagenComandante } from '../red/scryfall/useImagenComandante'
 import type { Identidad, Juego } from '../motor/tipos'
 import { type BordeAsiento, estiloBotonEnFila, estiloFila } from './bordes'
@@ -97,8 +96,6 @@ export function Asiento({
       {delta !== 0 && <div className="delta">{delta > 0 ? `+${delta}` : delta}</div>}
       <div className="inner">
         <div className="seat-top" style={estiloFila(borde?.arriba ?? null, borde?.hueco ?? '')}>
-          <span className="seat-name">{j.n}</span>
-          <span className="seat-cmd">{j.c2 ? dosComandantes(j.c, j.c2) : j.c || ''}</span>
           {esTurno && <span className="badge turn">Su turno</span>}
           {juego.iniciativa === indice && (
             <span className="badge">
@@ -177,14 +174,8 @@ export function Asiento({
                   fuente={fuenteAbierta}
                   esPropio={fuenteAbierta.k === indice}
                   valor={j.dmg[fuenteAbierta.clave] || 0}
-                  onSumar={() => {
-                    onCambiarDano(fuenteAbierta.clave, 1)
-                    cerrarSector()
-                  }}
-                  onRestar={() => {
-                    onCambiarDano(fuenteAbierta.clave, -1)
-                    cerrarSector()
-                  }}
+                  onSumar={() => onCambiarDano(fuenteAbierta.clave, 1)}
+                  onRestar={() => onCambiarDano(fuenteAbierta.clave, -1)}
                   onCerrar={cerrarSector}
                 />
               )}

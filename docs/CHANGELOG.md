@@ -8,6 +8,11 @@ en el que se convierte en una versión con fecha.
 
 ### Fixed
 
+- El panel ampliado de daño de comandante (ADR 0020) se cerraba tras un
+  único toque de sumar o restar: ahora esos toques solo reinician el
+  temporizador de autocierre, así que una serie de pulsaciones seguidas
+  mantiene el panel abierto en vez de obligar a mantener pulsado otra vez
+  por cada punto (ver ADR 0023).
 - El contenido de un asiento podía solaparse con varios contadores activos
   a la vez, incluso en ventanas grandes: `.life` fijaba su tamaño con
   unidades de *viewport* (`vh`), relativas a la ventana entera y no al
@@ -19,6 +24,24 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Décimo commit de la Fase 4, con cuatro ajustes tras probar el hub
+  central en mesa real:
+  - El número de vida crece de `clamp(38px, 11cqh, 84px)` a
+    `clamp(46px, 15cqh, 108px)` como dato principal del asiento.
+  - El hub deja de flotar sobre los asientos: el `gap` de `.board` sube de
+    6px a 44px para darle un hueco propio en el centro, sin tener que
+    tocar las 11 disposiciones de `DISPOS`/`LAYOUTS` una a una.
+  - Se retiran el nombre del jugador y el del comandante de la pantalla
+    del asiento (se conserva el nombre solo como `aria-label` del menú de
+    opciones, por accesibilidad).
+  - Corrección del cierre prematuro del panel ampliado de daño (ver
+    "Fixed" arriba y ADR 0023).
+- 2 pruebas nuevas (una del cierre por inactividad tras mantener pulsado,
+  otra de que sumar/restar seguidos retrasan el autocierre en vez de
+  cerrar), más verificación con un navegador real en mesas de 2 y de 4
+  jugadores: el hub no se solapa con ningún asiento en ninguna de las dos,
+  y sumar dos veces seguidas sobre el panel ampliado lo deja abierto y
+  acumula el daño correctamente.
 - Noveno commit de la Fase 4, con tres ajustes pedidos tras probar la app
   con muchos contadores a la vez:
   - Mantener pulsado un sector del cuadrado de daño ya no abre solo su

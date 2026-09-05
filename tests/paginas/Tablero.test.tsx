@@ -55,9 +55,9 @@ describe('Tablero', () => {
   it('pinta un asiento por jugador con su vida inicial', () => {
     renderTablero()
     expect(screen.getAllByText('40')).toHaveLength(2)
-    expect(document.querySelectorAll('.seat-name')).toHaveLength(2)
-    expect(screen.getAllByText('Ana').length).toBeGreaterThan(0) // en su asiento y en el reloj, es su turno
-    expect(document.querySelector('.seat-name')).toHaveTextContent('Ana')
+    // el nombre ya no se muestra en el asiento (solo en el reloj y como accesibilidad)
+    expect(screen.getAllByText('Ana')).toHaveLength(1)
+    expect(screen.getByLabelText('Opciones de Ana')).toBeInTheDocument()
   })
 
   it('sumar y quitar vida actualiza el número al momento', () => {
@@ -164,6 +164,9 @@ describe('Tablero', () => {
 
     fireEvent.click(cuadrado.querySelector('.dano-restar') as Element)
     expect(sectorDeBeto.querySelector('.dano-valor')).toBeNull()
+    expect(cuadrado.querySelector('.dano-expandido')).not.toBeNull() // restar ya no cierra el panel
+
+    fireEvent.pointerDown(document.body)
     expect(cuadrado.querySelector('.dano-expandido')).toBeNull()
   })
 

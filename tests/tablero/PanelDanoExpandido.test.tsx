@@ -48,17 +48,18 @@ describe('PanelDanoExpandido', () => {
     expect(panel.querySelector('.dano-restar')).not.toBeNull()
   })
 
-  it('tocar sumar llama a onSumar y cierra el panel', () => {
+  it('tocar sumar llama a onSumar sin cerrar el panel', () => {
     const { panel, onSumar, onCerrar } = renderPanel()
     fireEvent.click(panel.querySelector('.dano-sumar') as Element)
     expect(onSumar).toHaveBeenCalledOnce()
-    expect(onCerrar).not.toHaveBeenCalled() // cerrar es cosa del padre al reaccionar a onSumar, no del propio panel
+    expect(onCerrar).not.toHaveBeenCalled() // cerrarlo es cosa de tocar fuera o del tiempo, no de sumar/restar
   })
 
-  it('tocar restar llama a onRestar', () => {
-    const { panel, onRestar } = renderPanel()
+  it('tocar restar llama a onRestar sin cerrar el panel', () => {
+    const { panel, onRestar, onCerrar } = renderPanel()
     fireEvent.click(panel.querySelector('.dano-restar') as Element)
     expect(onRestar).toHaveBeenCalledOnce()
+    expect(onCerrar).not.toHaveBeenCalled()
   })
 
   it('tocar fuera del panel llama a onCerrar', () => {
@@ -71,6 +72,17 @@ describe('PanelDanoExpandido', () => {
     vi.useFakeTimers()
     const { onCerrar } = renderPanel()
     act(() => vi.advanceTimersByTime(3000))
+    expect(onCerrar).toHaveBeenCalledOnce()
+  })
+
+  it('cada toque de sumar/restar retrasa el cierre automático', () => {
+    vi.useFakeTimers()
+    const { panel, onCerrar } = renderPanel()
+    act(() => vi.advanceTimersByTime(2500))
+    fireEvent.click(panel.querySelector('.dano-sumar') as Element) // reinicia el temporizador
+    act(() => vi.advanceTimersByTime(2500))
+    expect(onCerrar).not.toHaveBeenCalled() // solo 2.5s desde el último toque, no 3s desde que se abrió
+    act(() => vi.advanceTimersByTime(1000))
     expect(onCerrar).toHaveBeenCalledOnce()
   })
 
