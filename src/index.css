@@ -1178,7 +1178,7 @@ textarea {
     height: 32px;
   }
   .life {
-    font-size: clamp(30px, 9vh, 54px);
+    font-size: clamp(30px, 9cqh, 54px);
   }
 }
 @container (max-height: 150px) {
@@ -1316,7 +1316,7 @@ textarea {
   font-family: Spectral, Georgia, serif;
   font-weight: 800;
   line-height: 0.9;
-  font-size: clamp(38px, 11vh, 84px);
+  font-size: clamp(38px, 11cqh, 84px);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 .tap {
@@ -1401,10 +1401,11 @@ textarea {
   justify-content: center;
 }
 .dano-cuadrado {
+  position: relative;
   display: grid;
   gap: 3px;
-  width: 128px;
-  height: 128px;
+  width: 148px;
+  height: 148px;
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.22);
@@ -1437,9 +1438,6 @@ textarea {
   outline: 2px solid var(--rust);
   outline-offset: -2px;
   z-index: 1;
-}
-.dano-cmd.abierto {
-  z-index: 2;
 }
 .dano-toque {
   position: absolute;
@@ -1477,9 +1475,57 @@ textarea {
 .dano-toque .pips {
   pointer-events: none;
 }
-/* Mantener pulsado un sector lo abre en dos mitades — sumar y restar — en vez de
-   restar a ciegas: se cierran solas al tocar fuera o pasados unos segundos sin
-   usarlas (ver ADR 0018). */
+/* Mantener pulsado un sector cubre el cuadrado *entero* con este panel — no solo
+   el hueco de esa fuente, que es demasiado pequeño para acertar el gesto con el
+   dedo — con dos mitades grandes de sumar/restar. Se cierra solo al tocar fuera,
+   pasados unos segundos sin usarlo, o al sumar/restar (ver ADR 0020). */
+.dano-expandido {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background-color: rgba(0, 0, 0, 0.55);
+  background-size: cover;
+  background-position: center;
+}
+.dano-expandido.letal {
+  outline: 2px solid var(--rust);
+  outline-offset: -2px;
+}
+.dano-expandido-id {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 1;
+  pointer-events: none;
+}
+.dano-expandido-titulo {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  z-index: 1;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--bone);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  pointer-events: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dano-expandido-valor {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--bone);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
 .dano-mitad {
   position: absolute;
   top: 0;
@@ -1487,7 +1533,7 @@ textarea {
   width: 50%;
   border: 0;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--bone);
   display: grid;
@@ -1504,8 +1550,8 @@ textarea {
 }
 @container (max-height: 210px) {
   .dano-cuadrado {
-    width: 92px;
-    height: 92px;
+    width: 104px;
+    height: 104px;
   }
   .dano-valor {
     min-width: 14px;
@@ -1513,7 +1559,10 @@ textarea {
     font-size: 9.5px;
   }
   .dano-mitad {
-    font-size: 15px;
+    font-size: 20px;
+  }
+  .dano-expandido-titulo {
+    font-size: 9.5px;
   }
 }
 @container (max-height: 150px) {

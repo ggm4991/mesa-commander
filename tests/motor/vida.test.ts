@@ -170,6 +170,18 @@ describe('ajustarMana', () => {
     juego = ajustarMana(juego, 0, null)
     expect(juego.j[0].mana).toEqual({ W: 0, U: 0, B: 0, R: 0, G: 0, C: 0 })
   })
+
+  it('con delta -1, gasta un punto del color', () => {
+    let juego = ajustarMana(partidaDePrueba(), 0, 'U')
+    juego = ajustarMana(juego, 0, 'U')
+    juego = ajustarMana(juego, 0, 'U', -1)
+    expect(juego.j[0].mana.U).toBe(1)
+  })
+
+  it('no baja de cero', () => {
+    const juego = ajustarMana(partidaDePrueba(), 0, 'U', -1)
+    expect(juego.j[0].mana.U).toBe(0)
+  })
 })
 
 describe('editarJugador', () => {

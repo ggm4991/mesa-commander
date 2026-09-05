@@ -1,13 +1,21 @@
+import { useCallback, useState } from 'react'
 import { Icono } from '../componentes/icono/Icono'
 import { fondoAsiento } from '../componentes/comunes/fondo'
 import { CONTADORES, comandantesAgrupadosPorJugador } from '../motor/vida'
 import { dosComandantes } from '../motor/utilidades'
 import { useImagenComandante } from '../red/scryfall/useImagenComandante'
-import type { Juego } from '../motor/tipos'
+import type { Identidad, Juego } from '../motor/tipos'
 import { type BordeAsiento, estiloBotonEnFila, estiloFila } from './bordes'
 import { ICONO_CONTADOR, MANA } from './constantesUI'
 import { IconoDanoComandante } from './IconoDanoComandante'
+import { PanelDanoExpandido } from './PanelDanoExpandido'
 import { useMantenerPulsado } from './useMantenerPulsado'
+
+/** Por encima de esto, los contadores sueltos (sin contar el maná, que se deja
+ * siempre visible porque se toca todo el rato) se agrupan en un solo botón que
+ * abre el menú del asiento — más vale un resumen que una fila que se desborda y
+ * se solapa con lo de al lado (ver ADR 0021). */
+const UMBRAL_CONTADORES_SUELTOS = 2
 
 interface Props {
   juego: Juego
@@ -20,6 +28,7 @@ interface Props {
   onCambiarVida: (delta: number) => void
   onAbrirMenu: () => void
   onCambiarDano: (clave: string, delta: number) => void
+  onAjustarMana: (color: keyof Identidad, delta: number) => void
   onElegirInicio: () => void
   onRetirada: () => void
   onEmpezarArrastreCorona: (e: React.PointerEvent) => void
@@ -39,6 +48,7 @@ export function Asiento({
   onCambiarVida,
   onAbrirMenu,
   onCambiarDano,
+  onAjustarMana,
   onElegirInicio,
   onRetirada,
   onEmpezarArrastreCorona,
@@ -56,9 +66,21 @@ export function Asiento({
   const columnasDano = Math.max(1, Math.ceil(Math.sqrt(gruposDano.length)))
   const filasDano = Math.max(1, Math.ceil(gruposDano.length / columnasDano))
 
+  // Mantener pulsado un sector no lo abre a él mismo: pide que el cuadrado entero
+  // (por eso el estado vive aquí y no en `IconoDanoComandante`) muestre el panel
+  // grande de esa fuente en concreto, sea cual sea su clave (ver ADR 0020).
+  const [sectorAbierto, setSectorAbierto] = useState<string | null>(null)
+  const cerrarSector = useCallback(() => setSectorAbierto(null), [])
+  const fuenteAbierta = sectorAbierto ? (gruposDano.flat().find((c) => c.clave === sectorAbierto) ?? null) : null
+
   const menosVida = useMantenerPulsado(() => onCambiarVida(-1))
   const masVida = useMantenerPulsado(() => onCambiarVida(1))
   const imagenComandante = useImagenComandante(j.c, j.imagenId)
+
+  const contadoresActivos = CONTADORES.filter((c) => j[c.clave] > 0)
+  const manaActivo = MANA.filter((m) => (j.mana || {})[m] > 0)
+  const otrosActivos = contadoresActivos.length + (j.bendicion ? 1 : 0) + (j.fuera > 0 ? 1 : 0)
+  const resumirOtros = otrosActivos > UMBRAL_CONTADORES_SUELTOS
 
   return (
     <div
@@ -145,36 +167,60 @@ export function Asiento({
                       esPropio={c.k === indice}
                       valor={j.dmg[c.clave] || 0}
                       onSumar={() => onCambiarDano(c.clave, 1)}
-                      onRestar={() => onCambiarDano(c.clave, -1)}
+                      onAbrir={() => setSectorAbierto(c.clave)}
                     />
                   ))}
                 </div>
               ))}
+              {fuenteAbierta && (
+                <PanelDanoExpandido
+                  fuente={fuenteAbierta}
+                  esPropio={fuenteAbierta.k === indice}
+                  valor={j.dmg[fuenteAbierta.clave] || 0}
+                  onSumar={() => {
+                    onCambiarDano(fuenteAbierta.clave, 1)
+                    cerrarSector()
+                  }}
+                  onRestar={() => {
+                    onCambiarDano(fuenteAbierta.clave, -1)
+                    cerrarSector()
+                  }}
+                  onCerrar={cerrarSector}
+                />
+              )}
             </div>
           </div>
         )}
 
         <div className="seat-bot" style={estiloFila(borde?.abajo ?? null, borde?.hueco ?? '')}>
-          {CONTADORES.filter((c) => j[c.clave] > 0).map((c) => (
-            <span key={c.clave} className={`ctr${c.letal && j[c.clave] >= c.letal ? ' warn' : ''}`} title={c.nombre}>
-              <Icono nombre={ICONO_CONTADOR[c.clave]} tamano={16} /> {j[c.clave]}
-            </span>
-          ))}
-          {MANA.filter((m) => (j.mana || {})[m] > 0).map((m) => (
-            <span key={m} className="ctr">
+          {manaActivo.map((m) => (
+            <button key={m} type="button" className="ctr" title={`Maná ${m}: toca para gastar uno`} onClick={() => onAjustarMana(m, -1)}>
               <i className={`pip ${m}`} />
               {j.mana[m]}
-            </span>
+            </button>
           ))}
-          {j.bendicion && (
-            <span className="ctr" title="Bendición de la ciudad">
-              <Icono nombre="ciudad" tamano={16} />
-            </span>
-          )}
-          {j.fuera > 0 && (
-            <span className="ctr warn" title="Veces que se pasó de tiempo">
-              <Icono nombre="reloj" tamano={16} /> {j.fuera}
-            </span>
+          {resumirOtros ? (
+            <button className="ctr" onClick={onAbrirMenu}>
+              <Icono nombre="puntos" tamano={16} /> {otrosActivos} más
+            </button>
+          ) : (
+            <>
+              {contadoresActivos.map((c) => (
+                <span key={c.clave} className={`ctr${c.letal && j[c.clave] >= c.letal ? ' warn' : ''}`} title={c.nombre}>
+                  <Icono nombre={ICONO_CONTADOR[c.clave]} tamano={16} /> {j[c.clave]}
+                </span>
+              ))}
+              {j.bendicion && (
+                <span className="ctr" title="Bendición de la ciudad">
+                  <Icono nombre="ciudad" tamano={16} />
+                </span>
+              )}
+              {j.fuera > 0 && (
+                <span className="ctr warn" title="Veces que se pasó de tiempo">
+                  <Icono nombre="reloj" tamano={16} /> {j.fuera}
+                </span>
+              )}
+            </>
           )}
         </div>
       </div>

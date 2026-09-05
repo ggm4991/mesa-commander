@@ -184,11 +184,16 @@ export function alternarFueraDeJuego(juego: Juego, i: number, ahora: number = Da
  * El maná disponible se toca demasiadas veces por turno como para que cada toque
  * cuente como una acción que se pueda deshacer o que sature el historial: el
  * original tampoco llama a `foto()` ni a `registrar()` aquí, así que esta función
- * se aplica con `mutarSinFoto` en el tablero, no con el `mutar` normal.
+ * se aplica con `mutarSinFoto` en el tablero, no con el `mutar` normal. Con
+ * `color: null` vacía todo el maná (el botón de "vaciar" del menú de asiento);
+ * con un color, `delta` deja subir (+1, desde el menú) o bajar (-1, tocando
+ * directamente la ficha de maná del asiento — regla 500.4, no se conserva entre
+ * pasos, así que restarlo a mano es tan legítimo como sumarlo).
  */
-export function ajustarMana(juego: Juego, i: number, color: keyof Identidad | null): Juego {
+export function ajustarMana(juego: Juego, i: number, color: keyof Identidad | null, delta: number = 1): Juego {
   const j = juego.j[i]
-  const mana: Identidad = color === null ? { W: 0, U: 0, B: 0, R: 0, G: 0, C: 0 } : { ...j.mana, [color]: j.mana[color] + 1 }
+  const mana: Identidad =
+    color === null ? { W: 0, U: 0, B: 0, R: 0, G: 0, C: 0 } : { ...j.mana, [color]: Math.max(0, j.mana[color] + delta) }
   const jActualizado = { ...j, mana }
   const jugadores = juego.j.map((x, idx) => (idx === i ? jActualizado : x))
   return { ...juego, j: jugadores }

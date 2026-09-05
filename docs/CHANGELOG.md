@@ -6,7 +6,39 @@ en el que se convierte en una versión con fecha.
 
 ## [Unreleased]
 
+### Fixed
+
+- El contenido de un asiento podía solaparse con varios contadores activos
+  a la vez, incluso en ventanas grandes: `.life` fijaba su tamaño con
+  unidades de *viewport* (`vh`), relativas a la ventana entera y no al
+  asiento real que lo contiene — pasa a `cqh` (unidades de *container
+  query*, ya en uso en esta pantalla). Además, la fila de contadores
+  sueltos (sin el maná) no tenía techo: por encima de 2 activos a la vez
+  se agrupan en un botón `"N más"` que abre el menú del asiento, en vez de
+  crecer sin límite (ver ADR 0021).
+
 ### Added
+
+- Noveno commit de la Fase 4, con tres ajustes pedidos tras probar la app
+  con muchos contadores a la vez:
+  - Mantener pulsado un sector del cuadrado de daño ya no abre solo su
+    propio hueco en dos mitades pequeñas: cubre el **cuadrado entero** con
+    dos mitades grandes de sumar/restar, mucho más fáciles de acertar con
+    el dedo — vale igual para cada comandante de un jugador con compañero
+    (`PanelDanoExpandido`, nuevo; ver ADR 0020).
+  - El maná ya no se conserva entre turnos (regla 500.4): `pasarTurno()`
+    vacía el de todos los jugadores, no solo el de quien lo pasa. Tocar
+    directamente una ficha de maná del asiento gasta un punto, sin tener
+    que abrir el menú (ver ADR 0022).
+  - Corrección de un solape real en el asiento con muchos contadores
+    activos a la vez, incluso en ventanas grandes (ver "Fixed" arriba y
+    ADR 0021).
+- 20 pruebas nuevas, más verificación con un navegador real: una mesa de
+  4 con un jugador de dos comandantes y los 9 contadores más los 6 colores
+  de maná activos a la vez, sin ningún solape ni en una ventana grande
+  (1400×900) ni en una pequeña (480×700); mantener pulsado cualquier
+  sector cubre el cuadrado entero; tocar una ficha de maná la baja en uno
+  — sin errores de consola.
 
 - Octavo commit de la Fase 4: la rejilla del cuadrado de daño se calcula
   ahora por número de *jugadores*, no de comandantes — una mesa de 4 sigue

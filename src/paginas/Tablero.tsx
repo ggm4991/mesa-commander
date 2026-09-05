@@ -190,6 +190,7 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
             onCambiarVida={(d) => alCambiarVida(i, d)}
             onAbrirMenu={() => setModal({ tipo: 'menuAsiento', indice: i })}
             onCambiarDano={(clave, delta) => mutar((j) => danoComandante(j, i, clave, delta))}
+            onAjustarMana={(color, delta) => mutarSinFoto((j) => ajustarMana(j, i, color, delta))}
             onElegirInicio={() => mutarSinFoto((j) => elegirInicio(j, i))}
             onRetirada={() => mutar((j) => retirada(j, i, 1))}
             onEmpezarArrastreCorona={(e) => empezarArrastreCorona(i, e)}

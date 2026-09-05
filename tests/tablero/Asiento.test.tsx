@@ -51,6 +51,7 @@ const props = (over: Record<string, unknown> = {}) => ({
   onCambiarVida: vi.fn(),
   onAbrirMenu: vi.fn(),
   onCambiarDano: vi.fn(),
+  onAjustarMana: vi.fn(),
   onElegirInicio: vi.fn(),
   onRetirada: vi.fn(),
   onEmpezarArrastreCorona: vi.fn(),
@@ -148,6 +149,35 @@ describe('Asiento', () => {
     expect(screen.queryByText('3')).toBeNull()
   })
 
+  it('tocar una ficha de maná gasta uno', () => {
+    const juego = juegoDePrueba()
+    juego.j[0].mana = { ...juego.j[0].mana, U: 2 }
+    const onAjustarMana = vi.fn()
+    renderAsiento(props({ juego, onAjustarMana }))
+    fireEvent.click(screen.getByTitle('Maná U: toca para gastar uno'))
+    expect(onAjustarMana).toHaveBeenCalledWith('U', -1)
+  })
+
+  it('con muchos contadores sueltos a la vez, se agrupan en un botón de resumen', () => {
+    const juego = juegoDePrueba()
+    // más de UMBRAL_CONTADORES_SUELTOS (2) contadores sueltos activos a la vez
+    Object.assign(juego.j[0], { ven: 1, exp: 1, ene: 1 })
+    const onAbrirMenu = vi.fn()
+    renderAsiento(props({ juego, onAbrirMenu }))
+    expect(screen.getByText('3 más')).toBeInTheDocument()
+    expect(screen.queryByTitle('Experiencia')).toBeNull()
+    fireEvent.click(screen.getByText('3 más'))
+    expect(onAbrirMenu).toHaveBeenCalledOnce()
+  })
+
+  it('con pocos contadores sueltos, se ven todos sin agrupar', () => {
+    const juego = juegoDePrueba()
+    juego.j[0].ven = 1
+    renderAsiento(props({ juego }))
+    expect(screen.queryByText(/más$/)).toBeNull()
+    expect(screen.getByTitle('Infectar')).toBeInTheDocument()
+  })
+
   it('abrir menú llama a su callback', () => {
     const onAbrirMenu = vi.fn()
     renderAsiento(props({ onAbrirMenu }))
@@ -165,19 +195,21 @@ describe('Asiento', () => {
     expect(onCambiarDano).toHaveBeenCalledWith('0:0', 1)
   })
 
-  it('mantener pulsado un sector lo abre en dos mitades; tocar restar quita un punto', () => {
+  it('mantener pulsado un sector cubre el cuadrado entero; tocar restar quita un punto', () => {
     vi.useFakeTimers()
     const onCambiarDano = vi.fn()
     renderAsiento(props({ onCambiarDano }))
-    const sector = document.querySelector('.dano-cmd') as Element
-    const toque = sector.querySelector('.dano-toque') as Element
+    const cuadrado = document.querySelector('.dano-cuadrado') as Element
+    const toque = cuadrado.querySelector('.dano-cmd .dano-toque') as Element
 
     fireEvent.pointerDown(toque)
     act(() => vi.advanceTimersByTime(500))
     expect(onCambiarDano).not.toHaveBeenCalled()
+    expect(cuadrado.querySelector('.dano-expandido')).not.toBeNull()
 
-    fireEvent.click(sector.querySelector('.dano-restar') as Element)
+    fireEvent.click(cuadrado.querySelector('.dano-restar') as Element)
     expect(onCambiarDano).toHaveBeenCalledWith('0:0', -1)
+    expect(cuadrado.querySelector('.dano-expandido')).toBeNull()
   })
 
   it('hay un icono por cada comandante en la mesa, propio incluido por si se lo roban', () => {

@@ -80,6 +80,8 @@ export function elegirInicio(juego: Juego, i: number, ahora: number = Date.now()
   return registrar(siguiente, `Empieza ${siguiente.j[i].n}`, ahora)
 }
 
+const MANA_VACIO = { W: 0, U: 0, B: 0, R: 0, G: 0, C: 0 }
+
 export function pasarTurno(juego: Juego, ahora: number = Date.now()): Juego {
   if (juego.turno == null) return juego
   const dur = transcurrido(juego, ahora)
@@ -91,7 +93,9 @@ export function pasarTurno(juego: Juego, ahora: number = Date.now()): Juego {
     tMax: Math.max(actual.tMax, dur),
     fuera: pasado ? actual.fuera + 1 : actual.fuera,
   }
-  const jugadores = juego.j.map((x, idx) => (idx === juego.turno ? actualActualizado : x))
+  // El maná no se conserva entre pasos ni turnos (regla 500.4): al pasar el turno
+  // se vacía el de todos, no solo el de quien lo pasa.
+  const jugadores = juego.j.map((x, idx) => ({ ...(idx === juego.turno ? actualActualizado : x), mana: { ...MANA_VACIO } }))
   let siguiente = registrar(
     { ...juego, j: jugadores },
     `Turno de ${actualActualizado.n}: ${reloj(dur)}${pasado ? ' — se pasó del límite' : ''}`,

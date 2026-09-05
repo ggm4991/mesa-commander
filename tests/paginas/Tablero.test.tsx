@@ -148,9 +148,10 @@ describe('Tablero', () => {
     expect(screen.getByText('19')).toBeInTheDocument() // 40 de vida - 21 de daño
   })
 
-  it('mantener pulsado un sector de daño lo abre en dos mitades; restar lo quita', () => {
+  it('mantener pulsado un sector de daño cubre el cuadrado entero; restar lo quita', () => {
     renderTablero(juegoDePrueba(3))
-    const sectorDeBeto = document.querySelectorAll('.seat')[0].querySelectorAll('.dano-cmd')[1] as HTMLElement
+    const cuadrado = document.querySelectorAll('.seat')[0].querySelector('.dano-cuadrado') as HTMLElement
+    const sectorDeBeto = cuadrado.querySelectorAll('.dano-cmd')[1] as HTMLElement
     const toque = sectorDeBeto.querySelector('.dano-toque') as HTMLElement
 
     fireEvent.pointerDown(toque)
@@ -159,11 +160,11 @@ describe('Tablero', () => {
 
     fireEvent.pointerDown(toque)
     act(() => vi.advanceTimersByTime(500))
-    expect(sectorDeBeto).toHaveClass('abierto')
+    expect(cuadrado.querySelector('.dano-expandido')).not.toBeNull()
 
-    fireEvent.click(sectorDeBeto.querySelector('.dano-restar') as Element)
+    fireEvent.click(cuadrado.querySelector('.dano-restar') as Element)
     expect(sectorDeBeto.querySelector('.dano-valor')).toBeNull()
-    expect(sectorDeBeto).not.toHaveClass('abierto')
+    expect(cuadrado.querySelector('.dano-expandido')).toBeNull()
   })
 
   it('salir sin terminar no borra la partida guardada', async () => {
