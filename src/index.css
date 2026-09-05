@@ -1,6 +1,5 @@
 /* Fase 3: CSS portado de app.html sección a sección, según se van construyendo
-   los componentes que la usan. Todavía falta el tablero de juego en sí (el hub,
-   los contadores, el arrastre de la corona) — llega en el siguiente commit. */
+   los componentes que la usan. */
 
 :root {
   --felt: #221a2b;
@@ -681,4 +680,429 @@ input[type='search'] {
   font-size: 11.5px;
   text-align: center;
   padding: 4px;
+}
+
+/* ============ tablero ============ */
+.board-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #100c15;
+  z-index: 30;
+}
+.board {
+  flex: 1;
+  display: grid;
+  gap: 6px;
+  padding: 6px;
+  position: relative;
+  min-height: 0;
+}
+.seat {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+  min-height: 0;
+}
+.seat .bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.seat.out .bg {
+  filter: grayscale(1) brightness(0.4);
+}
+.seat.out .inner {
+  opacity: 0.45;
+}
+.inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px 10px;
+}
+.empiezo {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border: 0;
+  background: rgba(14, 10, 19, 0.62);
+  color: var(--bone);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.empiezo:active {
+  background: rgba(217, 164, 65, 0.28);
+}
+.seat {
+  container-type: size;
+}
+@container (max-height: 210px) {
+  .seat-cmd {
+    display: none;
+  }
+  .more {
+    min-height: 34px;
+    padding: 5px 10px;
+    font-size: 11.5px;
+  }
+  .more.solo {
+    width: 36px;
+  }
+  .ctr {
+    min-height: 26px;
+    padding: 3px 8px;
+    font-size: 11.5px;
+  }
+  .corona {
+    width: 42px;
+    height: 32px;
+  }
+  .life {
+    font-size: clamp(30px, 9vh, 54px);
+  }
+}
+@container (max-height: 150px) {
+  .seat-bot {
+    display: none;
+  }
+}
+.seat[data-rot='180'] .inner {
+  transform: rotate(180deg);
+}
+.seat[data-rot='90'] .inner,
+.seat[data-rot='270'] .inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100cqh;
+  height: 100cqw;
+}
+.seat[data-rot='90'] .inner {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+.seat[data-rot='270'] .inner {
+  transform: translate(-50%, -50%) rotate(270deg);
+}
+
+.seat-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  min-height: 22px;
+}
+.seat-top > * {
+  min-width: 0;
+  flex-shrink: 0;
+}
+.seat-name {
+  flex-shrink: 1;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.seat-cmd {
+  flex-shrink: 2;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.badge {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.badge.turn {
+  background: var(--brass);
+  color: #241b12;
+  border-color: var(--brass);
+  font-weight: 700;
+}
+.life-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+}
+.life-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.corona {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 40px;
+  border-radius: 99px;
+  background: rgba(217, 164, 65, 0.2);
+  border: 1px solid var(--brass);
+  color: var(--brass);
+  cursor: grab;
+  touch-action: none;
+  flex: none;
+}
+.corona:active {
+  cursor: grabbing;
+  background: rgba(217, 164, 65, 0.4);
+}
+.corona-fantasma {
+  position: fixed;
+  z-index: 80;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  color: var(--brass);
+  filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.65));
+}
+.seat.destino {
+  outline: 3px solid var(--brass);
+  outline-offset: -3px;
+}
+.life {
+  font-family: Spectral, Georgia, serif;
+  font-weight: 800;
+  line-height: 0.9;
+  font-size: clamp(38px, 11vh, 84px);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+}
+.tap {
+  flex: 1;
+  height: 100%;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: 34px;
+  color: rgba(255, 255, 255, 0.5);
+  display: grid;
+  place-items: center;
+  user-select: none;
+  touch-action: manipulation;
+}
+.tap:active {
+  background: rgba(255, 255, 255, 0.09);
+}
+.delta {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -160%);
+  font-weight: 700;
+  font-size: 19px;
+  color: var(--brass);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+.seat-bot {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+}
+.seat-bot .more {
+  margin-left: 0;
+}
+.ctr {
+  font-size: 12.5px;
+  padding: 5px 10px;
+  min-height: 32px;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-weight: 600;
+}
+.ctr.warn {
+  border-color: var(--rust);
+  color: #ffc3b6;
+}
+.more {
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 99px;
+  font-size: 12.5px;
+  padding: 8px 13px;
+  min-height: 42px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  touch-action: manipulation;
+}
+.more:active {
+  background: rgba(255, 255, 255, 0.16);
+}
+.more.solo {
+  width: 44px;
+  padding: 0;
+  justify-content: center;
+}
+
+.hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  background: rgba(16, 12, 21, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 5px 6px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+.hub .pass {
+  border: 0;
+  background: var(--brass);
+  color: #241b12;
+  border-radius: 22px;
+  padding: 8px 20px;
+  min-height: 50px;
+  min-width: 132px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+.hub .pass span:first-child {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.82;
+  line-height: 1.15;
+}
+.hub .pass small {
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1.05;
+  letter-spacing: 0.5px;
+  font-variant-numeric: tabular-nums;
+}
+.hub .pass span:last-child {
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  opacity: 0.9;
+}
+.hub .pass.aviso small,
+.hub .pass.aviso span:last-child {
+  color: #7c1b09;
+}
+.hub .pass.over {
+  background: var(--rust);
+  color: #fff;
+}
+.hub .pass.pausa {
+  background: var(--steel);
+  color: #131822;
+}
+.hub .pass.pausa small {
+  opacity: 0.75;
+}
+.hub .ico.activo {
+  background: var(--steel);
+  border-color: var(--steel);
+  color: #131822;
+}
+.hub .ico {
+  border: 1px solid var(--line);
+  background: var(--felt-2);
+  border-radius: 99px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  touch-action: manipulation;
+}
+.hub .ico:hover {
+  background: var(--felt-3);
+}
+
+/* ============ historial de partida ============ */
+.log-list {
+  max-height: 340px;
+  overflow-y: auto;
+  font-size: 13.5px;
+}
+.log-list div {
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+.log-list .t {
+  color: var(--brass);
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+/* ============ pasos y formularios de dos columnas ============ */
+.row2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+.stepper button {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--felt-3);
+  cursor: pointer;
+  font-size: 22px;
+  display: grid;
+  place-items: center;
+}
+.stepper button:hover {
+  border-color: var(--muted);
+}
+.stepper .val {
+  min-width: 38px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+.stepper .val.letal {
+  color: var(--rust);
 }

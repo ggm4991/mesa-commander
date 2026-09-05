@@ -1,5 +1,5 @@
 import { registrar } from './partida'
-import type { ContadorClave, Juego } from './tipos'
+import type { ContadorClave, Identidad, Juego } from './tipos'
 
 /** Regla 903.10a: cada comandante lleva su propia cuenta de daño, rastreada por
  * comandante y por jugador, sin importar quién lo controle. Por eso las claves son
@@ -120,4 +120,83 @@ export function retirada(juego: Juego, i: number, delta: number, ahora: number =
     return registrar(siguiente, `${jActualizado.n} retira una jugada y la rehace (van ${valor})`, ahora)
   }
   return siguiente
+}
+
+/** El menú de asiento también deja ajustar `rehacer` libremente (a diferencia de
+ * `retirada()`, en cualquier dirección) y siempre lo anota, aunque baje. */
+export function ajustarRehacer(juego: Juego, i: number, delta: number, ahora: number = Date.now()): Juego {
+  const j = juego.j[i]
+  const valor = Math.max(0, j.rehacer + delta)
+  const jActualizado = { ...j, rehacer: valor }
+  const jugadores = juego.j.map((x, idx) => (idx === i ? jActualizado : x))
+  return registrar({ ...juego, j: jugadores }, `${jActualizado.n}: jugadas retiradas a ${valor}`, ahora)
+}
+
+export function ajustarFuera(juego: Juego, i: number, delta: number, ahora: number = Date.now()): Juego {
+  const j = juego.j[i]
+  const valor = Math.max(0, j.fuera + delta)
+  const jActualizado = { ...j, fuera: valor }
+  const jugadores = juego.j.map((x, idx) => (idx === i ? jActualizado : x))
+  return registrar({ ...juego, j: jugadores }, `${jActualizado.n}: pasadas de tiempo a ${valor}`, ahora)
+}
+
+export function alternarBendicion(juego: Juego, i: number, ahora: number = Date.now()): Juego {
+  const j = juego.j[i]
+  const jActualizado = { ...j, bendicion: !j.bendicion }
+  const jugadores = juego.j.map((x, idx) => (idx === i ? jActualizado : x))
+  return registrar(
+    { ...juego, j: jugadores },
+    `${jActualizado.n} ${jActualizado.bendicion ? 'tiene' : 'pierde'} la bendición de la ciudad`,
+    ahora,
+  )
+}
+
+/** Marcar/desmarcar a mano como fuera de la partida, desde el menú de asiento —
+ * distinto de la eliminación automática de `revisar()`, con su propio texto de
+ * registro ("queda fuera", no "queda fuera de la partida"). */
+export function alternarFueraDeJuego(juego: Juego, i: number, ahora: number = Date.now()): Juego {
+  const j = juego.j[i]
+  const jActualizado = { ...j, out: !j.out }
+  const jugadores = juego.j.map((x, idx) => (idx === i ? jActualizado : x))
+  return registrar(
+    { ...juego, j: jugadores },
+    `${jActualizado.n} ${jActualizado.out ? 'queda fuera' : 'vuelve al juego'}`,
+    ahora,
+  )
+}
+
+/**
+ * El maná disponible se toca demasiadas veces por turno como para que cada toque
+ * cuente como una acción que se pueda deshacer o que sature el historial: el
+ * original tampoco llama a `foto()` ni a `registrar()` aquí, así que esta función
+ * se aplica con `mutarSinFoto` en el tablero, no con el `mutar` normal.
+ */
+export function ajustarMana(juego: Juego, i: number, color: keyof Identidad | null): Juego {
+  const j = juego.j[i]
+  const mana: Identidad = color === null ? { W: 0, U: 0, B: 0, R: 0, G: 0, C: 0 } : { ...j.mana, [color]: j.mana[color] + 1 }
+  const jActualizado = { ...j, mana }
+  const jugadores = juego.j.map((x, idx) => (idx === i ? jActualizado : x))
+  return { ...juego, j: jugadores }
+}
+
+export interface CambiosJugador {
+  n?: string
+  c?: string
+  c2?: string
+  col?: string
+}
+
+/** Cambiar nombre/comandante/colores a media partida tampoco pasa por `foto()` ni
+ * por el registro en el original — se aplica con `mutarSinFoto`. */
+export function editarJugador(juego: Juego, i: number, cambios: CambiosJugador): Juego {
+  const j = juego.j[i]
+  const jActualizado = {
+    ...j,
+    n: cambios.n?.trim() || j.n,
+    c: cambios.c !== undefined ? cambios.c.trim() : j.c,
+    c2: cambios.c2 !== undefined ? cambios.c2.trim() : j.c2,
+    col: cambios.col ?? j.col,
+  }
+  const jugadores = juego.j.map((x, idx) => (idx === i ? jActualizado : x))
+  return { ...juego, j: jugadores }
 }

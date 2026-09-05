@@ -105,3 +105,25 @@ export function pasarTurno(juego: Juego, ahora: number = Date.now()): Juego {
   }
   return { ...siguiente, turno: n, tIni: ahora, acum: 0, pausado: false }
 }
+
+/** Arrastrar la corona de un asiento a otro (menú de partida → "Cambiar" tiene su
+ * propio texto de registro, distinto de este). */
+export function cambiarMonarcaPorArrastre(juego: Juego, desde: number, destino: number, ahora: number = Date.now()): Juego {
+  return registrar({ ...juego, monarca: destino }, `La corona pasa de ${juego.j[desde].n} a ${juego.j[destino].n}`, ahora)
+}
+
+export function cambiarMonarca(juego: Juego, destino: number | null, ahora: number = Date.now()): Juego {
+  const texto = destino == null ? 'Nadie tiene la corona' : `${juego.j[destino].n} es el monarca`
+  return registrar({ ...juego, monarca: destino }, texto, ahora)
+}
+
+export function cambiarIniciativa(juego: Juego, destino: number | null, ahora: number = Date.now()): Juego {
+  const texto = destino == null ? 'Nadie tiene la iniciativa' : `${juego.j[destino].n} toma la iniciativa`
+  return registrar({ ...juego, iniciativa: destino }, texto, ahora)
+}
+
+export function cambiarDiaNoche(juego: Juego, ahora: number = Date.now()): Juego {
+  const dia = juego.dia === 'dia' ? 'noche' : juego.dia === 'noche' ? null : 'dia'
+  const texto = dia === 'dia' ? 'Se hace de día' : dia === 'noche' ? 'Se hace de noche' : 'Ni día ni noche'
+  return registrar({ ...juego, dia }, texto, ahora)
+}

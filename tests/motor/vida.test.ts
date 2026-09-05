@@ -4,11 +4,17 @@ import type { Juego } from '../../src/motor/tipos'
 import {
   DANO_COMANDANTE_LETAL,
   VENENO_LETAL,
+  ajustarFuera,
+  ajustarMana,
+  ajustarRehacer,
+  alternarBendicion,
+  alternarFueraDeJuego,
   cambiarVida,
   comandantesEnMesa,
   comprobarFinal,
   contador,
   danoComandante,
+  editarJugador,
   retirada,
   revisar,
 } from '../../src/motor/vida'
@@ -96,6 +102,76 @@ describe('contadores', () => {
     const juego = contador(partidaDePrueba(), 0, 'exp', 3)
     expect(juego.j[0].exp).toBe(3)
     expect(juego.log[0].txt).toBe('Ana: Experiencia a 3')
+  })
+})
+
+describe('ajustarRehacer / ajustarFuera (menú de asiento)', () => {
+  it('a diferencia de retirada(), ajustarRehacer registra incluso al bajar', () => {
+    let juego = ajustarRehacer(partidaDePrueba(), 0, 1)
+    expect(juego.log[0].txt).toBe('Ana: jugadas retiradas a 1')
+    juego = ajustarRehacer(juego, 0, -1)
+    expect(juego.j[0].rehacer).toBe(0)
+    expect(juego.log[0].txt).toBe('Ana: jugadas retiradas a 0')
+  })
+
+  it('ajustarFuera no baja de 0 y siempre registra', () => {
+    const juego = ajustarFuera(partidaDePrueba(), 0, -5)
+    expect(juego.j[0].fuera).toBe(0)
+    expect(juego.log[0].txt).toBe('Ana: pasadas de tiempo a 0')
+  })
+})
+
+describe('alternarBendicion', () => {
+  it('la da y la quita, anotando cada cambio', () => {
+    let juego = alternarBendicion(partidaDePrueba(), 0)
+    expect(juego.j[0].bendicion).toBe(true)
+    expect(juego.log[0].txt).toBe('Ana tiene la bendición de la ciudad')
+    juego = alternarBendicion(juego, 0)
+    expect(juego.j[0].bendicion).toBe(false)
+    expect(juego.log[0].txt).toBe('Ana pierde la bendición de la ciudad')
+  })
+})
+
+describe('alternarFueraDeJuego', () => {
+  it('usa un texto de registro distinto al de la eliminación automática', () => {
+    const juego = alternarFueraDeJuego(partidaDePrueba(), 0)
+    expect(juego.j[0].out).toBe(true)
+    expect(juego.log[0].txt).toBe('Ana queda fuera') // revisar() diría "...de la partida"
+  })
+
+  it('se puede volver a marcar como en juego', () => {
+    let juego = alternarFueraDeJuego(partidaDePrueba(), 0)
+    juego = alternarFueraDeJuego(juego, 0)
+    expect(juego.j[0].out).toBe(false)
+    expect(juego.log[0].txt).toBe('Ana vuelve al juego')
+  })
+})
+
+describe('ajustarMana', () => {
+  it('suma un punto del color pulsado, sin tocar el registro', () => {
+    const juego = ajustarMana(partidaDePrueba(), 0, 'U')
+    expect(juego.j[0].mana.U).toBe(1)
+    expect(juego.log).toHaveLength(0)
+  })
+
+  it('vaciar (color null) pone todos los colores a 0', () => {
+    let juego = ajustarMana(partidaDePrueba(), 0, 'U')
+    juego = ajustarMana(juego, 0, 'R')
+    juego = ajustarMana(juego, 0, null)
+    expect(juego.j[0].mana).toEqual({ W: 0, U: 0, B: 0, R: 0, G: 0, C: 0 })
+  })
+})
+
+describe('editarJugador', () => {
+  it('cambia nombre, comandantes y colores sin tocar el registro', () => {
+    const juego = editarJugador(partidaDePrueba(), 1, { n: 'Beto R.', c: 'Krenko, Mob Boss', c2: '', col: 'R' })
+    expect(juego.j[1]).toMatchObject({ n: 'Beto R.', c: 'Krenko, Mob Boss', c2: '', col: 'R' })
+    expect(juego.log).toHaveLength(0)
+  })
+
+  it('un nombre en blanco no borra el nombre existente', () => {
+    const juego = editarJugador(partidaDePrueba(), 0, { n: '   ' })
+    expect(juego.j[0].n).toBe('Ana')
   })
 })
 

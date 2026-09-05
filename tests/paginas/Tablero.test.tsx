@@ -1,0 +1,170 @@
+// @vitest-environment jsdom
+import { act, fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { AvisoProvider } from '../../src/componentes/comunes/AvisoProvider'
+import { crearAlmacenMemoria } from '../../src/almacenamiento/adaptadorMemoria'
+import { leerPartidas } from '../../src/almacenamiento/repositorio'
+import { AlmacenContexto } from '../../src/contextos/AlmacenContexto'
+import { empezarPartida } from '../../src/motor/partida'
+import { Tablero } from '../../src/paginas/Tablero'
+
+function juegoDePrueba(numJugadores = 2) {
+  const nombres = ['Ana', 'Beto', 'Cris'].slice(0, numJugadores)
+  return empezarPartida({
+    asientos: nombres.map((nombre) => ({ nombre, comandante: 'X', colores: 'R' })),
+    vidaInicial: 40,
+    limiteTurno: 0,
+    dispo: null,
+    turnoInicial: 0,
+  })
+}
+
+function renderTablero(juegoInicial = juegoDePrueba(), onSalir = vi.fn(), onPartidaRegistrada = vi.fn()) {
+  const almacen = crearAlmacenMemoria()
+  render(
+    <AlmacenContexto.Provider value={almacen}>
+      <AvisoProvider>
+        <Tablero juegoInicial={juegoInicial} onSalir={onSalir} onPartidaRegistrada={onPartidaRegistrada} />
+      </AvisoProvider>
+    </AlmacenContexto.Provider>,
+  )
+  return { almacen, onSalir, onPartidaRegistrada }
+}
+
+describe('Tablero', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('pinta un asiento por jugador con su vida inicial', () => {
+    renderTablero()
+    expect(screen.getAllByText('40')).toHaveLength(2)
+    expect(document.querySelectorAll('.seat-name')).toHaveLength(2)
+    expect(screen.getAllByText('Ana').length).toBeGreaterThan(0) // en su asiento y en el reloj, es su turno
+    expect(document.querySelector('.seat-name')).toHaveTextContent('Ana')
+  })
+
+  it('sumar y quitar vida actualiza el número al momento', () => {
+    renderTablero()
+    fireEvent.pointerDown(screen.getAllByLabelText('Sumar vida')[0])
+    expect(screen.getByText('41')).toBeInTheDocument()
+    fireEvent.pointerDown(screen.getAllByLabelText('Quitar vida')[0])
+    fireEvent.pointerDown(screen.getAllByLabelText('Quitar vida')[0])
+    expect(screen.getByText('39')).toBeInTheDocument()
+  })
+
+  it('deshacer restaura la vida anterior', () => {
+    renderTablero()
+    fireEvent.pointerDown(screen.getAllByLabelText('Sumar vida')[0])
+    expect(screen.getByText('41')).toBeInTheDocument()
+    fireEvent.click(screen.getByLabelText('Deshacer lo último apuntado'))
+    expect(screen.queryByText('41')).toBeNull()
+    expect(screen.getAllByText('40')).toHaveLength(2) // los dos jugadores vuelven a 40
+  })
+
+  it('reclamar el primer turno no se puede deshacer, igual que en el original', () => {
+    // empezarPartida(turnoInicial: null) dejaría el tablero mostrando "Empiezo yo" en
+    // vez de un asiento activo; se reclama a mano para reproducir ese arranque.
+    const juego = empezarPartida({
+      asientos: [{ nombre: 'Ana' }, { nombre: 'Beto' }],
+      vidaInicial: 40,
+      limiteTurno: 0,
+      dispo: null,
+      turnoInicial: null,
+    })
+    renderTablero(juego)
+    fireEvent.click(screen.getAllByText(/Empiezo yo/)[0])
+    expect(screen.getByLabelText('Pasar turno')).not.toHaveTextContent('¿Quién empieza?')
+
+    fireEvent.click(screen.getByLabelText('Deshacer lo último apuntado'))
+    // sin nada más que deshacer, reclamar el turno no se revierte
+    expect(screen.getByLabelText('Pasar turno')).not.toHaveTextContent('¿Quién empieza?')
+  })
+
+  it('el reloj no muestra una duración negativa justo al reclamar el turno', () => {
+    // Con timers reales: si `ahora` (React) y `tIni` (motor) leen Date.now() en
+    // instantes reales ligeramente distintos, sin el refresco inmediato de
+    // `ahora` al cambiar `juego` el reloj restaría en negativo un instante.
+    // Con timers simulados todo `Date.now()` cae en el mismo instante congelado
+    // y el bug no se manifestaría, así que aquí hacen falta timers reales.
+    vi.useRealTimers()
+    const juego = empezarPartida({
+      asientos: [{ nombre: 'Ana' }, { nombre: 'Beto' }],
+      vidaInicial: 40,
+      limiteTurno: 0,
+      dispo: null,
+      turnoInicial: null,
+    })
+    renderTablero(juego)
+    fireEvent.click(screen.getAllByText(/Empiezo yo/)[0])
+    expect(screen.getByLabelText('Pasar turno').textContent).not.toContain('-')
+  })
+
+  it('pasar turno cambia quién juega en el reloj', () => {
+    renderTablero()
+    expect(screen.getByLabelText('Pasar turno')).toHaveTextContent('Ana')
+    fireEvent.click(screen.getByLabelText('Pasar turno'))
+    expect(screen.getByLabelText('Pasar turno')).toHaveTextContent('Beto')
+  })
+
+  it('el menú de asiento sube un contador visible en la ficha', () => {
+    renderTablero()
+    fireEvent.click(screen.getAllByLabelText(/Opciones de/)[0])
+    const fila = screen.getByText('Experiencia').closest('.line') as HTMLElement
+    fireEvent.click(fila.querySelector('.stepper button:last-child') as Element)
+    fireEvent.click(screen.getByText('Listo'))
+    expect(screen.getByTitle('Experiencia')).toHaveTextContent('1')
+  })
+
+  it('el daño de comandante resta vida y queda fuera a partir de 21', () => {
+    // con 3 jugadores: si solo hubiera 2, eliminar a Ana terminaría la partida
+    // sola (comprobarFinal) y el modal de daño se sustituiría por el de terminar.
+    renderTablero(juegoDePrueba(3))
+    // el segundo ".more" de cada asiento es el de daño (el primero es "retirada");
+    // el índice 1 en el documento es, por tanto, el del primer asiento (Ana)
+    fireEvent.click(document.querySelectorAll('.seat-bot .more')[1])
+    // el "+" del stepper del modal, no el de "sumar vida" del asiento (ambos son "+");
+    // la primera fila es el comandante de Beto, la primera fuente ajena de daño de Ana
+    const masDelStepper = document.querySelector('.stepper button:last-child') as Element
+    for (let i = 0; i < 21; i++) fireEvent.click(masDelStepper)
+    fireEvent.click(screen.getByText('Listo'))
+    expect(screen.getByText('Fuera')).toBeInTheDocument()
+    expect(screen.getByText('19')).toBeInTheDocument() // 40 de vida - 21 de daño
+  })
+
+  it('salir sin terminar no borra la partida guardada', async () => {
+    const { almacen, onSalir } = renderTablero()
+    fireEvent.click(screen.getByLabelText('Menú de la partida'))
+    fireEvent.click(screen.getByText(/Salir sin terminar/))
+    expect(onSalir).toHaveBeenCalledOnce()
+    const partidas = await leerPartidas(almacen)
+    expect(partidas).toEqual([]) // no se registró nada, pero tampoco se pide borrar la partida en curso
+  })
+
+  it('terminar y elegir un ganador registra la partida', async () => {
+    const { almacen, onPartidaRegistrada } = renderTablero()
+    fireEvent.click(screen.getByLabelText('Menú de la partida'))
+    fireEvent.click(screen.getByText(/Terminar y registrar/))
+    fireEvent.click(screen.getAllByText('Ganó')[0])
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(onPartidaRegistrada).toHaveBeenCalledOnce()
+    const partidas = await leerPartidas(almacen)
+    expect(partidas).toHaveLength(1)
+    expect(partidas[0].seats.find((s) => s.j === 'Ana')?.r).toBe('V')
+    expect(partidas[0].seats.find((s) => s.j === 'Beto')?.r).toBe('D')
+  })
+
+  it('una partida en solitario solo se puede cerrar, sin registrar', () => {
+    renderTablero(juegoDePrueba(1))
+    fireEvent.click(screen.getByLabelText('Menú de la partida'))
+    fireEvent.click(screen.getByText(/Terminar y registrar/))
+    expect(screen.queryByText('Ganó')).toBeNull()
+  })
+})

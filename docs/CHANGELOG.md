@@ -8,6 +8,46 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Tercer commit de la Fase 3: el tablero de juego completo (sección 8 y parte
+  de la 9 de app.html) — grid de asientos con rotación y reparto de emergencia
+  (`LAYOUTS`) si la disposición guardada no es válida, vidas con pulsación
+  mantenida y delta flotante agrupado 2s antes de anotarse, contadores,
+  maná, daño de comandante, jugadas retiradas, bendición de la ciudad, marcar
+  como fuera, editar jugador a media partida, corona arrastrable, monarca e
+  iniciativa, día/noche, alarma sonora una vez por turno, deshacer/pausa/
+  pasar turno, menú de la partida con historial y dados, y terminar la
+  partida (con detección automática de un único superviviente) validando y
+  registrando el resultado.
+- `src/tablero/`: `useJuegoEnCurso` (el store que la ADR 0004 dejó pendiente
+  — ver ADR 0008 sobre por qué expone `mutar` y `mutarSinFoto`, no uno solo),
+  `useArrastrarCorona`, `useMantenerPulsado`, `useBordesAsientos` (ver ADR
+  0009 sobre el bucle de renders que hubo que resolver), `bordes.ts`
+  (geometría pura de evitar el reloj central), `reloj.ts` (estado del
+  cronómetro), `sonido.ts` (alarma), `layouts.ts`, y los componentes
+  `Asiento`, `Hub`, `ModalPanelDano`, `ModalMenuAsiento` y `ModalesPartida`.
+- `src/registro/validar.ts` y `src/registro/construirPartida.ts`, portados
+  ahora porque el tablero los necesita para poder terminar y registrar una
+  partida; el resto del registro (ranking, fichas, alta manual) llega en la
+  próxima fase.
+- Seis funciones nuevas en el motor (`motor/vida.ts`, `motor/partida.ts`):
+  `ajustarRehacer`, `ajustarFuera`, `alternarBendicion`,
+  `alternarFueraDeJuego`, `ajustarMana`, `editarJugador`,
+  `cambiarMonarca`/`cambiarMonarcaPorArrastre`, `cambiarIniciativa`,
+  `cambiarDiaNoche` — cada una con el texto de registro exacto (o su
+  ausencia deliberada, en el caso de maná y editar jugador) del original.
+- Resto del CSS del tablero portado a `src/index.css`.
+- 52 pruebas nuevas (motor, geometría pura, componentes y una integración
+  completa del tablero), más verificación visual con Chromium real: cuatro
+  rotaciones a la vez, vida con deshacer, contadores, daño de comandante,
+  arrastre de la corona, y terminar partida — sin errores de consola.
+
+### Fixed
+
+- Dos correcciones encontradas por la propia verificación en Chromium real,
+  no por los tests unitarios (ver ADR 0008 y 0009 para el detalle): reclamar
+  el primer turno se podía deshacer por error, y el reloj mostraba una
+  duración negativa un instante justo al reclamarlo.
+
 - Segundo commit de la Fase 3: la pantalla previa completa (secciones 5 y 6
   de app.html) — número de jugadores, disposición de mesa con vista cenital
   y rotación por asiento, vida inicial, límite de turno, barajar/girar,
