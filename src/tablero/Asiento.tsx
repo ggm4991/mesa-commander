@@ -1,7 +1,8 @@
 import { Icono } from '../componentes/icono/Icono'
-import { fondoIdentidad } from '../componentes/comunes/fondo'
+import { fondoAsiento } from '../componentes/comunes/fondo'
 import { CONTADORES, nombreComandante } from '../motor/vida'
 import { dosComandantes } from '../motor/utilidades'
+import { useImagenComandante } from '../red/scryfall/useImagenComandante'
 import type { Juego } from '../motor/tipos'
 import { type BordeAsiento, estiloBotonEnFila, estiloFila } from './bordes'
 import { ICONO_CONTADOR, MANA } from './constantesUI'
@@ -49,6 +50,7 @@ export function Asiento({
 
   const menosVida = useMantenerPulsado(() => onCambiarVida(-1))
   const masVida = useMantenerPulsado(() => onCambiarVida(1))
+  const imagenComandante = useImagenComandante(j.c)
 
   return (
     <div
@@ -58,7 +60,10 @@ export function Asiento({
       data-rot={rotacion}
       style={areaGrid ? { gridArea: areaGrid } : undefined}
     >
-      <div className="bg" style={{ background: fondoIdentidad(j.col) }} />
+      <div
+        className="bg"
+        style={{ backgroundImage: fondoAsiento(j.col, imagenComandante), backgroundSize: 'cover', backgroundPosition: 'center' }}
+      />
       {delta !== 0 && <div className="delta">{delta > 0 ? `+${delta}` : delta}</div>}
       <div className="inner">
         <div className="seat-top" style={estiloFila(borde?.arriba ?? null, borde?.hueco ?? '')}>

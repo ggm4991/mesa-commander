@@ -11,15 +11,18 @@ function ordenarIdentidad(colores: string[]): string {
 export interface InfoComandante {
   nombre: string
   identidad: string
+  /** Solo la ilustración (recorte `art_crop` de Scryfall), sin marco ni texto. */
   imagen: string | null
 }
 
 interface CartaScryfall {
   name: string
   color_identity?: string[]
-  image_uris?: { normal?: string }
+  /** `art_crop`: solo la ilustración, sin marco ni texto — pensada para fondos, a
+   * diferencia de `normal` (la carta entera, ilegible en el hueco de un asiento). */
+  image_uris?: { art_crop?: string }
   /** Las cartas de dos caras (transformar, modales...) llevan la imagen aquí en vez de en la raíz. */
-  card_faces?: { image_uris?: { normal?: string } }[]
+  card_faces?: { image_uris?: { art_crop?: string } }[]
 }
 
 /**
@@ -50,6 +53,6 @@ export async function buscarPorNombreExacto(nombre: string, señal?: AbortSignal
   if (resp.status === 404) return null
   if (!resp.ok) throw new Error(`Scryfall respondió ${resp.status} al buscar "${nombre}"`)
   const carta = (await resp.json()) as CartaScryfall
-  const imagen = carta.image_uris?.normal ?? carta.card_faces?.[0]?.image_uris?.normal ?? null
+  const imagen = carta.image_uris?.art_crop ?? carta.card_faces?.[0]?.image_uris?.art_crop ?? null
   return { nombre: carta.name, identidad: ordenarIdentidad(carta.color_identity ?? []), imagen }
 }

@@ -50,36 +50,36 @@ describe('buscarNombres', () => {
 })
 
 describe('buscarPorNombreExacto', () => {
-  it('devuelve la identidad de color en orden WUBRG y la imagen normal', async () => {
+  it('devuelve la identidad de color en orden WUBRG y solo la ilustración (art_crop)', async () => {
     servidor.use(
       http.get('https://api.scryfall.com/cards/named', ({ request }) => {
         expect(new URL(request.url).searchParams.get('exact')).toBe('Edgar Markov')
         return HttpResponse.json({
           name: 'Edgar Markov',
           color_identity: ['R', 'W', 'B'],
-          image_uris: { normal: 'https://cards.scryfall.io/normal/edgar-markov.jpg' },
+          image_uris: { normal: 'https://cards.scryfall.io/normal/edgar-markov.jpg', art_crop: 'https://cards.scryfall.io/art_crop/edgar-markov.jpg' },
         })
       }),
     )
     expect(await buscarPorNombreExacto('Edgar Markov')).toEqual({
       nombre: 'Edgar Markov',
       identidad: 'WBR',
-      imagen: 'https://cards.scryfall.io/normal/edgar-markov.jpg',
+      imagen: 'https://cards.scryfall.io/art_crop/edgar-markov.jpg',
     })
   })
 
-  it('una carta de dos caras toma la imagen de la primera cara', async () => {
+  it('una carta de dos caras toma la ilustración de la primera cara', async () => {
     servidor.use(
       http.get('https://api.scryfall.com/cards/named', () =>
         HttpResponse.json({
           name: 'Comandante Transformable',
           color_identity: ['U'],
-          card_faces: [{ image_uris: { normal: 'https://cards.scryfall.io/normal/cara-1.jpg' } }, { image_uris: {} }],
+          card_faces: [{ image_uris: { art_crop: 'https://cards.scryfall.io/art_crop/cara-1.jpg' } }, { image_uris: {} }],
         }),
       ),
     )
     const info = await buscarPorNombreExacto('Comandante Transformable')
-    expect(info?.imagen).toBe('https://cards.scryfall.io/normal/cara-1.jpg')
+    expect(info?.imagen).toBe('https://cards.scryfall.io/art_crop/cara-1.jpg')
   })
 
   it('un nombre que no existe devuelve null, no un error', async () => {

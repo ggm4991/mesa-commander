@@ -1,12 +1,23 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { HttpResponse, http } from 'msw'
+import { setupServer } from 'msw/node'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AvisoProvider } from '../../src/componentes/comunes/AvisoProvider'
 import { crearAlmacenMemoria } from '../../src/almacenamiento/adaptadorMemoria'
 import { leerPartidas } from '../../src/almacenamiento/repositorio'
 import { AlmacenContexto } from '../../src/contextos/AlmacenContexto'
 import { empezarPartida } from '../../src/motor/partida'
 import { Tablero } from '../../src/paginas/Tablero'
+import { ProveedorQueryDePrueba } from '../ayudantes/queryDePrueba'
+
+// Ninguna de estas pruebas es sobre la imagen del comandante (ver tests/tablero/
+// Asiento.test.tsx): un 404 por defecto evita que cada asiento dispare una
+// petición real a Scryfall con el nombre de prueba "X".
+const servidor = setupServer(http.get('https://api.scryfall.com/cards/named', () => new HttpResponse(null, { status: 404 })))
+beforeAll(() => servidor.listen({ onUnhandledRequest: 'error' }))
+afterEach(() => servidor.resetHandlers())
+afterAll(() => servidor.close())
 
 function juegoDePrueba(numJugadores = 2) {
   const nombres = ['Ana', 'Beto', 'Cris'].slice(0, numJugadores)
@@ -22,11 +33,13 @@ function juegoDePrueba(numJugadores = 2) {
 function renderTablero(juegoInicial = juegoDePrueba(), onSalir = vi.fn(), onPartidaRegistrada = vi.fn()) {
   const almacen = crearAlmacenMemoria()
   render(
-    <AlmacenContexto.Provider value={almacen}>
-      <AvisoProvider>
-        <Tablero juegoInicial={juegoInicial} onSalir={onSalir} onPartidaRegistrada={onPartidaRegistrada} />
-      </AvisoProvider>
-    </AlmacenContexto.Provider>,
+    <ProveedorQueryDePrueba>
+      <AlmacenContexto.Provider value={almacen}>
+        <AvisoProvider>
+          <Tablero juegoInicial={juegoInicial} onSalir={onSalir} onPartidaRegistrada={onPartidaRegistrada} />
+        </AvisoProvider>
+      </AlmacenContexto.Provider>
+    </ProveedorQueryDePrueba>,
   )
   return { almacen, onSalir, onPartidaRegistrada }
 }

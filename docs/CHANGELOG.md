@@ -8,6 +8,25 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Tercer commit de la Fase 4: la ilustración del comandante como fondo de su
+  asiento en el tablero (`Asiento.tsx`), sustituyendo al degradado de color
+  de siempre cuando Scryfall la trae. Se pide el recorte `art_crop` (solo la
+  ilustración, sin marco ni texto — la carta completa resultaba ilegible
+  encima del número de vida), con la misma caché que ya usa el
+  autocompletado de `EditorMazo`: si el mazo se creó eligiendo una
+  sugerencia, la imagen del asiento sale de caché al instante. Sin
+  comandante, sin coincidencia en Scryfall o sin red, el asiento se queda
+  exactamente como antes — nunca bloquea ni deja un hueco vacío.
+- `src/red/scryfall/useImagenComandante.ts` y `fondoAsiento()` en
+  `componentes/comunes/fondo.ts`.
+- `docs/decisiones/0014`: por qué `art_crop` y no la carta entera, y por qué
+  comparte caché con el autocompletado.
+- 2 pruebas nuevas en `Asiento.test.tsx` (con imagen y sin ella), más
+  verificación con un navegador real y datos reales de Scryfall: crear un
+  perfil con "Edgar Markov" a mano, sentarlo, empezar la partida, y
+  comprobar que su asiento muestra la ilustración mientras el otro (sin
+  comandante) mantiene el degradado de color — sin errores de consola.
+
 - Segundo commit de la Fase 4: autocompletado de comandantes en `EditorMazo`
   (comandante y compañero de un mazo, dentro de un perfil). Al escribir con
   el campo enfocado aparecen sugerencias de Scryfall; al elegir una, el
