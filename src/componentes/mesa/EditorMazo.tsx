@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Modal } from '../comunes/Modal'
 import type { Mazo } from '../../motor/tipos'
 import { uid } from '../../motor/utilidades'
+import { CampoComandante } from './CampoComandante'
 import { COLORES } from './colores'
 
 interface Props {
@@ -9,6 +10,13 @@ interface Props {
   mazo: Mazo | null
   onGuardar: (mazo: Mazo) => void
   onCancelar: () => void
+}
+
+/** Un mazo con compañero saca su identidad de la unión de las dos cartas: elegir un
+ * comandante de Scryfall enciende sus colores sin apagar los que ya puso el otro. */
+function mezclarIdentidad(actual: string, nueva: string): string {
+  const set = new Set([...actual.split(''), ...nueva.split('')])
+  return COLORES.filter((c) => set.has(c)).join('')
 }
 
 /** Sustituye a `editorMazo()` en app.html: comandante, compañero opcional e
@@ -50,26 +58,26 @@ export function EditorMazo({ mazo, onGuardar, onCancelar }: Props) {
         </>
       }
     >
-      <div className="field">
-        <label htmlFor="m-c">Comandante</label>
-        <input
-          id="m-c"
-          type="text"
-          value={borrador.c}
-          placeholder="Nombre en inglés"
-          onChange={(e) => setBorrador((m) => ({ ...m, c: e.target.value }))}
-        />
-      </div>
-      <div className="field">
-        <label htmlFor="m-c2">Compañero (opcional)</label>
-        <input
-          id="m-c2"
-          type="text"
-          value={borrador.c2}
-          placeholder="Solo si el mazo lleva dos comandantes"
-          onChange={(e) => setBorrador((m) => ({ ...m, c2: e.target.value }))}
-        />
-      </div>
+      <CampoComandante
+        id="m-c"
+        etiqueta="Comandante"
+        valor={borrador.c}
+        placeholder="Nombre en inglés"
+        onCambiar={(c) => setBorrador((m) => ({ ...m, c }))}
+        onElegirSugerencia={(c, identidad) =>
+          setBorrador((m) => ({ ...m, c, col: identidad ? mezclarIdentidad(m.col, identidad) : m.col }))
+        }
+      />
+      <CampoComandante
+        id="m-c2"
+        etiqueta="Compañero (opcional)"
+        valor={borrador.c2}
+        placeholder="Solo si el mazo lleva dos comandantes"
+        onCambiar={(c2) => setBorrador((m) => ({ ...m, c2 }))}
+        onElegirSugerencia={(c2, identidad) =>
+          setBorrador((m) => ({ ...m, c2, col: identidad ? mezclarIdentidad(m.col, identidad) : m.col }))
+        }
+      />
       <div className="field" style={{ margin: 0 }}>
         <label>Identidad de color</label>
         <div className="colors">

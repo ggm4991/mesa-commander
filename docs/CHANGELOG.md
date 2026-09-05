@@ -8,6 +8,28 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Segundo commit de la Fase 4: autocompletado de comandantes en `EditorMazo`
+  (comandante y compañero de un mazo, dentro de un perfil). Al escribir con
+  el campo enfocado aparecen sugerencias de Scryfall; al elegir una, el
+  nombre se rellena con la ortografía exacta de la carta y su identidad de
+  color se enciende sola (combinándose con la que ya hubiera, nunca
+  sustituyéndola — un mazo con compañero suma los colores de los dos). Sin
+  elegir ninguna sugerencia, el campo funciona exactamente igual que antes.
+- `src/red/scryfall/useDebounce.ts` y `useSugerenciasComandante.ts` (activa
+  la búsqueda solo con el campo enfocado, para que ninguna prueba dispare una
+  petición real sin querer), y `src/componentes/mesa/CampoComandante.tsx`
+  (el campo con sugerencias, reutilizable donde haga falta comandante).
+- `docs/decisiones/0013`: por qué solo elegir una sugerencia rellena la
+  identidad de color (nunca escribir texto libre, aunque coincida con una
+  carta real), y por qué se combina en vez de sustituir.
+- `tests/ayudantes/`: `crearQueryClientDePrueba`/`ProveedorQueryDePrueba`,
+  para montar componentes que usan TanStack Query en los tests.
+- 18 pruebas nuevas (el hook y el campo, con `msw` cubriendo sugerencias,
+  selección, combinación de identidad y fallo de red), más verificación con
+  un navegador real contra la API pública de Scryfall (sin mocks): buscar
+  "edgar mark", elegir "Edgar Markov" y comprobar que su identidad real
+  (W/B/R) queda marcada, sin errores de CORS ni de consola.
+
 - Primer commit de la Fase 4 (Scryfall + offline-first): `src/red/scryfall/cliente.ts`
   (`buscarNombres` para el autocompletado, `buscarPorNombreExacto` para la
   identidad de color y la imagen — sin credenciales, sin caché propia) y

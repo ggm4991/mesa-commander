@@ -888,6 +888,19 @@ textarea {
   white-space: nowrap;
 }
 
+/* Sugerencias de Scryfall flotando bajo un campo de texto normal, a diferencia del
+   desplegable de mazos (que cuelga de un botón, no de un input). */
+.dd-panel-flotante {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 15;
+  width: 100%;
+  margin-top: 2px;
+  border-top: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
 /* ============ vista cenital de la mesa (pantalla previa) ============ */
 .mesa-prev {
   display: grid;

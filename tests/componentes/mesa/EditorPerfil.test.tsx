@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { EditorPerfil } from '../../../src/componentes/mesa/EditorPerfil'
 import type { Perfil } from '../../../src/motor/tipos'
+import { ProveedorQueryDePrueba } from '../../ayudantes/queryDePrueba'
 
 describe('EditorPerfil', () => {
   it('exige un nombre', () => {
@@ -20,7 +21,11 @@ describe('EditorPerfil', () => {
 
   it('añadir un mazo lo deja marcado como el último usado', () => {
     const onGuardar = vi.fn()
-    render(<EditorPerfil perfil={null} onGuardar={onGuardar} onCerrar={() => {}} />)
+    render(
+      <ProveedorQueryDePrueba>
+        <EditorPerfil perfil={null} onGuardar={onGuardar} onCerrar={() => {}} />
+      </ProveedorQueryDePrueba>,
+    )
     fireEvent.change(screen.getByLabelText('Nombre del jugador'), { target: { value: 'Gonzalo' } })
     fireEvent.click(screen.getByText('Añadir mazo'))
     fireEvent.change(screen.getByLabelText('Comandante'), { target: { value: 'Edgar Markov' } })
