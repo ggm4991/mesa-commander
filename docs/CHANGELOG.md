@@ -8,6 +8,35 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Segundo commit de la Fase 3: la pantalla previa completa (secciones 5 y 6
+  de app.html) — número de jugadores, disposición de mesa con vista cenital
+  y rotación por asiento, vida inicial, límite de turno, barajar/girar,
+  tirar un dado, sortear quién empieza, perfiles (crear/editar/eliminar,
+  con sus mazos) y elegir asiento (perfil existente, otro de sus mazos por
+  el desplegable con buscador, nombre suelto, o crear perfil sobre la
+  marcha). La copia de seguridad queda para la fase de Registro, que es
+  donde vive de verdad en el original.
+- `src/contextos/`: `AlmacenContexto`/`useAlmacen` (el almacén activo, por
+  defecto Capacitor, sustituible en tests), `usePerfiles` y `useConfig`
+  (cargan y guardan contra el repositorio de la Fase 2 como estado de
+  React).
+- `src/componentes/mesa/`: `disposiciones.ts` (DISPOS portado, antes
+  pendiente de la Fase 3 por decisión explícita en el motor), `colores.ts`,
+  `perfiles.ts`, y los componentes `EditorMazo`, `EditorPerfil`,
+  `ModalGestionarPerfiles`, `ModalElegirAsiento`, `ModalDado`, `VistaMesa`.
+- `src/componentes/comunes/`: `Pips`, `fondoIdentidad` y `Desplegable`
+  (el buscador desplegable genérico, antes `desplegable()`/
+  `activarDesplegables()`).
+- Resto del CSS de la pantalla previa portado a `src/index.css` (mesa
+  cenital, rotaciones, desplegable, formularios, pips).
+- `docs/decisiones/0007`: por qué el modal abierto de cada pantalla se
+  guarda como un único estado (`EstadoModal`), no un booleano por modal.
+- 53 pruebas nuevas con Testing Library, más verificación visual con
+  Chromium real (uso puntual, no dependencia): 4 jugadores con distintas
+  rotaciones, sentar con nombre suelto, girar un asiento, crear un perfil
+  con mazo desde cero, y arrancar una partida — capturas y consola limpia
+  confirmadas.
+
 - Primer commit de la Fase 3 (UI en React): `src/componentes/icono/` (los 36
   SVG de `ICONOS` portados literalmente, más el componente `<Icono>`
   sustituyendo a `ic()`) y `src/componentes/comunes/` (`<Modal>` con

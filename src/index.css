@@ -1,6 +1,6 @@
 /* Fase 3: CSS portado de app.html sección a sección, según se van construyendo
-   los componentes que la usan. Todavía falta el tablero, los asientos y sus
-   rotaciones (Fase 3, siguiente commit). */
+   los componentes que la usan. Todavía falta el tablero de juego en sí (el hub,
+   los contadores, el arrastre de la corona) — llega en el siguiente commit. */
 
 :root {
   --felt: #221a2b;
@@ -268,4 +268,417 @@ button {
   border-radius: 99px;
   font-size: 14px;
   z-index: 70;
+}
+
+/* ============ pantalla de inicio ============ */
+.top {
+  padding: 34px 0 24px;
+  border-bottom: 1px solid var(--line);
+}
+.top h1 {
+  font-family: Spectral, Georgia, serif;
+  font-weight: 800;
+  font-size: clamp(28px, 5vw, 42px);
+  line-height: 1.05;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+.top p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 56ch;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 30px 0 10px;
+  flex-wrap: wrap;
+}
+.section-head h2 {
+  font-family: Spectral, Georgia, serif;
+  font-weight: 600;
+  font-size: 20px;
+  margin: 0;
+}
+.hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+.setup h2 {
+  font-family: Spectral, Georgia, serif;
+  font-weight: 600;
+  font-size: 20px;
+  margin: 30px 0 12px;
+}
+
+/* ============ formularios ============ */
+.field {
+  margin-bottom: 14px;
+}
+.field label {
+  display: block;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.colors {
+  display: flex;
+  gap: 6px;
+}
+.color-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: var(--felt-3);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.color-btn i {
+  width: 20px;
+  height: 20px;
+  border-radius: 99px;
+  opacity: 0.28;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+.color-btn[aria-pressed='true'] {
+  border-color: var(--bone);
+}
+.color-btn[aria-pressed='true'] i {
+  opacity: 1;
+}
+.errors {
+  border: 1px solid rgba(194, 96, 78, 0.5);
+  background: rgba(194, 96, 78, 0.1);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  color: var(--rust);
+  font-size: 13.5px;
+}
+.grid-list {
+  display: grid;
+  gap: 10px;
+}
+.line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 64px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: var(--felt-2);
+}
+.line .txt {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+.line .txt > div {
+  min-width: 0;
+}
+.line .txt b {
+  display: block;
+  font-weight: 600;
+}
+.line .txt span {
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dado {
+  font-family: Spectral, Georgia, serif;
+  font-size: 56px;
+  font-weight: 800;
+  text-align: center;
+  padding: 10px 0;
+}
+input[type='search'],
+input[type='text'],
+input[type='number'],
+select,
+textarea {
+  background: var(--felt-2);
+  border: 1px solid var(--line);
+  color: var(--bone);
+  font: inherit;
+  padding: 12px 14px;
+  min-height: 48px;
+  border-radius: var(--radius);
+  width: 100%;
+}
+input[type='search'] {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* ============ identidad de color (pips) ============ */
+.pips {
+  display: inline-flex;
+  gap: 3px;
+  vertical-align: middle;
+}
+.pip {
+  width: 9px;
+  height: 9px;
+  border-radius: 99px;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+}
+.pip.W {
+  background: var(--w);
+}
+.pip.U {
+  background: var(--u);
+}
+.pip.B {
+  background: var(--b);
+}
+.pip.R {
+  background: var(--r);
+}
+.pip.G {
+  background: var(--g);
+}
+.pip.C {
+  background: var(--c);
+}
+
+/* ============ desplegable con buscador ============ */
+.lupa {
+  flex: 1;
+  min-width: 220px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.lupa .ic {
+  position: absolute;
+  left: 13px;
+  color: var(--muted);
+  pointer-events: none;
+}
+.lupa input {
+  padding-left: 42px;
+}
+.dd {
+  margin: -6px 0 10px;
+}
+.dd-btn {
+  width: 100%;
+  min-height: 44px;
+  background: var(--felt-3);
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 var(--radius) var(--radius);
+  color: var(--muted);
+  font-size: 13.5px;
+  padding: 8px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.dd-btn:hover {
+  color: var(--bone);
+}
+.dd-btn[aria-expanded='true'] .ic {
+  transform: rotate(180deg);
+}
+.dd-panel {
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: var(--felt);
+  padding: 12px;
+}
+.dd-panel .lupa {
+  min-width: 0;
+}
+.dd-lista {
+  max-height: min(46vh, 280px);
+  overflow-y: auto;
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.dd-op {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  background: var(--felt-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+}
+.dd-op:hover {
+  border-color: var(--muted);
+  background: var(--felt-3);
+}
+.dd-op .txt {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+.dd-op .txt b {
+  display: block;
+  font-weight: 600;
+}
+.dd-op .txt span {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.dd-vacio {
+  color: var(--muted);
+  font-size: 13.5px;
+  margin: 10px 2px 0;
+}
+.badge {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  white-space: nowrap;
+}
+
+/* ============ vista cenital de la mesa (pantalla previa) ============ */
+.mesa-prev {
+  display: grid;
+  gap: 6px;
+  height: min(56vh, 420px);
+  margin-top: 14px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #100c15;
+}
+.pseat {
+  position: relative;
+  border-radius: 7px;
+  overflow: hidden;
+  container-type: size;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  padding: 0;
+}
+.pseat.vacio {
+  border-style: dashed;
+  border-color: var(--line);
+}
+.pseat:hover {
+  border-color: var(--muted);
+}
+.pseat:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+.pseat .pbg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.pinner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px;
+  text-align: center;
+  overflow: hidden;
+}
+.pseat[data-rot='180'] .pinner {
+  transform: rotate(180deg);
+}
+.pseat[data-rot='90'] .pinner,
+.pseat[data-rot='270'] .pinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100cqh;
+  height: 100cqw;
+}
+.pseat[data-rot='90'] .pinner {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+.pseat[data-rot='270'] .pinner {
+  transform: translate(-50%, -50%) rotate(270deg);
+}
+.pinner b {
+  font-size: 14.5px;
+  font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pinner .det {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.66);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pinner .rot {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 99px;
+  font-size: 12px;
+  padding: 8px 13px;
+  min-height: 40px;
+  cursor: pointer;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  touch-action: manipulation;
+}
+.pinner .rot:hover {
+  background: rgba(0, 0, 0, 0.7);
+  border-color: var(--bone);
+}
+.empieza-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--brass);
+  border: 1px solid var(--brass);
+  border-radius: 99px;
+  padding: 2px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.centro {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 11.5px;
+  text-align: center;
+  padding: 4px;
 }

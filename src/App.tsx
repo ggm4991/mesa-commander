@@ -1,53 +1,38 @@
 import { useState } from 'react'
 import { AvisoProvider } from './componentes/comunes/AvisoProvider'
-import { useAviso } from './componentes/comunes/contextoAviso'
-import { Modal } from './componentes/comunes/Modal'
-import { Icono } from './componentes/icono/Icono'
+import { Previa } from './paginas/Previa'
+import type { Juego } from './motor/tipos'
 
-// Página temporal: demuestra que el nav, los botones, el modal y el aviso ya
-// funcionan, mientras las pantallas reales (Previa, Tablero, Registro) se
-// portan en los próximos commits de la Fase 3.
+type Pantalla = { nombre: 'previa' } | { nombre: 'tablero'; juego: Juego }
+
 function Contenido() {
-  const [modalAbierto, setModalAbierto] = useState(false)
-  const mostrarAviso = useAviso()
+  const [pantalla, setPantalla] = useState<Pantalla>({ nombre: 'previa' })
 
   return (
     <>
       <nav className="nav">
         <span className="brand">Mesa Commander</span>
-        <button className="tab" aria-selected="true">
+        <button className="tab" aria-selected={pantalla.nombre === 'previa'} onClick={() => setPantalla({ nombre: 'previa' })}>
           Inicio
         </button>
-        <button className="tab" aria-selected="false">
+        <button className="tab" aria-selected="false" disabled>
           Registro
         </button>
       </nav>
-      <div className="wrap page on">
-        <h2>
-          <Icono nombre="corona" /> En migración desde app.html
-        </h2>
-        <p className="lead">Las pantallas reales llegan en los próximos commits de la Fase 3.</p>
-        <div className="actions">
-          <button className="btn primary" onClick={() => setModalAbierto(true)}>
-            Abrir modal de ejemplo
-          </button>
-          <button className="btn" onClick={() => mostrarAviso('Esto es un aviso')}>
-            Mostrar aviso
+      {pantalla.nombre === 'previa' ? (
+        <Previa onIrAlTablero={(juego) => setPantalla({ nombre: 'tablero', juego })} />
+      ) : (
+        // El tablero de verdad (vidas, contadores, corona) llega en el próximo commit de la Fase 3.
+        <div className="wrap page on">
+          <h2>Partida en marcha</h2>
+          <p className="hint">
+            {pantalla.juego.j.length} jugadores a {pantalla.juego.cfg.vida} vidas. El tablero real llega en el
+            siguiente commit.
+          </p>
+          <button className="btn" onClick={() => setPantalla({ nombre: 'previa' })}>
+            Volver a la pantalla previa
           </button>
         </div>
-      </div>
-      {modalAbierto && (
-        <Modal
-          titulo="Modal de ejemplo"
-          onCerrar={() => setModalAbierto(false)}
-          pie={
-            <button className="btn primary" onClick={() => setModalAbierto(false)}>
-              Cerrar
-            </button>
-          }
-        >
-          <p>El motor y el almacenamiento ya están portados; esta pantalla llega con la Fase 3.</p>
-        </Modal>
       )}
     </>
   )
