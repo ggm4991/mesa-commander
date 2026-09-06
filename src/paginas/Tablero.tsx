@@ -86,15 +86,28 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
   // que `.hub` sigue midiendo lo de siempre aunque el botón girado sobresalga
   // por fuera) — de ahí medir también `.pass` y quedarse con el mayor de los
   // dos, en vez de un tamaño fijo para ese caso (ver ADR 0033).
+  //
+  // Importante: nunca se mide el alto YA APLICADO de `.hub` (`getBoundingClientRect`
+  // sobre el propio `.hub`), porque eso se retroalimenta con lo que esta misma
+  // función acaba de fijarle por `style` — una vez subido, ya no podría bajar
+  // nunca, aunque el contenido encogiera después (pasó de verdad al reducir el
+  // tamaño del hub, ver ADR 0037). Se mide el contenido (el botón del reloj y
+  // un icono, que no cambian de tamaño por culpa de la altura de su padre) y
+  // se le suma el relleno/borde de `.hub` leídos de su CSS, nunca de su caja.
   const hubRef = useRef<HTMLDivElement>(null)
   const [altoHub, setAltoHub] = useState(64)
   const medirHub = useCallback(() => {
     const el = hubRef.current
     if (!el) return
-    const altoBarra = el.getBoundingClientRect().height
-    const altoReloj = el.querySelector('.pass')?.getBoundingClientRect().height ?? 0
-    const alto = Math.ceil(Math.max(altoBarra, altoReloj))
-    if (alto > 0) setAltoHub((actual) => (actual === alto ? actual : alto))
+    const altoPass = el.querySelector('.pass')?.getBoundingClientRect().height ?? 0
+    const altoIco = el.querySelector('.ico')?.getBoundingClientRect().height ?? 0
+    const altoContenido = Math.max(altoPass, altoIco)
+    if (altoContenido === 0) return
+    const estilo = getComputedStyle(el)
+    const relleno = parseFloat(estilo.paddingTop) + parseFloat(estilo.paddingBottom)
+    const borde = parseFloat(estilo.borderTopWidth) + parseFloat(estilo.borderBottomWidth)
+    const alto = Math.ceil(altoContenido + relleno + borde)
+    setAltoHub((actual) => (actual === alto ? actual : alto))
   }, [])
   useLayoutEffect(() => {
     medirHub()

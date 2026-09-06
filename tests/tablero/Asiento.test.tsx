@@ -86,17 +86,17 @@ describe('Asiento', () => {
     expect(screen.getByLabelText('Opciones de Ana')).toBeInTheDocument()
   })
 
-  it('marca "Su turno" solo a quien le toca y no está fuera', () => {
+  it('marca el asiento de quien le toca con el borde dorado (ya no una insignia de texto)', () => {
     renderAsiento(props())
-    expect(screen.getByText('Su turno')).toBeInTheDocument()
+    expect(document.querySelector('.seat')).toHaveClass('turno')
   })
 
-  it('un jugador fuera se marca y no muestra "Su turno" aunque sea su índice', () => {
+  it('un jugador fuera se marca y no lleva el borde de turno aunque sea su índice', () => {
     const juego = juegoDePrueba()
     juego.j[0].out = true
     renderAsiento(props({ juego }))
     expect(screen.getByText('Fuera')).toBeInTheDocument()
-    expect(screen.queryByText('Su turno')).toBeNull()
+    expect(document.querySelector('.seat')).not.toHaveClass('turno')
   })
 
   it('el aviso de pasarse de tiempo vive siempre en su propia esquina, como el de jugadas rehechas', () => {

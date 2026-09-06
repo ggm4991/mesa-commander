@@ -8,6 +8,12 @@ en el que se convierte en una versión con fecha.
 
 ### Fixed
 
+- La medición dinámica del hub (ADR 0026) leía el alto de `.hub` ya
+  ajustado por ella misma en la vuelta anterior, así que una vez que subía
+  (por ejemplo al girar el reloj a 90°/270°, ADR 0033) no podía volver a
+  bajar aunque el contenido encogiera después. Ahora mide el contenido de
+  verdad (el botón del reloj y un icono) más el relleno/borde de `.hub`
+  leídos de su CSS, nunca de su propia caja. Ver ADR 0037.
 - El reparto de la ADR 0034 quedó al revés: los avisos de tamaño fijo
   (jugadas rehechas, tiempo pasado) suben juntos a la esquina superior
   izquierda; el maná y los contadores sueltos, que varían en número,
@@ -69,6 +75,12 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- El hub central ocupa menos: sus tres botones redondos bajan de 50 a
+  40px, y el botón del reloj reduce relleno y tipografía — el alto real
+  baja de ~69px a ~50px sin girar, dejando más sitio a los asientos.
+- La insignia de texto "Su turno" desaparece (el nombre ya se lee en el
+  reloj): el asiento de quien tiene el turno se marca con el mismo borde
+  dorado que ya usa el destino al arrastrar la corona. Ver ADR 0037.
 - La app muestra su versión y la hora del build junto al nombre
   ("Mesa Commander", barra de navegación), para saber a simple vista si una
   instalación nueva es de verdad una build distinta. `android/app/build.gradle`

@@ -106,7 +106,7 @@ export function Asiento({
   return (
     <div
       ref={seatRef}
-      className={`seat${j.out ? ' out' : ''}${esDestinoDeCorona ? ' destino' : ''}`}
+      className={`seat${j.out ? ' out' : ''}${esDestinoDeCorona ? ' destino' : ''}${esTurno ? ' turno' : ''}`}
       data-asiento={indice}
       data-rot={rotacion}
       style={areaGrid ? { gridArea: areaGrid } : undefined}
@@ -117,7 +117,6 @@ export function Asiento({
       />
       <div className="inner">
         <div className="seat-top" style={estiloFila(borde?.arriba ?? null, borde?.hueco ?? '')}>
-          {esTurno && <span className="badge turn">Su turno</span>}
           {juego.iniciativa === indice && (
             <span className="badge">
               <Icono nombre="bandera" tamano={13} /> Iniciativa

@@ -51,7 +51,7 @@ export const Hub = forwardRef<HTMLDivElement, Props>(function Hub(
       }
     >
       <button className="ico" aria-label="Deshacer lo último apuntado" onClick={onDeshacer}>
-        <Icono nombre="deshacer" tamano={22} />
+        <Icono nombre="deshacer" tamano={18} />
       </button>
       <button
         className={`ico${estado.pausado ? ' activo' : ''}`}
@@ -59,7 +59,7 @@ export const Hub = forwardRef<HTMLDivElement, Props>(function Hub(
         title={estado.pausado ? 'Reanudar el tiempo' : 'Parar el tiempo'}
         onClick={onPausa}
       >
-        <Icono nombre={estado.pausado ? 'play' : 'pausa'} tamano={22} />
+        <Icono nombre={estado.pausado ? 'play' : 'pausa'} tamano={18} />
       </button>
       <button className={clasesPass} aria-label="Pasar turno" onClick={onPasar} data-rot={rotacionTurno}>
         <span>{estado.quien}</span>
@@ -67,7 +67,7 @@ export const Hub = forwardRef<HTMLDivElement, Props>(function Hub(
         {estado.estado && <span>{estado.estado}</span>}
       </button>
       <button className="ico" aria-label="Menú de la partida" onClick={onMenu}>
-        <Icono nombre="puntos" tamano={22} />
+        <Icono nombre="puntos" tamano={18} />
       </button>
     </div>
   )
