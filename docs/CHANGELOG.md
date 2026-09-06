@@ -69,6 +69,12 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- La app muestra su versión y la hora del build junto al nombre
+  ("Mesa Commander", barra de navegación), para saber a simple vista si una
+  instalación nueva es de verdad una build distinta. `android/app/build.gradle`
+  deja de fijar `versionCode`/`versionName` a mano (se quedaban siempre en
+  `1`/`"1.0"`, los valores por defecto de `cap add android`): `versionName`
+  lee `package.json` y `versionCode` sube solo con cada build. Ver ADR 0036.
 - Primer paso de la Fase 5: la app se puede instalar como PWA
   (`vite-plugin-pwa`, manifiesto + *service worker* con actualización
   automática). El *service worker* cachea también las respuestas de

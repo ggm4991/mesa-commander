@@ -25,7 +25,12 @@ function Contenido() {
   return (
     <>
       <nav className="nav">
-        <span className="brand">Mesa Commander</span>
+        <span className="brand">
+          Mesa Commander
+          <span className="version" title={`Build del ${__BUILD_TIME__}`}>
+            v{__APP_VERSION__} · {__BUILD_TIME__.slice(0, 16).replace('T', ' ')}
+          </span>
+        </span>
         <button className="tab" aria-selected={pantalla.nombre === 'previa'} onClick={() => setPantalla({ nombre: 'previa' })}>
           Inicio
         </button>

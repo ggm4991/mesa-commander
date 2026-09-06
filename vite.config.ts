@@ -1,9 +1,21 @@
+import { readFileSync } from 'node:fs'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// La versión de `package.json` y el instante del build quedan disponibles en
+// la app (App.tsx los muestra junto al nombre) para poder comprobar a
+// simple vista, después de instalar un `.apk` nuevo, si de verdad es una
+// build distinta a la anterior — antes no había ninguna forma de saberlo
+// (ver ADR 0036).
+const version = JSON.parse(readFileSync('./package.json', 'utf-8')).version as string
+
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   plugins: [
     react(),
     VitePWA({

@@ -5,6 +5,13 @@ import { defineConfig } from 'vitest/config'
 // es pura y no necesita DOM. Los tests de tests/componentes activan jsdom por
 // archivo con un comentario `// @vitest-environment jsdom` al inicio.
 export default defineConfig({
+  // Mismas variables globales que vite.config.ts (ver ADR 0036): sin esto,
+  // cualquier test que llegue a importar App.tsx fallaría con un
+  // ReferenceError, al no existir estas dos constantes fuera del build real.
+  define: {
+    __APP_VERSION__: JSON.stringify('0.0.0-test'),
+    __BUILD_TIME__: JSON.stringify('1970-01-01T00:00:00.000Z'),
+  },
   plugins: [react()],
   test: {
     environment: 'node',

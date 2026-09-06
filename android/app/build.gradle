@@ -1,5 +1,16 @@
 apply plugin: 'com.android.application'
 
+import groovy.json.JsonSlurper
+
+// Version de package.json (control manual) + un versionCode que sube solo con
+// cada build (minutos desde el 1 de enero de 1970, cabe de sobra en un int de
+// 32 bits hasta bien pasado el año 6000) — antes los dos se quedaban fijos en
+// los valores por defecto de `cap add android` (1 / "1.0"), así que instalar
+// una build nueva encima de otra no dejaba ninguna forma de distinguirlas
+// (ver ADR 0036).
+def packageJson = new JsonSlurper().parse(file('../../package.json'))
+def versionCodeAuto = (System.currentTimeMillis() / 60000) as int
+
 android {
     namespace = "com.goncholoko.mesacommander"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +18,8 @@ android {
         applicationId "com.goncholoko.mesacommander"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode versionCodeAuto
+        versionName packageJson.version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

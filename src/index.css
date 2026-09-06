@@ -63,11 +63,23 @@ button {
   z-index: 20;
 }
 .nav .brand {
+  display: flex;
+  flex-direction: column;
   font-family: Spectral, Georgia, serif;
   font-weight: 800;
   font-size: 17px;
   margin-right: auto;
   letter-spacing: -0.01em;
+}
+/* Versión y hora del build (ADR 0036): para poder ver a simple vista, tras
+   instalar un `.apk` nuevo, si de verdad es una build distinta a la
+   anterior — antes no había ninguna forma de saberlo sin comparar a ojo. */
+.nav .version {
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 10.5px;
+  letter-spacing: 0;
+  color: var(--muted);
 }
 .tab {
   background: none;
