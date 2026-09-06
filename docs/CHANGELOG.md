@@ -6,6 +6,23 @@ en el que se convierte en una versión con fecha.
 
 ## [Unreleased]
 
+### Added
+
+- Primer paso de la Fase 5: la app se puede instalar como PWA
+  (`vite-plugin-pwa`, manifiesto + *service worker* con actualización
+  automática). El *service worker* cachea también las respuestas de
+  Scryfall (identidad e ilustración de comandante) y las fuentes de Google
+  Fonts, no solo el cascarón de la app, para que el offline-first de la
+  Fase 4 sobreviva a una recarga en frío sin conexión. Iconos nuevos en
+  `public/icons/` (192, 512 y una versión "maskable" a sangre completa),
+  a partir del mismo dibujo del favicon. Etiquetas propias de Safari en
+  `index.html` (no lee el manifiesto para "Añadir a inicio"). Ver ADR 0028.
+- Verificado sirviendo el build de producción (`vite preview`, no
+  `vite dev`): manifiesto e iconos accesibles, *service worker* activo, y
+  la app arranca y pinta la pantalla previa con la conexión cortada del
+  todo. Queda pendiente el resto de la Fase 5: el *shell* nativo de
+  Capacitor, para quien quiera un `.apk` de verdad en vez de una PWA.
+
 ### Fixed
 
 - En un móvil de verdad (probado a 390px de ancho, no solo en el navegador
