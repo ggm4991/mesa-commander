@@ -73,8 +73,10 @@ export function Asiento({
   const fuenteAbierta = sectorAbierto ? (gruposDano.flat().find((c) => c.clave === sectorAbierto) ?? null) : null
 
   // El cuadrado de daño ya no ocupa sitio fijo en el asiento: se abre como un
-  // pequeño popup con el botón de debajo de la vida, y solo se cierra al tocar
-  // fuera de él (ver ADR 0025).
+  // pequeño popup con el botón de debajo de la vida. La referencia apunta al
+  // propio `.dano-cuadrado`, no al fondo semitransparente que lo envuelve
+  // (`.dano-popup`): así "tocar fuera" es fuera del cuadrado de verdad, y no
+  // queda absorbido por el fondo que cubre el asiento entero (ver ADR 0026).
   const [mostrarDano, setMostrarDano] = useState(false)
   const popupDanoRef = useRef<HTMLDivElement>(null)
   const cerrarPopupDano = useCallback(() => {
@@ -96,7 +98,9 @@ export function Asiento({
 
   const contadoresActivos = CONTADORES.filter((c) => j[c.clave] > 0)
   const manaActivo = MANA.filter((m) => (j.mana || {})[m] > 0)
-  const otrosActivos = contadoresActivos.length + (j.bendicion ? 1 : 0) + (j.fuera > 0 ? 1 : 0)
+  // "Fuera" (veces que se pasó de tiempo) no cuenta aquí: vive en su propia
+  // esquina, siempre visible igual que las jugadas retiradas, no en esta fila.
+  const otrosActivos = contadoresActivos.length + (j.bendicion ? 1 : 0)
   const resumirOtros = otrosActivos > UMBRAL_CONTADORES_SUELTOS
 
   return (
@@ -112,7 +116,6 @@ export function Asiento({
         style={{ backgroundImage: fondoAsiento(j.col, imagenComandante), backgroundSize: 'cover', backgroundPosition: 'center' }}
       />
       <div className="inner">
-        {delta !== 0 && <div className="delta">{delta > 0 ? `+${delta}` : delta}</div>}
         <div className="seat-top" style={estiloFila(borde?.arriba ?? null, borde?.hueco ?? '')}>
           {esTurno && <span className="badge turn">Su turno</span>}
           {juego.iniciativa === indice && (
@@ -140,6 +143,7 @@ export function Asiento({
             −
           </button>
           <div className="life-wrap">
+            {delta !== 0 && <div className="delta">{delta > 0 ? `+${delta}` : delta}</div>}
             {juego.monarca === indice && (
               <span
                 className="corona"
@@ -173,10 +177,15 @@ export function Asiento({
           <Icono nombre="retirada" tamano={16} /> {j.rehacer}
         </button>
 
+        <span className={`tiempo-esquina${j.fuera > 0 ? ' warn' : ''}`} title="Veces que se pasó de tiempo">
+          <Icono nombre="reloj" tamano={16} /> {j.fuera}
+        </span>
+
         {juego.j.length > 1 && mostrarDano && (
-          <div className="dano-popup" ref={popupDanoRef}>
+          <div className="dano-popup">
             <div
               className="dano-cuadrado"
+              ref={popupDanoRef}
               style={{ gridTemplateColumns: `repeat(${columnasDano}, 1fr)`, gridTemplateRows: `repeat(${filasDano}, 1fr)` }}
             >
               {gruposDano.map((grupo, k) => (
@@ -228,11 +237,6 @@ export function Asiento({
               {j.bendicion && (
                 <span className="ctr" title="Bendición de la ciudad">
                   <Icono nombre="ciudad" tamano={16} />
-                </span>
-              )}
-              {j.fuera > 0 && (
-                <span className="ctr warn" title="Veces que se pasó de tiempo">
-                  <Icono nombre="reloj" tamano={16} /> {j.fuera}
                 </span>
               )}
             </>

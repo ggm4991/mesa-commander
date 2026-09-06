@@ -8,6 +8,20 @@ en el que se convierte en una versión con fecha.
 
 ### Fixed
 
+- El hub seguía invadiendo los asientos incluso después del primer intento
+  de arreglo (ver la entrada siguiente): el alto se había calculado a mano
+  y se quedaba corto en cuanto el contenido real (tres líneas de texto en
+  el botón del reloj) superaba lo asumido. Ahora `Tablero` mide el alto
+  real del hub en el DOM y lo aplica como `row-gap`, así que no puede
+  quedarse corto sea cual sea el contenido (ver ADR 0026).
+- El popup del cuadrado de daño de comandante no se cerraba al tocar su
+  propio fondo (fuera del cuadrado, pero dentro del asiento): la
+  referencia usada para "dentro o fuera" apuntaba al fondo entero en vez
+  de al cuadrado. Ver ADR 0026.
+- El indicador de cambio de vida (`+N`/`-N`) quedaba muy pegado al número
+  de vida: pasa a anclarse a la propia caja que envuelve la vida, con una
+  separación fija, en vez de a un punto calculado a mano sobre el asiento
+  entero. Ver ADR 0026.
 - El hub (ADR 0024) se desbordaba sobre los asientos de arriba y de abajo:
   su altura real (62px) superaba el hueco vertical que se le había dejado
   (44px). El `row-gap` de `.board` sube a 64px para que quepa entero.
@@ -32,6 +46,19 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Decimotercer commit de la Fase 4: el aviso de "se pasó de tiempo" deja la
+  fila de contadores sueltos y pasa a su propia esquina fija
+  (`.tiempo-esquina`), en el lado opuesto al contador de jugadas rehechas y
+  siempre visible (antes solo aparecía a partir de 1, y contaba para el
+  umbral de "N más" de la ADR 0021 — ya no). El número de vida vuelve a
+  crecer, de `clamp(46px, 15cqh, 108px)` a `clamp(54px, 18cqh, 128px)`. Ver
+  ADR 0026.
+- 5 pruebas nuevas (el fondo del popup también lo cierra, tocar dentro del
+  cuadrado no lo cierra, la esquina de tiempo siempre visible y con aviso
+  a partir de 1, el delta dentro de `.life-wrap`), más verificación con un
+  navegador real: el hub mide 69px de alto y el `row-gap` se aplicó a 70px
+  sin invadir ningún asiento, el delta queda claramente separado de la
+  vida, y tocar el fondo del popup de daño (fuera del cuadrado) lo cierra.
 - Duodécimo commit de la Fase 4: el cuadrado de daño de comandante deja de
   estar siempre visible en el asiento. En su lugar, un botón ("Daño de
   comandante", debajo de la vida) lo abre como un popup pequeño, centrado

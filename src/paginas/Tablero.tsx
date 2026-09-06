@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Icono } from '../componentes/icono/Icono'
 import { ModalDado } from '../componentes/mesa/ModalDado'
 import { useAviso } from '../componentes/comunes/contextoAviso'
@@ -71,6 +71,26 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
   const tableroRef = useRef<HTMLDivElement>(null)
   const asientoRefs = useRef<(HTMLDivElement | null)[]>([])
   const bordes = useBordesAsientos(tableroRef, asientoRefs, dispo.rot, !!dispo.centro)
+
+  // El hueco entre filas tiene que medir exactamente lo que ocupa el hub: uno
+  // fijo a ojo se queda corto en cuanto cambia el contenido (el texto del
+  // reloj, el tamaño de letra del sistema...) y la barra acaba invadiendo los
+  // asientos de al lado (ver ADR 0026). Mismo patrón que `useBordesAsientos`
+  // (medir tras cada render + un listener de resize, sin `ResizeObserver`,
+  // que jsdom no implementa) en vez de una API nueva para un caso más.
+  const hubRef = useRef<HTMLDivElement>(null)
+  const [altoHub, setAltoHub] = useState(64)
+  const medirHub = useCallback(() => {
+    const alto = Math.ceil(hubRef.current?.getBoundingClientRect().height ?? 0)
+    if (alto > 0) setAltoHub((actual) => (actual === alto ? actual : alto))
+  }, [])
+  useLayoutEffect(() => {
+    medirHub()
+  })
+  useEffect(() => {
+    addEventListener('resize', medirHub)
+    return () => removeEventListener('resize', medirHub)
+  }, [medirHub])
 
   const { arrastre, empezar: empezarArrastreCorona } = useArrastrarCorona((desde, destino) =>
     mutar((j) => cambiarMonarcaPorArrastre(j, desde, destino)),
@@ -175,7 +195,7 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
       <div
         className="board"
         ref={tableroRef}
-        style={{ gridTemplateColumns: dispo.cols, gridTemplateRows: dispo.rows }}
+        style={{ gridTemplateColumns: dispo.cols, gridTemplateRows: dispo.rows, rowGap: altoHub }}
       >
         {juego.j.map((_, i) => (
           <Asiento
@@ -200,6 +220,7 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
           />
         ))}
         <Hub
+          ref={hubRef}
           juego={juego}
           ahora={ahora}
           areaCentro={dispo.centro}

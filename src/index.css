@@ -1101,11 +1101,12 @@ textarea {
   flex: 1;
   display: grid;
   /* Separación solo entre filas (arriba/abajo): ahí es donde vive la barra del
-     reloj, de lado a lado (ver ADR 0023 y ADR 0024). El alto tiene que ser al
-     menos el de la propia barra (dos bordes de 1px + su relleno de 5px arriba
-     y abajo + los 50px de sus botones = 62px): si el hueco fuera más pequeño
-     que la barra que vive dentro, esta se saldría sobre los asientos en vez
-     de ser de verdad la separación entre ellos (ver ADR 0025). Entre columnas
+     reloj, de lado a lado (ver ADR 0023 y ADR 0024). `row-gap` no lleva un
+     valor fijo aquí: un número adivinado a mano se queda corto en cuanto
+     cambia el contenido de la barra y esta acaba invadiendo los asientos de
+     al lado (pasó dos veces, ver ADR 0025). `Tablero` lo fija por JS al alto
+     real medido del propio hub, siempre exacto (ver ADR 0026); 64px es solo
+     el valor de partida antes de la primera medición. Entre columnas
      (jugadores del mismo lado) se deja el hueco mínimo de siempre. */
   row-gap: 64px;
   column-gap: 6px;
@@ -1183,7 +1184,7 @@ textarea {
     height: 32px;
   }
   .life {
-    font-size: clamp(34px, 12cqh, 64px);
+    font-size: clamp(40px, 14cqh, 76px);
   }
 }
 @container (max-height: 150px) {
@@ -1268,6 +1269,7 @@ textarea {
   min-height: 0;
 }
 .life-wrap {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1306,7 +1308,7 @@ textarea {
   font-family: Spectral, Georgia, serif;
   font-weight: 800;
   line-height: 0.9;
-  font-size: clamp(46px, 15cqh, 108px);
+  font-size: clamp(54px, 18cqh, 128px);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 .tap {
@@ -1325,15 +1327,19 @@ textarea {
 .tap:active {
   background: rgba(255, 255, 255, 0.09);
 }
-/* Hijo de `.inner` (no de `.seat`) a propósito: así gira con el resto del
+/* Hijo de `.life-wrap` (no de `.seat`) a propósito: así gira con el resto del
    contenido en los asientos de arriba, en vez de quedarse siempre en la misma
    esquina de la pantalla y acabar debajo de lo que gira encima suyo (ver ADR
-   0025). El z-index lo deja por delante de cualquier otra cosa del asiento. */
+   0025). Anclado a `bottom:100%` de `.life-wrap` en vez de a un punto fijo
+   del asiento entero, para que la separación con el número de vida no
+   dependa de lo alto que sea el asiento (ver ADR 0026). El z-index lo deja
+   por delante de cualquier otra cosa del asiento. */
 .delta {
   position: absolute;
-  top: 50%;
+  bottom: 100%;
   left: 50%;
-  transform: translate(-50%, -160%);
+  transform: translateX(-50%);
+  margin-bottom: 10px;
   z-index: 7;
   font-weight: 700;
   font-size: 19px;
@@ -1614,6 +1620,30 @@ textarea {
 }
 .retirada-esquina:active {
   background: rgba(255, 255, 255, 0.16);
+}
+/* Misma idea que `.retirada-esquina`, en la esquina opuesta y siempre visible
+   (no solo cuando pasa de 0): antes vivía en la fila de contadores sueltos,
+   donde se solapaba con el resto en cuanto había varios a la vez (ver ADR
+   0026). No es un botón: no hay ninguna acción que hacer al tocarlo. */
+.tiempo-esquina {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 99px;
+  font-size: 12px;
+  padding: 6px 10px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+}
+.tiempo-esquina.warn {
+  border-color: var(--rust);
+  color: #ffc3b6;
 }
 
 /* Barra de lado a lado en el hueco vertical entre los asientos de abajo y los

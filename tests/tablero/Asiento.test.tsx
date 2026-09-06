@@ -99,6 +99,20 @@ describe('Asiento', () => {
     expect(screen.queryByText('Su turno')).toBeNull()
   })
 
+  it('el aviso de pasarse de tiempo vive siempre en su propia esquina, como el de jugadas rehechas', () => {
+    const juego = juegoDePrueba()
+    renderAsiento(props({ juego }))
+    // visible aunque esté a 0, igual que el contador de jugadas rehechas
+    const esquina = document.querySelector('.tiempo-esquina') as Element
+    expect(esquina).not.toBeNull()
+    expect(esquina).not.toHaveClass('warn')
+
+    juego.j[0].fuera = 2
+    renderAsiento(props({ juego }))
+    const esquinas = document.querySelectorAll('.tiempo-esquina')
+    expect(esquinas[esquinas.length - 1]).toHaveClass('warn')
+  })
+
   it('tocar + y - llama a onCambiarVida', () => {
     const onCambiarVida = vi.fn()
     renderAsiento(props({ onCambiarVida }))
@@ -117,10 +131,10 @@ describe('Asiento', () => {
     expect(screen.getByText('-2')).toBeInTheDocument()
   })
 
-  it('el delta flotante vive dentro de .inner, para que gire con el resto del asiento en los de arriba', () => {
+  it('el delta flotante vive dentro de .life-wrap, para que gire con el asiento y quede separado de la vida', () => {
     renderAsiento(props({ delta: 3 }))
-    const inner = document.querySelector('.inner') as Element
-    expect(inner.querySelector('.delta')).not.toBeNull()
+    const wrap = document.querySelector('.life-wrap') as Element
+    expect(wrap.querySelector('.delta')).not.toBeNull()
   })
 
   it('la corona solo aparece en el asiento del monarca', () => {
@@ -203,6 +217,27 @@ describe('Asiento', () => {
 
     fireEvent.pointerDown(document.body)
     expect(document.querySelector('.dano-popup')).toBeNull()
+  })
+
+  it('tocar el fondo del popup (fuera del cuadrado, pero dentro del asiento) también lo cierra', () => {
+    // el fondo semitransparente (.dano-popup) cubre el asiento entero: si "fuera"
+    // se midiera contra él en vez de contra el propio .dano-cuadrado, tocar ese
+    // fondo se tomaría como un toque "dentro" y el popup no se cerraría nunca
+    renderAsiento(props())
+    fireEvent.click(screen.getByText('Daño de comandante'))
+    const fondo = document.querySelector('.dano-popup') as Element
+
+    fireEvent.pointerDown(fondo)
+    expect(document.querySelector('.dano-popup')).toBeNull()
+  })
+
+  it('tocar dentro del cuadrado de daño no cierra el popup', () => {
+    renderAsiento(props())
+    fireEvent.click(screen.getByText('Daño de comandante'))
+    const cuadrado = document.querySelector('.dano-cuadrado') as Element
+
+    fireEvent.pointerDown(cuadrado)
+    expect(document.querySelector('.dano-popup')).not.toBeNull()
   })
 
   it('tocar el sector de un comandante suma daño directamente', () => {

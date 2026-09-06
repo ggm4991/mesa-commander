@@ -1,3 +1,4 @@
+import { forwardRef } from 'react'
 import { Icono } from '../componentes/icono/Icono'
 import type { Juego } from '../motor/tipos'
 import { estadoReloj } from './reloj'
@@ -18,8 +19,16 @@ interface Props {
 }
 
 /** El cluster central: deshacer, pausa, pasar turno (con el reloj) y el menú de
- * la partida. Sustituye al `.hub` de `pintarTablero()`/`pintarCrono()`. */
-export function Hub({ juego, ahora, areaCentro, rotacionTurno = 0, onDeshacer, onPausa, onPasar, onMenu }: Props) {
+ * la partida. Sustituye al `.hub` de `pintarTablero()`/`pintarCrono()`.
+ *
+ * Expone su nodo raíz por `ref`: `Tablero` mide su alto real para dimensionar
+ * el hueco de `.board` a esa medida exacta, en vez de adivinar un número de
+ * píxeles fijo que se queda corto en cuanto cambia el contenido (ver ADR
+ * 0026). */
+export const Hub = forwardRef<HTMLDivElement, Props>(function Hub(
+  { juego, ahora, areaCentro, rotacionTurno = 0, onDeshacer, onPausa, onPasar, onMenu },
+  ref,
+) {
   const estado = estadoReloj(juego, ahora)
   const clasesPass = ['pass', estado.pasado && 'over', estado.cerca && 'aviso', estado.pausado && 'pausa']
     .filter(Boolean)
@@ -27,6 +36,7 @@ export function Hub({ juego, ahora, areaCentro, rotacionTurno = 0, onDeshacer, o
 
   return (
     <div
+      ref={ref}
       className="hub"
       style={
         areaCentro
@@ -55,4 +65,4 @@ export function Hub({ juego, ahora, areaCentro, rotacionTurno = 0, onDeshacer, o
       </button>
     </div>
   )
-}
+})
