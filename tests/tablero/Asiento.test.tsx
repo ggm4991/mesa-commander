@@ -154,14 +154,20 @@ describe('Asiento', () => {
     expect(wrap.querySelector('.corona')).not.toBeNull()
   })
 
-  it('los contadores y el maná viven arriba, antes de la fila de vida, no abajo con las esquinas fijas', () => {
+  it('los contadores y el maná viven abajo, y las jugadas rehechas/tiempo pasado juntas arriba a la izquierda', () => {
     const juego = juegoDePrueba()
     juego.j[0].ven = 1
     renderAsiento(props({ juego }))
     const inner = document.querySelector('.inner') as Element
     const hijos = Array.from(inner.children).map((n) => n.className)
-    expect(hijos.indexOf('seat-estados')).toBeGreaterThan(-1)
-    expect(hijos.indexOf('seat-estados')).toBeLessThan(hijos.indexOf('life-row'))
+    // el maná/contadores sueltos van después de la fila de vida (varían en
+    // número, tienen todo el ancho de abajo para no solaparse entre ellos)
+    expect(hijos.indexOf('seat-estados')).toBeGreaterThan(hijos.indexOf('life-row'))
+    // jugadas rehechas y tiempo pasado son de tamaño fijo: van juntas arriba
+    // a la izquierda, no una en cada esquina de abajo (ver ADR 0035)
+    const esquinas = document.querySelector('.esquinas-fijas') as Element
+    expect(esquinas.querySelector('.tiempo-esquina')).not.toBeNull()
+    expect(esquinas.querySelector('.retirada-esquina')).not.toBeNull()
   })
 
   it('"Empiezo yo" solo aparece cuando la partida espera turno', () => {

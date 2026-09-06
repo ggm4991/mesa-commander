@@ -8,6 +8,15 @@ en el que se convierte en una versión con fecha.
 
 ### Fixed
 
+- El reparto de la ADR 0034 quedó al revés: los avisos de tamaño fijo
+  (jugadas rehechas, tiempo pasado) suben juntos a la esquina superior
+  izquierda; el maná y los contadores sueltos, que varían en número,
+  vuelven abajo con toda la fila para crecer sin chocar. El botón del
+  reloj pasa a `border-radius: 0` — un rectángulo de esquinas rectas, sin
+  el hueco muerto que dejaba el redondeo ahora que la barra ya mide
+  justo lo que él. Los botones de sumar/restar vida centran el signo un
+  poco más arriba, a la altura del número de vida. Ver ADR 0035.
+
 - El reloj girado a 90°/270° (ADR 0033) se salía del fondo de la barra
   central: `Hub` ahora fija su alto real también como `height` de `.hub`,
   no solo como `row-gap` de `.board`.

@@ -138,33 +138,6 @@ export function Asiento({
           </button>
         </div>
 
-        <div className="seat-estados" style={estiloFila(borde?.arriba ?? null, borde?.hueco ?? '')}>
-          {manaActivo.map((m) => (
-            <button key={m} type="button" className="ctr" title={`Maná ${m}: toca para gastar uno`} onClick={() => onAjustarMana(m, -1)}>
-              <i className={`pip ${m}`} />
-              {j.mana[m]}
-            </button>
-          ))}
-          {resumirOtros ? (
-            <button className="ctr" onClick={onAbrirMenu}>
-              <Icono nombre="puntos" tamano={16} /> {otrosActivos} más
-            </button>
-          ) : (
-            <>
-              {contadoresActivos.map((c) => (
-                <span key={c.clave} className={`ctr${c.letal && j[c.clave] >= c.letal ? ' warn' : ''}`} title={c.nombre}>
-                  <Icono nombre={ICONO_CONTADOR[c.clave]} tamano={16} /> {j[c.clave]}
-                </span>
-              ))}
-              {j.bendicion && (
-                <span className="ctr" title="Bendición de la ciudad">
-                  <Icono nombre="ciudad" tamano={16} />
-                </span>
-              )}
-            </>
-          )}
-        </div>
-
         <div className="life-row">
           <button className="tap" aria-label="Quitar vida" {...menosVida}>
             −
@@ -200,13 +173,41 @@ export function Asiento({
           </button>
         )}
 
-        <button className="retirada-esquina" title="Retiró una jugada y la rehízo" onClick={onRetirada}>
-          <Icono nombre="retirada" tamano={16} /> {j.rehacer}
-        </button>
+        <div className="esquinas-fijas">
+          <span className={`tiempo-esquina${j.fuera > 0 ? ' warn' : ''}`} title="Veces que se pasó de tiempo">
+            <Icono nombre="reloj" tamano={16} /> {j.fuera}
+          </span>
+          <button className="retirada-esquina" title="Retiró una jugada y la rehízo" onClick={onRetirada}>
+            <Icono nombre="retirada" tamano={16} /> {j.rehacer}
+          </button>
+        </div>
 
-        <span className={`tiempo-esquina${j.fuera > 0 ? ' warn' : ''}`} title="Veces que se pasó de tiempo">
-          <Icono nombre="reloj" tamano={16} /> {j.fuera}
-        </span>
+        <div className="seat-estados" style={estiloFila(borde?.abajo ?? null, borde?.hueco ?? '')}>
+          {manaActivo.map((m) => (
+            <button key={m} type="button" className="ctr" title={`Maná ${m}: toca para gastar uno`} onClick={() => onAjustarMana(m, -1)}>
+              <i className={`pip ${m}`} />
+              {j.mana[m]}
+            </button>
+          ))}
+          {resumirOtros ? (
+            <button className="ctr" onClick={onAbrirMenu}>
+              <Icono nombre="puntos" tamano={16} /> {otrosActivos} más
+            </button>
+          ) : (
+            <>
+              {contadoresActivos.map((c) => (
+                <span key={c.clave} className={`ctr${c.letal && j[c.clave] >= c.letal ? ' warn' : ''}`} title={c.nombre}>
+                  <Icono nombre={ICONO_CONTADOR[c.clave]} tamano={16} /> {j[c.clave]}
+                </span>
+              ))}
+              {j.bendicion && (
+                <span className="ctr" title="Bendición de la ciudad">
+                  <Icono nombre="ciudad" tamano={16} />
+                </span>
+              )}
+            </>
+          )}
+        </div>
 
         {juego.j.length > 1 && mostrarDano && (
           <div className="dano-popup">

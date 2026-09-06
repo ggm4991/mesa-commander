@@ -1342,6 +1342,11 @@ textarea {
   color: rgba(255, 255, 255, 0.5);
   display: grid;
   place-items: center;
+  /* Sube el signo un poco del centro exacto del botón, para que quede a la
+     altura del número de vida y no por debajo (el botón entero se queda del
+     mismo alto y sigue siendo igual de fácil de tocar: solo se mueve dónde
+     se centra el signo dentro de él). */
+  padding-bottom: 10%;
   user-select: none;
   touch-action: manipulation;
 }
@@ -1368,17 +1373,16 @@ textarea {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
   pointer-events: none;
 }
-/* Maná y contadores sueltos: viven arriba a la izquierda, debajo de
-   `.seat-top` (antes abajo, `.seat-bot`) — ahí no compiten con las dos
-   esquinas fijas de abajo (`.retirada-esquina`, `.tiempo-esquina`, ver ADR
-   0026), que antes se les solapaban en cuanto había varios contadores a la
-   vez (ver ADR 0034). */
+/* Maná y contadores sueltos, abajo (antes `.seat-bot`): a diferencia de las
+   dos esquinas fijas (`.esquinas-fijas`, arriba a la izquierda desde la ADR
+   0035), esta fila varía en número — el ancho entero de abajo es donde tiene
+   sitio de sobra para crecer sin solapar con nada. */
 .seat-estados {
   display: flex;
   gap: 7px;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   min-height: 22px;
 }
 .seat-estados .more {
@@ -1624,48 +1628,41 @@ textarea {
   }
 }
 
-/* El botón de jugadas retiradas se fija en una esquina en vez de compartir fila
-   con los contadores: gira con el resto del contenido (es hijo de `.inner`). */
-.retirada-esquina {
+/* Jugadas retiradas y veces que se pasó de tiempo van siempre juntas en la
+   esquina superior izquierda, no una en cada esquina de abajo: son dos
+   valores de tamaño fijo (caben bien apretados), a diferencia del maná y los
+   contadores sueltos (`.seat-estados`, más abajo), que varían en número y
+   necesitan el ancho entero de la fila de abajo para no solaparse entre
+   ellos (ver ADR 0035). El contenedor, no cada aviso por separado, es quien
+   se ancla a la esquina — así no hace falta calcular el ancho del primero
+   para no solapar con el segundo. */
+.esquinas-fijas {
   position: absolute;
-  right: 8px;
-  bottom: 8px;
+  top: 8px;
+  left: 8px;
   z-index: 2;
+  display: flex;
+  gap: 6px;
+}
+.retirada-esquina,
+.tiempo-esquina {
   background: rgba(0, 0, 0, 0.42);
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 99px;
   font-size: 12px;
   padding: 6px 10px;
   min-height: 32px;
-  cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   color: inherit;
+}
+.retirada-esquina {
+  cursor: pointer;
   touch-action: manipulation;
 }
 .retirada-esquina:active {
   background: rgba(255, 255, 255, 0.16);
-}
-/* Misma idea que `.retirada-esquina`, en la esquina opuesta y siempre visible
-   (no solo cuando pasa de 0): antes vivía en la fila de contadores sueltos,
-   donde se solapaba con el resto en cuanto había varios a la vez (ver ADR
-   0026). No es un botón: no hay ninguna acción que hacer al tocarlo. */
-.tiempo-esquina {
-  position: absolute;
-  left: 8px;
-  bottom: 8px;
-  z-index: 2;
-  background: rgba(0, 0, 0, 0.42);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 99px;
-  font-size: 12px;
-  padding: 6px 10px;
-  min-height: 32px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: inherit;
 }
 .tiempo-esquina.warn {
   border-color: var(--rust);
@@ -1695,7 +1692,11 @@ textarea {
   border: 0;
   background: var(--brass);
   color: #241b12;
-  border-radius: 22px;
+  /* Rectángulo recto a propósito, no una esquina redondeada: con la barra ya
+     ajustada al tamaño real del botón (ADR 0033/0034), cualquier redondeo
+     deja un hueco muerto en las puntas que podría ser de los asientos de al
+     lado en vez de espacio sin aprovechar (ver ADR 0035). */
+  border-radius: 0;
   padding: 8px 20px;
   min-height: 50px;
   min-width: 132px;
