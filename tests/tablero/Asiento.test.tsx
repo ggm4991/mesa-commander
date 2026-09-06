@@ -146,6 +146,24 @@ describe('Asiento', () => {
     expect(document.querySelector('.corona')).toBeNull()
   })
 
+  it('la corona vive dentro de .life-wrap, fuera del flujo, para no desplazar el número de vida', () => {
+    const juego = juegoDePrueba()
+    juego.monarca = 0
+    renderAsiento(props({ juego }))
+    const wrap = document.querySelector('.life-wrap') as Element
+    expect(wrap.querySelector('.corona')).not.toBeNull()
+  })
+
+  it('los contadores y el maná viven arriba, antes de la fila de vida, no abajo con las esquinas fijas', () => {
+    const juego = juegoDePrueba()
+    juego.j[0].ven = 1
+    renderAsiento(props({ juego }))
+    const inner = document.querySelector('.inner') as Element
+    const hijos = Array.from(inner.children).map((n) => n.className)
+    expect(hijos.indexOf('seat-estados')).toBeGreaterThan(-1)
+    expect(hijos.indexOf('seat-estados')).toBeLessThan(hijos.indexOf('life-row'))
+  })
+
   it('"Empiezo yo" solo aparece cuando la partida espera turno', () => {
     const juego = juegoDePrueba()
     juego.turno = null

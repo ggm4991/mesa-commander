@@ -12,6 +12,10 @@ interface Props {
    * gira igual para que esa persona pueda leer su propio tiempo sin ladear el
    * móvil (ver ADR 0024). */
   rotacionTurno?: number
+  /** Alto medido en `Tablero` (ver ADR 0026 y 0033): sin fijarlo aquí, el fondo
+   * de la barra se queda con su alto de siempre aunque el botón del reloj
+   * girado a 90°/270° sea más alto que eso, y el reloj asoma por fuera. */
+  altoBarra?: number
   onDeshacer: () => void
   onPausa: () => void
   onPasar: () => void
@@ -26,7 +30,7 @@ interface Props {
  * píxeles fijo que se queda corto en cuanto cambia el contenido (ver ADR
  * 0026). */
 export const Hub = forwardRef<HTMLDivElement, Props>(function Hub(
-  { juego, ahora, areaCentro, rotacionTurno = 0, onDeshacer, onPausa, onPasar, onMenu },
+  { juego, ahora, areaCentro, rotacionTurno = 0, altoBarra, onDeshacer, onPausa, onPasar, onMenu },
   ref,
 ) {
   const estado = estadoReloj(juego, ahora)
@@ -41,7 +45,9 @@ export const Hub = forwardRef<HTMLDivElement, Props>(function Hub(
       style={
         areaCentro
           ? { position: 'static', transform: 'none', gridArea: areaCentro, justifySelf: 'center', alignSelf: 'center' }
-          : undefined
+          : altoBarra
+            ? { height: altoBarra }
+            : undefined
       }
     >
       <button className="ico" aria-label="Deshacer lo último apuntado" onClick={onDeshacer}>

@@ -8,6 +8,22 @@ en el que se convierte en una versión con fecha.
 
 ### Fixed
 
+- El reloj girado a 90°/270° (ADR 0033) se salía del fondo de la barra
+  central: `Hub` ahora fija su alto real también como `height` de `.hub`,
+  no solo como `row-gap` de `.board`.
+- Ser el monarca desplazaba el número de vida hasta solaparlo con "Daño de
+  comandante": la corona pasa a `position:absolute` (como `.delta`), fuera
+  del flujo de `.life-wrap`, así que ganarla o perderla ya no mueve la vida.
+- El maná y los contadores sueltos se solapaban con las dos esquinas fijas
+  de abajo (jugadas rehechas, se pasó de tiempo) en cuanto había varios a
+  la vez: esa fila (`.seat-estados`, antes `.seat-bot`) sube junto a
+  `.seat-top`, alineada a la izquierda.
+- El aviso de "se pasó de tiempo" hacía que el reloj pareciera girar solo:
+  su animación de latido sustituía el `transform` entero del botón,
+  incluida su rotación. La rotación pasa a una variable CSS (`--rot`) que
+  la animación combina con su propia escala, en vez de reemplazarla.
+  Los cuatro puntos, verificados con un navegador real. Ver ADR 0034.
+
 - El autocompletado de comandante sugería cualquier carta, no solo las que
   pueden ser comandante. `buscarNombres()` pasa de `/cards/autocomplete` a
   `/cards/search` con `is:commander`. Comprobado a mano contra la propia

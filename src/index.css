@@ -1199,7 +1199,7 @@ textarea {
   }
 }
 @container (max-height: 150px) {
-  .seat-bot {
+  .seat-estados {
     display: none;
   }
 }
@@ -1286,7 +1286,17 @@ textarea {
   align-items: center;
   gap: 5px;
 }
+/* Fuera del flujo, igual que `.delta` (ver ADR 0026): en el sitio, ser
+   monarca añadía 40px+5px de alto a `.life-wrap` y la vida se desplazaba
+   hacia abajo hasta solapar con el botón de "Daño de comandante" — con
+   `position:absolute` la vida no se mueve por ganar o perder la corona
+   (ver ADR 0034). */
 .corona {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 4px;
   display: grid;
   place-items: center;
   width: 52px;
@@ -1358,15 +1368,20 @@ textarea {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
   pointer-events: none;
 }
-.seat-bot {
+/* Maná y contadores sueltos: viven arriba a la izquierda, debajo de
+   `.seat-top` (antes abajo, `.seat-bot`) — ahí no compiten con las dos
+   esquinas fijas de abajo (`.retirada-esquina`, `.tiempo-esquina`, ver ADR
+   0026), que antes se les solapaban en cuanto había varios contadores a la
+   vez (ver ADR 0034). */
+.seat-estados {
   display: flex;
   gap: 7px;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 22px;
 }
-.seat-bot .more {
+.seat-estados .more {
   margin-left: 0;
 }
 .ctr {
@@ -1733,15 +1748,23 @@ textarea {
    móvil (ver ADR 0024). Con 90°/270° (asientos a los lados) el botón, más
    ancho que alto, se sale de la barra al girarse — `Tablero` mide ese caso
    por JS y ensancha el hueco vertical lo que haga falta, en vez de adivinar
-   un tamaño fijo (ver ADR 0033). */
-.hub .pass[data-rot='180'] {
-  transform: rotate(180deg);
+   un tamaño fijo (ver ADR 0033). La rotación se guarda en la variable
+   `--rot` (no directamente en `transform`) para que la animación de
+   "se pasó de tiempo" (`.pass.over`, más abajo) pueda combinarla con su
+   propio pulso en vez de sustituirla entera y hacer que el reloj gire de
+   golpe a 0° en cada pulso (ver ADR 0034). */
+.hub .pass {
+  --rot: 0deg;
+  transform: rotate(var(--rot));
 }
 .hub .pass[data-rot='90'] {
-  transform: rotate(90deg);
+  --rot: 90deg;
+}
+.hub .pass[data-rot='180'] {
+  --rot: 180deg;
 }
 .hub .pass[data-rot='270'] {
-  transform: rotate(270deg);
+  --rot: 270deg;
 }
 .hub .ico.activo {
   background: var(--steel);
@@ -1844,7 +1867,11 @@ textarea {
   @keyframes latido {
     50% {
       background: #8e3527;
-      transform: scale(1.04);
+      /* Con solo `scale()` aquí, la animación sustituye el `transform` entero
+         del botón y el reloj girado (ver `--rot` más arriba) volvía a 0° en
+         cada pulso, dando la sensación de que giraba solo — combinando la
+         misma rotación con la escala no se pierde (ver ADR 0034). */
+      transform: rotate(var(--rot)) scale(1.04);
     }
   }
   tbody tr {

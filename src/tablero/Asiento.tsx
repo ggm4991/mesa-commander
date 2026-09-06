@@ -138,6 +138,33 @@ export function Asiento({
           </button>
         </div>
 
+        <div className="seat-estados" style={estiloFila(borde?.arriba ?? null, borde?.hueco ?? '')}>
+          {manaActivo.map((m) => (
+            <button key={m} type="button" className="ctr" title={`Maná ${m}: toca para gastar uno`} onClick={() => onAjustarMana(m, -1)}>
+              <i className={`pip ${m}`} />
+              {j.mana[m]}
+            </button>
+          ))}
+          {resumirOtros ? (
+            <button className="ctr" onClick={onAbrirMenu}>
+              <Icono nombre="puntos" tamano={16} /> {otrosActivos} más
+            </button>
+          ) : (
+            <>
+              {contadoresActivos.map((c) => (
+                <span key={c.clave} className={`ctr${c.letal && j[c.clave] >= c.letal ? ' warn' : ''}`} title={c.nombre}>
+                  <Icono nombre={ICONO_CONTADOR[c.clave]} tamano={16} /> {j[c.clave]}
+                </span>
+              ))}
+              {j.bendicion && (
+                <span className="ctr" title="Bendición de la ciudad">
+                  <Icono nombre="ciudad" tamano={16} />
+                </span>
+              )}
+            </>
+          )}
+        </div>
+
         <div className="life-row">
           <button className="tap" aria-label="Quitar vida" {...menosVida}>
             −
@@ -215,33 +242,6 @@ export function Asiento({
             </div>
           </div>
         )}
-
-        <div className="seat-bot" style={estiloFila(borde?.abajo ?? null, borde?.hueco ?? '')}>
-          {manaActivo.map((m) => (
-            <button key={m} type="button" className="ctr" title={`Maná ${m}: toca para gastar uno`} onClick={() => onAjustarMana(m, -1)}>
-              <i className={`pip ${m}`} />
-              {j.mana[m]}
-            </button>
-          ))}
-          {resumirOtros ? (
-            <button className="ctr" onClick={onAbrirMenu}>
-              <Icono nombre="puntos" tamano={16} /> {otrosActivos} más
-            </button>
-          ) : (
-            <>
-              {contadoresActivos.map((c) => (
-                <span key={c.clave} className={`ctr${c.letal && j[c.clave] >= c.letal ? ' warn' : ''}`} title={c.nombre}>
-                  <Icono nombre={ICONO_CONTADOR[c.clave]} tamano={16} /> {j[c.clave]}
-                </span>
-              ))}
-              {j.bendicion && (
-                <span className="ctr" title="Bendición de la ciudad">
-                  <Icono nombre="ciudad" tamano={16} />
-                </span>
-              )}
-            </>
-          )}
-        </div>
       </div>
     </div>
   )

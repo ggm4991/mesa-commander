@@ -50,7 +50,7 @@ export function calcularBordeAsiento(
   }
 }
 
-/** Estilo de una fila de controles (`.seat-top`/`.seat-bot`) que se aparta hacia
+/** Estilo de una fila de controles (`.seat-top`/`.seat-estados`) que se aparta hacia
  * `lado`, o `undefined` si no hay nada que esquivar en esta fila. */
 export function estiloFila(lado: Lado, hueco: string): CSSProperties | undefined {
   if (!lado) return undefined

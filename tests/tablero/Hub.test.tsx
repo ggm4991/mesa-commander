@@ -82,6 +82,14 @@ describe('Hub', () => {
     expect(screen.getByLabelText('Pasar turno')).toHaveAttribute('data-rot', '270')
   })
 
+  it('el alto medido en Tablero se fija en la propia barra, para que quepa el reloj girado', () => {
+    const juego = juegoDePrueba()
+    const { container } = render(
+      <Hub juego={juego} ahora={juego.tIni} rotacionTurno={90} altoBarra={132} onDeshacer={() => {}} onPausa={() => {}} onPasar={() => {}} onMenu={() => {}} />,
+    )
+    expect(container.querySelector('.hub')).toHaveStyle({ height: '132px' })
+  })
+
   it('sin rotación indicada, el reloj se queda como está', () => {
     const juego = juegoDePrueba()
     render(<Hub juego={juego} ahora={juego.tIni} onDeshacer={() => {}} onPausa={() => {}} onPasar={() => {}} onMenu={() => {}} />)

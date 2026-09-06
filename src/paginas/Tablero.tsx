@@ -237,6 +237,7 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
           ahora={ahora}
           areaCentro={dispo.centro}
           rotacionTurno={juego.turno != null ? dispo.rot[juego.turno] || 0 : 0}
+          altoBarra={altoHub}
           onDeshacer={deshacer}
           onPausa={() => mutar((j) => alternarPausa(j))}
           onPasar={() => mutar((j) => pasarTurno(j))}
