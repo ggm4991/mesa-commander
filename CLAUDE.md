@@ -36,6 +36,25 @@ npm run lint             # oxlint sobre src/ y tests/ — se mantiene en 0 aviso
 Hace falta Node 22: el proyecto lo fija con `volta pin` (ver ADR 0003), así
 que si tienes Volta instalado se activa solo al entrar en la carpeta.
 
+### Empaquetar para Android (Fase 5)
+
+```bash
+npm run build              # antes de nada: cap sync copia dist/, no fuentes
+npx cap add android        # solo la primera vez: crea android/
+npx cap sync android       # tras cada npm run build, para llevarle los cambios
+cd android
+./gradlew.bat assembleDebug   # genera android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Hace falta el SDK de Android (`ANDROID_HOME`/`ANDROID_SDK_ROOT` apuntando a
+él; `android/local.properties` con `sdk.dir` sirve igual si no quieres tocar
+variables de entorno) y **JDK 21** — no 17: el Gradle de `@capacitor/android`
+pide `sourceCompatibility 21` y falla con "invalid source release" en
+cualquier JDK más viejo (ver ADR 0029). El `.apk` de depuración resultante se
+instala tal cual en un Android con "orígenes desconocidos" permitido; para
+publicarlo en la Play Store hace falta además firmarlo con una clave de
+release, que no está montada todavía.
+
 ### La app antigua (`app.html`)
 
 Sigue sin compilación ni dependencias: se abre a doble clic en cualquier
@@ -205,8 +224,11 @@ de aquí y no se ha tocado.
   color e imagen) con TanStack Query, en `src/red/`, y offline-first de
   verdad: caché servida → introducción manual → aviso no bloqueante, nunca
   bloquear el juego por falta de red.
-- **Fase 5** — shell de Capacitor y PWA (manifiesto + service worker):
-  cuando esté lista, `app.html` y `pruebas/` se retiran.
+- **Fase 5** — la PWA (manifiesto + *service worker*, ADR 0028) y el `.apk`
+  de Android por Capacitor (ADR 0029) ya funcionan los dos. Queda: firmar un
+  build de release de verdad (el de depuración de hoy sirve para instalar a
+  mano, no para publicar), iOS (hace falta un Mac con Xcode, no disponible
+  todavía) y decidir cuándo se retiran `app.html` y `pruebas/`.
 - **Fase 6** — sincronización multi-dispositivo con Supabase (privado por
   usuario con Row Level Security; esbozo en `src/sync/README.md` cuando
   exista).

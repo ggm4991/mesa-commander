@@ -20,8 +20,15 @@ en el que se convierte en una versión con fecha.
 - Verificado sirviendo el build de producción (`vite preview`, no
   `vite dev`): manifiesto e iconos accesibles, *service worker* activo, y
   la app arranca y pinta la pantalla previa con la conexión cortada del
-  todo. Queda pendiente el resto de la Fase 5: el *shell* nativo de
-  Capacitor, para quien quiera un `.apk` de verdad en vez de una PWA.
+  todo.
+- Segundo paso de la Fase 5: `@capacitor/android` y `npx cap add android`
+  generan el proyecto nativo en `android/`, compilado con
+  `./gradlew assembleDebug` en un `.apk` de depuración instalable a mano en
+  cualquier Android. Documentado en `CLAUDE.md` ("Empaquetar para Android")
+  el SDK de Android y el JDK 21 que hacen falta para compilarlo (no JDK 17:
+  el Gradle de `@capacitor/android` pide `sourceCompatibility 21`). iOS
+  queda fuera de alcance en esta máquina, al necesitar un Mac con Xcode.
+  Ver ADR 0029.
 
 ### Fixed
 
