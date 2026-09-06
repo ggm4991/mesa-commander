@@ -28,6 +28,32 @@ describe('dispoActual', () => {
   })
 })
 
+describe('orden de los asientos: sentido horario (regla 103.1)', () => {
+  // `pasarTurno` (motor/partida.ts) solo hace índice+1: para que eso sea de
+  // verdad "pasar al de la izquierda", el índice de cada asiento tiene que
+  // seguir el sentido de las agujas del reloj visto desde arriba, no el
+  // orden en que la rejilla coloca las celdas (ver ADR 0031).
+  it('"Dos y dos" (4a): arriba-izq., arriba-der., abajo-der., abajo-izq.', () => {
+    const d = DISPOS[4].find((x) => x.id === '4a')!
+    expect(d.areas).toEqual(['1/1/2/2', '1/2/2/3', '2/2/3/3', '2/1/3/2'])
+  })
+
+  it('"Uno enfrente" (3a): arriba, abajo-der., abajo-izq.', () => {
+    const d = DISPOS[3].find((x) => x.id === '3a')!
+    expect(d.areas).toEqual(['1/1/2/3', '2/2/3/3', '2/1/3/2'])
+  })
+
+  it('"Uno en cada lado" (4b): norte, este, sur, oeste', () => {
+    const d = DISPOS[4].find((x) => x.id === '4b')!
+    expect(d.rot).toEqual([180, 270, 0, 90])
+  })
+
+  it('"Rodeando el móvil" de 6 (6b): norte-izq., norte-der., este, sureste, suroeste, oeste', () => {
+    const d = DISPOS[6].find((x) => x.id === '6b')!
+    expect(d.rot).toEqual([180, 180, 270, 0, 0, 90])
+  })
+})
+
 describe('conDisposicionGuardada', () => {
   it('guarda la disposición para ese número de jugadores sin tocar las demás', () => {
     const original = { 2: { id: '2a', rot: [180, 0] } }

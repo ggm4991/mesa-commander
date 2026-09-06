@@ -8,6 +8,16 @@ en el que se convierte en una versión con fecha.
 
 ### Fixed
 
+- Pasar el turno no avanzaba en el sentido de las agujas del reloj (regla
+  103.1): `pasarTurno()` siempre ha hecho solo índice+1, correcto solo si el
+  índice de cada asiento ya sigue ese sentido alrededor de la mesa — y en
+  disposiciones como "Dos y dos" o "Rodeando el móvil" no lo seguía (el
+  índice salía del orden en que es más simple describir la rejilla CSS, no
+  del recorrido real por la mesa). Reordenadas las `areas`/`rot` de
+  `disposiciones.ts` y los `area` de emergencia de `layouts.ts` para las
+  disposiciones con geometría real (3a, 3b, 4a, 4b, 5a, 5b, 6a, 6b); las
+  disposiciones en columna o "todos en la misma dirección" no tienen un
+  sentido horario físico que corregir, y se quedan igual. Ver ADR 0031.
 - Probado el `.apk` en un móvil real, la barra de estado del sistema
   (edge-to-edge desde Android 15) se pintaba encima de la barra de
   navegación de la app y tapaba sus botones. `.nav`, `.board-screen`,

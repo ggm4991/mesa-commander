@@ -8,13 +8,17 @@ export interface LayoutGenerico {
   area?: Record<number, string>
 }
 
+// Los `area` de más de un asiento (a partir de 3 jugadores) están para que el
+// orden de los índices siga las agujas del reloj vistas desde arriba (regla
+// 103.1), no el orden en que los coloca la rejilla por defecto — mismo motivo
+// que las `areas` de `disposiciones.ts` (ver ADR 0031).
 export const LAYOUTS: Record<number, LayoutGenerico> = {
   1: { c: 1, r: 1, rot: [] },
   2: { c: 1, r: 2, rot: [0] },
-  3: { c: 2, r: 2, rot: [0], area: { 0: '1 / 1 / 2 / 3' } },
-  4: { c: 2, r: 2, rot: [0, 1] },
-  5: { c: 2, r: 3, rot: [0, 1], area: { 4: '3 / 1 / 4 / 3' } },
-  6: { c: 2, r: 3, rot: [0, 1] },
+  3: { c: 2, r: 2, rot: [0], area: { 0: '1 / 1 / 2 / 3', 1: '2 / 2 / 3 / 3', 2: '2 / 1 / 3 / 2' } },
+  4: { c: 2, r: 2, rot: [0, 1], area: { 2: '2 / 2 / 3 / 3', 3: '2 / 1 / 3 / 2' } },
+  5: { c: 2, r: 3, rot: [0, 1], area: { 2: '2 / 2 / 3 / 3', 3: '3 / 1 / 4 / 3', 4: '2 / 1 / 3 / 2' } },
+  6: { c: 2, r: 3, rot: [0, 1], area: { 2: '2 / 2 / 3 / 3', 3: '3 / 2 / 4 / 3', 4: '3 / 1 / 4 / 2', 5: '2 / 1 / 3 / 2' } },
 }
 
 export interface DispoTablero {

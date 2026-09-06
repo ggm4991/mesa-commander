@@ -25,7 +25,10 @@ export const DISPOS: Record<number, Dispo[]> = {
       n: 'Uno enfrente',
       cols: '1fr 1fr',
       rows: '1fr 1fr',
-      areas: ['1/1/2/3', '2/1/3/2', '2/2/3/3'],
+      // El orden de los asientos sigue las agujas del reloj vistas desde
+      // arriba (regla 103.1): arriba, luego abajo-derecha, luego abajo-
+      // izquierda — no el orden en que aparecían en la rejilla (ver ADR 0031).
+      areas: ['1/1/2/3', '2/2/3/3', '2/1/3/2'],
       rot: [180, 0, 0],
     },
     {
@@ -33,21 +36,28 @@ export const DISPOS: Record<number, Dispo[]> = {
       n: 'Rodeando el móvil',
       cols: '1fr 1.1fr 1fr',
       rows: '1fr 1fr',
-      areas: ['1/1/2/4', '2/1/3/2', '2/3/3/4'],
-      rot: [180, 90, 270],
+      areas: ['1/1/2/4', '2/3/3/4', '2/1/3/2'],
+      rot: [180, 270, 90],
       centro: '2/2/3/3',
     },
     { id: '3c', n: 'En columna', cols: '1fr', rows: 'repeat(3,1fr)', rot: [180, 180, 0] },
   ],
   4: [
-    { id: '4a', n: 'Dos y dos', cols: '1fr 1fr', rows: '1fr 1fr', rot: [180, 180, 0, 0] },
+    {
+      id: '4a',
+      n: 'Dos y dos',
+      cols: '1fr 1fr',
+      rows: '1fr 1fr',
+      areas: ['1/1/2/2', '1/2/2/3', '2/2/3/3', '2/1/3/2'],
+      rot: [180, 180, 0, 0],
+    },
     {
       id: '4b',
       n: 'Uno en cada lado',
       cols: '1fr 1.1fr 1fr',
       rows: '1fr 1.3fr 1fr',
-      areas: ['1/1/2/4', '2/1/3/2', '2/3/3/4', '3/1/4/4'],
-      rot: [180, 90, 270, 0],
+      areas: ['1/1/2/4', '2/3/3/4', '3/1/4/4', '2/1/3/2'],
+      rot: [180, 270, 0, 90],
       centro: '2/2/3/3',
     },
     { id: '4c', n: 'En columna', cols: '1fr', rows: 'repeat(4,1fr)', rot: [180, 180, 0, 0] },
@@ -58,7 +68,7 @@ export const DISPOS: Record<number, Dispo[]> = {
       n: 'Dos, dos y uno',
       cols: '1fr 1fr',
       rows: 'repeat(3,1fr)',
-      areas: [null, null, null, null, '3/1/4/3'],
+      areas: ['1/1/2/2', '1/2/2/3', '2/2/3/3', '3/1/4/3', '2/1/3/2'],
       rot: [180, 180, 0, 0, 0],
     },
     {
@@ -66,8 +76,8 @@ export const DISPOS: Record<number, Dispo[]> = {
       n: 'Rodeando el móvil',
       cols: '1fr 1fr',
       rows: 'repeat(3,1fr)',
-      areas: ['1/1/2/2', '1/2/2/3', '2/1/3/2', '2/2/3/3', '3/1/4/3'],
-      rot: [180, 180, 90, 270, 0],
+      areas: ['1/1/2/2', '1/2/2/3', '2/2/3/3', '3/1/4/3', '2/1/3/2'],
+      rot: [180, 180, 270, 0, 90],
     },
     {
       id: '5c',
@@ -79,8 +89,22 @@ export const DISPOS: Record<number, Dispo[]> = {
     },
   ],
   6: [
-    { id: '6a', n: 'Tres y tres', cols: 'repeat(3,1fr)', rows: '1fr 1fr', rot: [180, 180, 180, 0, 0, 0] },
-    { id: '6b', n: 'Rodeando el móvil', cols: '1fr 1fr', rows: 'repeat(3,1fr)', rot: [180, 180, 90, 270, 0, 0] },
+    {
+      id: '6a',
+      n: 'Tres y tres',
+      cols: 'repeat(3,1fr)',
+      rows: '1fr 1fr',
+      areas: ['1/1/2/2', '1/2/2/3', '1/3/2/4', '2/3/3/4', '2/2/3/3', '2/1/3/2'],
+      rot: [180, 180, 180, 0, 0, 0],
+    },
+    {
+      id: '6b',
+      n: 'Rodeando el móvil',
+      cols: '1fr 1fr',
+      rows: 'repeat(3,1fr)',
+      areas: ['1/1/2/2', '1/2/2/3', '2/2/3/3', '3/2/4/3', '3/1/4/2', '2/1/3/2'],
+      rot: [180, 180, 270, 0, 0, 90],
+    },
     { id: '6c', n: 'Dos columnas', cols: '1fr 1fr', rows: 'repeat(3,1fr)', rot: [0, 0, 0, 0, 0, 0] },
   ],
 }

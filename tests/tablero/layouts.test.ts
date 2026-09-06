@@ -27,7 +27,13 @@ describe('dispoTablero', () => {
   })
 
   it('para 3 y 5 jugadores, aplica el área especial del asiento central', () => {
-    expect(dispoTablero(3, null).areas).toEqual(['1 / 1 / 2 / 3', null, null])
-    expect(dispoTablero(5, null).areas).toEqual([null, null, null, null, '3 / 1 / 4 / 3'])
+    expect(dispoTablero(3, null).areas).toEqual(['1 / 1 / 2 / 3', '2 / 2 / 3 / 3', '2 / 1 / 3 / 2'])
+    expect(dispoTablero(5, null).areas).toEqual([null, null, '2 / 2 / 3 / 3', '3 / 1 / 4 / 3', '2 / 1 / 3 / 2'])
+  })
+
+  it('el orden de los asientos va en el sentido de las agujas del reloj (regla 103.1), no el de la rejilla', () => {
+    // 4 jugadores: 0 arriba-izq., 1 arriba-der., 2 abajo-der., 3 abajo-izq. —
+    // pasar turno (que solo hace índice+1) va así en sentido horario de verdad
+    expect(dispoTablero(4, null).areas).toEqual([null, null, '2 / 2 / 3 / 3', '2 / 1 / 3 / 2'])
   })
 })
