@@ -52,7 +52,10 @@ button {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 14px;
+  /* El margen de zona segura se suma al de siempre, no lo sustituye: si no,
+     la barra de estado del sistema tapa "Mesa Commander"/"Inicio"/"Registro"
+     en un móvil de verdad (ver ADR 0030). */
+  padding: calc(10px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) 10px calc(14px + env(safe-area-inset-left));
   border-bottom: 1px solid var(--line);
   background: var(--felt);
   position: sticky;
@@ -200,7 +203,10 @@ button {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 20px 14px;
+  /* Igual que `.nav` y `.board-screen`: sin sumar la zona segura, la cruz de
+     cerrar del modal puede quedar bajo la barra de estado (ver ADR 0030). */
+  padding: calc(20px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom))
+    calc(14px + env(safe-area-inset-left));
   overflow-y: auto;
   z-index: 60;
 }
@@ -259,7 +265,7 @@ button {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 26px;
+  bottom: calc(26px + env(safe-area-inset-bottom));
   transform: translateX(-50%);
   background: var(--felt-3);
   border: 1px solid var(--brass);
@@ -1096,6 +1102,11 @@ textarea {
   flex-direction: column;
   background: #100c15;
   z-index: 30;
+  /* A pantalla completa de verdad (`position:fixed;inset:0`), este es el sitio
+     donde más se nota el "edge-to-edge" de Android 15+: sin este margen, la
+     barra de estado del sistema queda pintada encima del menú del primer
+     asiento y tapa sus botones (ver ADR 0030). */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 .board {
   flex: 1;

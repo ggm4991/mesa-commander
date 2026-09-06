@@ -6,6 +6,14 @@ en el que se convierte en una versión con fecha.
 
 ## [Unreleased]
 
+### Fixed
+
+- Probado el `.apk` en un móvil real, la barra de estado del sistema
+  (edge-to-edge desde Android 15) se pintaba encima de la barra de
+  navegación de la app y tapaba sus botones. `.nav`, `.board-screen`,
+  `.overlay` y `.toast` suman ahora los márgenes de zona segura
+  (`env(safe-area-inset-*)`) a su `padding` de siempre. Ver ADR 0030.
+
 ### Added
 
 - Primer paso de la Fase 5: la app se puede instalar como PWA
