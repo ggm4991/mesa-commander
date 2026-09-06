@@ -1730,9 +1730,18 @@ textarea {
 }
 /* El reloj gira hacia quien tiene el turno, igual que el resto de su asiento
    (`.seat[data-rot]`), para que pueda leer su propio tiempo sin girar el
-   móvil (ver ADR 0024). */
+   móvil (ver ADR 0024). Con 90°/270° (asientos a los lados) el botón, más
+   ancho que alto, se sale de la barra al girarse — `Tablero` mide ese caso
+   por JS y ensancha el hueco vertical lo que haga falta, en vez de adivinar
+   un tamaño fijo (ver ADR 0033). */
 .hub .pass[data-rot='180'] {
   transform: rotate(180deg);
+}
+.hub .pass[data-rot='90'] {
+  transform: rotate(90deg);
+}
+.hub .pass[data-rot='270'] {
+  transform: rotate(270deg);
 }
 .hub .ico.activo {
   background: var(--steel);

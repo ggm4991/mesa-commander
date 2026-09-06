@@ -87,8 +87,8 @@ describe('EditorMazo', () => {
 
   it('al enfocar y escribir aparecen sugerencias de Scryfall', async () => {
     servidor.use(
-      http.get('https://api.scryfall.com/cards/autocomplete', () =>
-        HttpResponse.json({ data: ['Edgar Markov', 'Edgar, Charmed Groom'] }),
+      http.get('https://api.scryfall.com/cards/search', () =>
+        HttpResponse.json({ data: [{ name: 'Edgar Markov' }, { name: 'Edgar, Charmed Groom' }] }),
       ),
     )
     renderEditorMazo({ mazo: null, onGuardar: () => {}, onCancelar: () => {} })
@@ -101,7 +101,7 @@ describe('EditorMazo', () => {
 
   it('elegir una sugerencia rellena el nombre y enciende su identidad de color sola', async () => {
     servidor.use(
-      http.get('https://api.scryfall.com/cards/autocomplete', () => HttpResponse.json({ data: ['Edgar Markov'] })),
+      http.get('https://api.scryfall.com/cards/search', () => HttpResponse.json({ data: [{ name: 'Edgar Markov' }] })),
       http.get('https://api.scryfall.com/cards/named', () =>
         HttpResponse.json({ name: 'Edgar Markov', color_identity: ['R', 'W', 'B'] }),
       ),
@@ -128,7 +128,7 @@ describe('EditorMazo', () => {
 
   it('un compañero elegido de Scryfall añade su color sin apagar el del principal', async () => {
     servidor.use(
-      http.get('https://api.scryfall.com/cards/autocomplete', () => HttpResponse.json({ data: ['Silas Renn, Seeker Adept'] })),
+      http.get('https://api.scryfall.com/cards/search', () => HttpResponse.json({ data: [{ name: 'Silas Renn, Seeker Adept' }] })),
       http.get('https://api.scryfall.com/cards/named', () =>
         HttpResponse.json({ name: 'Silas Renn, Seeker Adept', color_identity: ['U', 'B'] }),
       ),
@@ -151,7 +151,7 @@ describe('EditorMazo', () => {
 
   it('si Scryfall falla al elegir una sugerencia, avisa pero deja el nombre puesto', async () => {
     servidor.use(
-      http.get('https://api.scryfall.com/cards/autocomplete', () => HttpResponse.json({ data: ['Edgar Markov'] })),
+      http.get('https://api.scryfall.com/cards/search', () => HttpResponse.json({ data: [{ name: 'Edgar Markov' }] })),
       http.get('https://api.scryfall.com/cards/named', () => HttpResponse.error()),
     )
     renderEditorMazo({ mazo: null, onGuardar: () => {}, onCancelar: () => {} })

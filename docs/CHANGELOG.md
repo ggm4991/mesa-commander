@@ -8,6 +8,24 @@ en el que se convierte en una versión con fecha.
 
 ### Fixed
 
+- El autocompletado de comandante sugería cualquier carta, no solo las que
+  pueden ser comandante. `buscarNombres()` pasa de `/cards/autocomplete` a
+  `/cards/search` con `is:commander`. Comprobado a mano contra la propia
+  API: la primera versión (un regex "empieza por") se saltaba comandantes
+  reales como "Krenko, Mob Boss" por una limitación de cómo Scryfall indexa
+  la búsqueda por expresión regular — se usa `name:"texto"` (coincide en
+  cualquier parte del nombre) en su lugar. Ver ADR 0033.
+- La copia de seguridad no se podía descargar en el `.apk` de Android: el
+  `<a download>` de toda la vida no hace nada dentro de un WebView nativo,
+  sin ningún error visible. Ahora, en Capacitor, escribe el archivo de
+  verdad con `@capacitor/filesystem` y lo pasa al selector nativo de
+  "compartir o guardar en..." con `@capacitor/share`; en el navegador/PWA
+  sigue igual que siempre. Ver ADR 0032.
+- El reloj del hub no giraba para quien tiene el turno sentado a un lado
+  (90°/270°) — solo se había cubierto 180° (ADR 0024). Además, girado,
+  necesita más alto del que mide `.hub` en el caso normal: la medición
+  dinámica (ADR 0026) ahora también mide `.pass` y se queda con el mayor de
+  los dos. Ver ADR 0033.
 - Pasar el turno no avanzaba en el sentido de las agujas del reloj (regla
   103.1): `pasarTurno()` siempre ha hecho solo índice+1, correcto solo si el
   índice de cada asiento ya sigue ese sentido alrededor de la mesa — y en

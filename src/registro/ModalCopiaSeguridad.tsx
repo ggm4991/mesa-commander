@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { Capacitor } from '@capacitor/core'
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem'
+import { Share } from '@capacitor/share'
 import { Modal } from '../componentes/comunes/Modal'
 import { Icono } from '../componentes/icono/Icono'
 import { hoy } from '../motor/utilidades'
@@ -24,13 +27,30 @@ export function ModalCopiaSeguridad({ partidas, perfiles, config, onReemplazarTo
   const [texto, setTexto] = useState(() => JSON.stringify(paqueteCompleto(partidas, perfiles, config), null, 2))
   const [mensaje, setMensaje] = useState<{ texto: string; mal: boolean } | null>(null)
 
-  const descargar = () => {
+  // Bajo Capacitor no hay ninguna "carpeta de descargas" a la que un <a download>
+  // pueda apuntar (el WebView nativo lo ignora sin más, sin avisar de nada): hay
+  // que escribir el archivo de verdad y pasarlo al selector nativo de "compartir
+  // o guardar en..." (ver ADR 0032). En el navegador/PWA se sigue con el <a
+  // download> de siempre, que ahí sí funciona.
+  const descargar = async () => {
+    const nombre = `mesa-commander-${hoy()}.json`
+    const contenido = JSON.stringify(paqueteCompleto(partidas, perfiles, config), null, 2)
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const { uri } = await Filesystem.writeFile({ path: nombre, data: contenido, directory: Directory.Cache, encoding: Encoding.UTF8 })
+        await Share.share({ title: nombre, url: uri, dialogTitle: 'Guardar copia de seguridad' })
+        setMensaje({ texto: 'Elige dónde guardar el archivo.', mal: false })
+      } catch {
+        setMensaje({ texto: 'No se ha podido generar el archivo. Copia el texto de abajo.', mal: true })
+      }
+      return
+    }
     try {
-      const blob = new Blob([JSON.stringify(paqueteCompleto(partidas, perfiles, config), null, 2)], { type: 'application/json' })
+      const blob = new Blob([contenido], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `mesa-commander-${hoy()}.json`
+      a.download = nombre
       document.body.appendChild(a)
       a.click()
       a.remove()

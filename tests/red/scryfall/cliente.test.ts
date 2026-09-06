@@ -15,31 +15,46 @@ describe('buscarNombres', () => {
     expect(await buscarNombres('e')).toEqual([])
   })
 
-  it('devuelve las sugerencias que manda Scryfall', async () => {
+  it('busca solo cartas que pueden ser comandante, por nombre entre comillas', async () => {
     servidor.use(
-      http.get('https://api.scryfall.com/cards/autocomplete', ({ request }) => {
-        expect(new URL(request.url).searchParams.get('q')).toBe('edgar mark')
-        return HttpResponse.json({ data: ['Edgar Markov', 'Edgar, Charmed Groom'] })
+      http.get('https://api.scryfall.com/cards/search', ({ request }) => {
+        expect(new URL(request.url).searchParams.get('q')).toBe('name:"edgar mark" is:commander')
+        return HttpResponse.json({ data: [{ name: 'Edgar Markov' }, { name: 'Edgar, Charmed Groom' }] })
       }),
     )
     expect(await buscarNombres('edgar mark')).toEqual(['Edgar Markov', 'Edgar, Charmed Groom'])
   })
 
+  it('escapa una comilla suelta del texto escrito, para no romper las comillas de la búsqueda', async () => {
+    servidor.use(
+      http.get('https://api.scryfall.com/cards/search', ({ request }) => {
+        expect(new URL(request.url).searchParams.get('q')).toBe('name:"k\\"rrik" is:commander')
+        return HttpResponse.json({ data: [] })
+      }),
+    )
+    await buscarNombres('k"rrik')
+  })
+
+  it('sin ninguna carta que pueda ser comandante con ese nombre, devuelve una lista vacía', async () => {
+    servidor.use(http.get('https://api.scryfall.com/cards/search', () => new HttpResponse(null, { status: 404 })))
+    expect(await buscarNombres('edgar')).toEqual([])
+  })
+
   it('un error de servidor se propaga como excepción', async () => {
-    servidor.use(http.get('https://api.scryfall.com/cards/autocomplete', () => new HttpResponse(null, { status: 500 })))
+    servidor.use(http.get('https://api.scryfall.com/cards/search', () => new HttpResponse(null, { status: 500 })))
     await expect(buscarNombres('edgar')).rejects.toThrow('500')
   })
 
   it('sin red, se propaga como excepción (no como lista vacía)', async () => {
-    servidor.use(http.get('https://api.scryfall.com/cards/autocomplete', () => HttpResponse.error()))
+    servidor.use(http.get('https://api.scryfall.com/cards/search', () => HttpResponse.error()))
     await expect(buscarNombres('edgar')).rejects.toThrow()
   })
 
   it('una respuesta lenta se puede cancelar con AbortSignal, como haría un debounce', async () => {
     servidor.use(
-      http.get('https://api.scryfall.com/cards/autocomplete', async () => {
+      http.get('https://api.scryfall.com/cards/search', async () => {
         await delay(200)
-        return HttpResponse.json({ data: ['Edgar Markov'] })
+        return HttpResponse.json({ data: [{ name: 'Edgar Markov' }] })
       }),
     )
     const control = new AbortController()

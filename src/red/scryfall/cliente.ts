@@ -48,19 +48,31 @@ function aInfoComandante(carta: CartaScryfall): InfoComandante {
 }
 
 /**
- * Sugerencias de nombre mientras se escribe, para el autocompletado de comandantes.
- * Por debajo de 2 letras Scryfall no devuelve nada útil, así que se corta antes de
- * llamar. Lanza si Scryfall responde con un error de servidor o si no hay red — la
- * degradación (seguir permitiendo escribir el nombre a mano) es cosa de quien llama,
- * nunca de este cliente.
+ * Sugerencias de nombre mientras se escribe, para el autocompletado de comandantes
+ * — solo cartas que de verdad pueden serlo (`is:commander`: criaturas legendarias,
+ * trasfondos con ese permiso, planeswalkers con esa habilidad...). `/cards/autocomplete`
+ * no admite filtros, así que se usa `/cards/search` con `name:"..."` (coincide en
+ * cualquier parte del nombre, no solo al empezar — más resultados de los estrictamente
+ * necesarios, pero de sobra preferible a lo que sigue) en vez de un regex ancla
+ * (`name:/^.../i`): comprobado a mano contra la propia API, ese regex se salta cartas
+ * de verdad (p. ej. "Krenko, Mob Boss" no aparece con `name:/^krenko/i`, ni siquiera
+ * con `name:/krenko/i` sin anclar, aunque sí con `name:krenko` — un límite conocido de
+ * cómo indexa Scryfall la búsqueda por regex, no un error de sintaxis) y esta app no
+ * puede permitirse que un comandante real no aparezca nunca en las sugerencias (ver
+ * ADR 0033). Por debajo de 2 letras Scryfall no devuelve nada útil, así que se corta
+ * antes de llamar. Lanza si Scryfall responde con un error de servidor o si no hay
+ * red — la degradación (seguir permitiendo escribir el nombre a mano) es cosa de
+ * quien llama, nunca de este cliente.
  */
 export async function buscarNombres(consulta: string, señal?: AbortSignal): Promise<string[]> {
   const q = consulta.trim()
   if (q.length < 2) return []
-  const resp = await fetch(`${BASE}/cards/autocomplete?q=${encodeURIComponent(q)}`, { signal: señal })
+  const busqueda = `name:"${q.replace(/"/g, '\\"')}" is:commander`
+  const resp = await fetch(`${BASE}/cards/search?q=${encodeURIComponent(busqueda)}&unique=cards&order=name`, { signal: señal })
+  if (resp.status === 404) return [] // ninguna carta que pueda ser comandante empieza así
   if (!resp.ok) throw new Error(`Scryfall respondió ${resp.status} al autocompletar`)
-  const datos = (await resp.json()) as { data?: string[] }
-  return datos.data ?? []
+  const datos = (await resp.json()) as { data?: CartaScryfall[] }
+  return (datos.data ?? []).map((carta) => carta.name)
 }
 
 /**

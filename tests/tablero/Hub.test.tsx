@@ -70,6 +70,18 @@ describe('Hub', () => {
     expect(screen.getByLabelText('Pasar turno')).toHaveAttribute('data-rot', '180')
   })
 
+  it('también gira a 90°/270°, cuando le toca a alguien sentado a un lado', () => {
+    const juego = juegoDePrueba()
+    const { rerender } = render(
+      <Hub juego={juego} ahora={juego.tIni} rotacionTurno={90} onDeshacer={() => {}} onPausa={() => {}} onPasar={() => {}} onMenu={() => {}} />,
+    )
+    expect(screen.getByLabelText('Pasar turno')).toHaveAttribute('data-rot', '90')
+    rerender(
+      <Hub juego={juego} ahora={juego.tIni} rotacionTurno={270} onDeshacer={() => {}} onPausa={() => {}} onPasar={() => {}} onMenu={() => {}} />,
+    )
+    expect(screen.getByLabelText('Pasar turno')).toHaveAttribute('data-rot', '270')
+  })
+
   it('sin rotación indicada, el reloj se queda como está', () => {
     const juego = juegoDePrueba()
     render(<Hub juego={juego} ahora={juego.tIni} onDeshacer={() => {}} onPausa={() => {}} onPasar={() => {}} onMenu={() => {}} />)

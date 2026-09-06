@@ -80,10 +80,20 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
   // asientos de al lado (ver ADR 0026). Mismo patrón que `useBordesAsientos`
   // (medir tras cada render + un listener de resize, sin `ResizeObserver`,
   // que jsdom no implementa) en vez de una API nueva para un caso más.
+  // Cuando le toca a alguien sentado a los lados (90°/270°), el botón del
+  // reloj gira sobre sí mismo y su alto real ya no es el de `.hub` (un
+  // `transform` no cambia el hueco que su padre le reserva en la fila, así
+  // que `.hub` sigue midiendo lo de siempre aunque el botón girado sobresalga
+  // por fuera) — de ahí medir también `.pass` y quedarse con el mayor de los
+  // dos, en vez de un tamaño fijo para ese caso (ver ADR 0033).
   const hubRef = useRef<HTMLDivElement>(null)
   const [altoHub, setAltoHub] = useState(64)
   const medirHub = useCallback(() => {
-    const alto = Math.ceil(hubRef.current?.getBoundingClientRect().height ?? 0)
+    const el = hubRef.current
+    if (!el) return
+    const altoBarra = el.getBoundingClientRect().height
+    const altoReloj = el.querySelector('.pass')?.getBoundingClientRect().height ?? 0
+    const alto = Math.ceil(Math.max(altoBarra, altoReloj))
     if (alto > 0) setAltoHub((actual) => (actual === alto ? actual : alto))
   }, [])
   useLayoutEffect(() => {

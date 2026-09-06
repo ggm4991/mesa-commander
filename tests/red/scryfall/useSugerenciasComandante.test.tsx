@@ -30,9 +30,9 @@ describe('useSugerenciasComandante', () => {
   it('espera a que el texto se asiente antes de consultar (debounce)', async () => {
     let peticiones = 0
     servidor.use(
-      http.get('https://api.scryfall.com/cards/autocomplete', () => {
+      http.get('https://api.scryfall.com/cards/search', () => {
         peticiones++
-        return HttpResponse.json({ data: ['Edgar Markov'] })
+        return HttpResponse.json({ data: [{ name: 'Edgar Markov' }] })
       }),
     )
     const { result, rerender } = montar('ed')
@@ -45,7 +45,7 @@ describe('useSugerenciasComandante', () => {
   })
 
   it('un fallo de red no se propaga: se queda sin sugerencias', async () => {
-    servidor.use(http.get('https://api.scryfall.com/cards/autocomplete', () => HttpResponse.error()))
+    servidor.use(http.get('https://api.scryfall.com/cards/search', () => HttpResponse.error()))
     const { result } = montar('edgar')
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 300))
