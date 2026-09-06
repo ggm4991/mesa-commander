@@ -195,6 +195,17 @@ describe('editarJugador', () => {
     const juego = editarJugador(partidaDePrueba(), 0, { n: '   ' })
     expect(juego.j[0].n).toBe('Ana')
   })
+
+  it('cambiar de mazo fija también la edición de imagen de cada comandante', () => {
+    const juego = editarJugador(partidaDePrueba(), 1, { c: 'Ragavan, Nimble Pilferer', c2: '', col: 'R', imagenId: 'abc', imagenId2: '' })
+    expect(juego.j[1]).toMatchObject({ c: 'Ragavan, Nimble Pilferer', imagenId: 'abc', imagenId2: '' })
+  })
+
+  it('sin tocar la imagen en los cambios, la edición fijada se conserva', () => {
+    const conImagen = editarJugador(partidaDePrueba(), 1, { imagenId: 'xyz' })
+    const juego = editarJugador(conImagen, 1, { n: 'Beto R.' })
+    expect(juego.j[1].imagenId).toBe('xyz')
+  })
 })
 
 describe('comprobarFinal', () => {

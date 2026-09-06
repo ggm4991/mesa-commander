@@ -4,6 +4,7 @@ import { ModalDado } from '../componentes/mesa/ModalDado'
 import { useAviso } from '../componentes/comunes/contextoAviso'
 import { useAlmacen } from '../contextos/AlmacenContexto'
 import { useConfig } from '../contextos/useConfig'
+import { usePerfiles } from '../contextos/usePerfiles'
 import { guardarJuego, guardarPartidas, leerPartidas, normalizarPartidas } from '../almacenamiento/repositorio'
 import {
   alternarPausa,
@@ -63,6 +64,7 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
   const almacen = useAlmacen()
   const mostrarAviso = useAviso()
   const { config, actualizar: actualizarConfig } = useConfig()
+  const { perfiles } = usePerfiles()
   const { juego, mutar, mutarSinFoto, deshacer } = useJuegoEnCurso(juegoInicial)
   const [modal, setModal] = useState<EstadoModal | null>(null)
 
@@ -242,8 +244,9 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
         <ModalMenuAsiento
           juego={juego}
           indice={modal.indice}
+          perfiles={perfiles}
           onContador={(clave: ContadorClave, d) => mutar((j) => contador(j, modal.indice, clave, d))}
-          onMana={(color: keyof Identidad | null) => mutarSinFoto((j) => ajustarMana(j, modal.indice, color))}
+          onMana={(color: keyof Identidad | null, delta?: number) => mutarSinFoto((j) => ajustarMana(j, modal.indice, color, delta))}
           onRehacer={(d) => mutar((j) => ajustarRehacer(j, modal.indice, d))}
           onFuera={(d) => mutar((j) => ajustarFuera(j, modal.indice, d))}
           onBendicion={() => mutar((j) => alternarBendicion(j, modal.indice))}

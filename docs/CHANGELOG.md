@@ -8,6 +8,10 @@ en el que se convierte en una versión con fecha.
 
 ### Fixed
 
+- En un móvil de verdad (probado a 390px de ancho, no solo en el navegador
+  de escritorio de las rondas anteriores), la fila de maná del menú de
+  asiento —seis botones de color más "Vaciar"— se salía del propio popup.
+  Ver ADR 0027.
 - El hub seguía invadiendo los asientos incluso después del primer intento
   de arreglo (ver la entrada siguiente): el alto se había calculado a mano
   y se quedaba corto en cuanto el contenido real (tres líneas de texto en
@@ -46,6 +50,20 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Decimocuarto commit de la Fase 4: en el menú de cada asiento, el maná pasa
+  de seis botones de color a un selector (reutilizando `.color-btn`) más un
+  paso −/+ compartido, y "Cambiar nombre o comandante" pasa a "Cambiar de
+  mazo", reutilizando la misma lista de perfiles y mazos guardados que ya
+  usa la pantalla previa (`ModalElegirAsiento`) — elegir un mazo rellena
+  comandante(s), colores e imagen de golpe; escribir a mano sigue
+  disponible debajo, para un mazo que no está guardado. `CambiosJugador`
+  y `editarJugador` ganan `imagenId`/`imagenId2`, para no dejar la imagen
+  fijada apuntando al comandante anterior tras el cambio. Ver ADR 0027.
+- 6 pruebas nuevas (el selector de maná ajusta el color elegido, elegir un
+  mazo guardado rellena todo, `editarJugador` conserva o actualiza la
+  imagen fijada según lo que se le pase), más verificación con un
+  navegador real en un viewport de móvil de 390px: nada del menú se sale
+  del ancho de la pantalla.
 - Decimotercer commit de la Fase 4: el aviso de "se pasó de tiempo" deja la
   fila de contadores sueltos y pasa a su propia esquina fija
   (`.tiempo-esquina`), en el lado opuesto al contador de jugadas rehechas y

@@ -1,16 +1,21 @@
 import { useState } from 'react'
 import { Icono } from '../componentes/icono/Icono'
 import { Modal } from '../componentes/comunes/Modal'
+import { Desplegable, type OpcionDesplegable } from '../componentes/comunes/Desplegable'
+import { Pips } from '../componentes/comunes/Pips'
 import { COLORES } from '../componentes/mesa/colores'
+import { mazoUltimo } from '../componentes/mesa/perfiles'
+import { dosComandantes } from '../motor/utilidades'
 import { CONTADORES, type CambiosJugador } from '../motor/vida'
-import type { ContadorClave, Identidad, Juego } from '../motor/tipos'
+import type { ContadorClave, Identidad, Juego, Mazo, Perfil } from '../motor/tipos'
 import { ICONO_CONTADOR, MANA } from './constantesUI'
 
 interface Props {
   juego: Juego
   indice: number
+  perfiles: Perfil[]
   onContador: (clave: ContadorClave, delta: number) => void
-  onMana: (color: keyof Identidad | null) => void
+  onMana: (color: keyof Identidad | null, delta?: number) => void
   onRehacer: (delta: number) => void
   onFuera: (delta: number) => void
   onBendicion: () => void
@@ -20,11 +25,13 @@ interface Props {
 }
 
 /** Sustituye a `menuAsiento()` en app.html: contadores, maná, jugadas retiradas,
- * pasadas de tiempo, bendición de la ciudad, y el acceso a editar al jugador o
- * marcarlo como fuera. Editar es un paso interno de este mismo componente. */
+ * pasadas de tiempo, bendición de la ciudad, y el acceso a cambiar de mazo o
+ * marcarlo como fuera. Cambiar de mazo es un paso interno de este mismo
+ * componente. */
 export function ModalMenuAsiento({
   juego,
   indice,
+  perfiles,
   onContador,
   onMana,
   onRehacer,
@@ -35,12 +42,14 @@ export function ModalMenuAsiento({
   onCerrar,
 }: Props) {
   const [editando, setEditando] = useState(false)
+  const [colorMana, setColorMana] = useState<keyof Identidad>('W')
   const j = juego.j[indice]
 
   if (editando) {
     return (
-      <EditarJugador
+      <CambiarMazo
         jugador={j}
+        perfiles={perfiles}
         onCancelar={() => setEditando(false)}
         onGuardar={(cambios) => {
           onEditar(cambios)
@@ -57,7 +66,7 @@ export function ModalMenuAsiento({
       pie={
         <>
           <button className="btn" onClick={() => setEditando(true)}>
-            <Icono nombre="lapiz" tamano={18} /> Cambiar nombre o comandante
+            <Icono nombre="barajar" tamano={18} /> Cambiar de mazo
           </button>
           <button className={`btn ${j.out ? '' : 'danger'}`} onClick={onMarcarFuera}>
             <Icono nombre="calavera" tamano={18} /> {j.out ? 'Volver al juego' : 'Marcar como fuera'}
@@ -91,24 +100,46 @@ export function ModalMenuAsiento({
             <Icono nombre="mana" tamano={22} />
             <div>
               <b>Maná disponible</b>
-              <span>Se vacía cuando quieras</span>
+              <span>Elige un color y ajusta cuánto tiene</span>
             </div>
           </span>
-          <span className="stepper" style={{ gap: 4 }}>
-            {MANA.map((m) => (
-              <button
-                key={m}
-                style={{ width: 44, height: 44, padding: 0 }}
-                title={`Maná ${m}`}
-                onClick={() => onMana(m)}
-              >
-                <i className={`pip ${m}`} style={{ display: 'inline-block', width: 16, height: 16 }} />
-              </button>
-            ))}
-            <button style={{ width: 'auto', padding: '0 12px', fontSize: '13.5px' }} onClick={() => onMana(null)}>
-              Vaciar
+        </div>
+        <div className="colors" style={{ marginBottom: 10 }}>
+          {MANA.map((m) => (
+            <button
+              key={m}
+              type="button"
+              className="color-btn"
+              aria-pressed={colorMana === m}
+              title={`Maná ${m}`}
+              onClick={() => setColorMana(m)}
+            >
+              <i className={`pip ${m}`} />
             </button>
+          ))}
+        </div>
+        <div className="line">
+          <span className="txt">
+            <i className={`pip ${colorMana}`} style={{ display: 'inline-block', width: 22, height: 22, opacity: 1 }} />
+            <div>
+              <b>Maná {colorMana}</b>
+            </div>
           </span>
+          <span className="stepper">
+            <button onClick={() => onMana(colorMana, -1)}>−</button>
+            <span className="val">{j.mana[colorMana]}</span>
+            <button onClick={() => onMana(colorMana, 1)}>+</button>
+          </span>
+        </div>
+        <div className="line">
+          <span className="txt">
+            <div>
+              <span>Vacía todos los colores a la vez</span>
+            </div>
+          </span>
+          <button className="btn small" onClick={() => onMana(null)}>
+            Vaciar todo
+          </button>
         </div>
 
         <div className="line">
@@ -157,12 +188,14 @@ export function ModalMenuAsiento({
   )
 }
 
-function EditarJugador({
+function CambiarMazo({
   jugador,
+  perfiles,
   onGuardar,
   onCancelar,
 }: {
   jugador: Juego['j'][number]
+  perfiles: Perfil[]
   onGuardar: (cambios: CambiosJugador) => void
   onCancelar: () => void
 }) {
@@ -170,6 +203,19 @@ function EditarJugador({
   const [c, setC] = useState(jugador.c)
   const [c2, setC2] = useState(jugador.c2 || '')
   const [col, setCol] = useState(jugador.col)
+  const [imagenId, setImagenId] = useState(jugador.imagenId)
+  const [imagenId2, setImagenId2] = useState(jugador.imagenId2)
+
+  // Elegir un mazo guardado rellena comandantes, colores y su edición de
+  // imagen de una vez; los campos de abajo siguen ahí para retocarlo a mano o
+  // para un mazo que no se guardó como perfil (ver ADR 0027).
+  const elegirMazo = (mazo: Mazo) => {
+    setC(mazo.c)
+    setC2(mazo.c2)
+    setCol(mazo.col)
+    setImagenId(mazo.imagenId)
+    setImagenId2(mazo.imagenId2)
+  }
 
   const alternarColor = (color: string) => {
     setCol((actual) => {
@@ -182,38 +228,105 @@ function EditarJugador({
 
   return (
     <Modal
-      titulo="Editar jugador"
+      titulo="Cambiar de mazo"
       onCerrar={onCancelar}
       pie={
         <>
           <button className="btn" onClick={onCancelar}>
             Cancelar
           </button>
-          <button className="btn primary" onClick={() => onGuardar({ n, c, c2, col })}>
+          <button className="btn primary" onClick={() => onGuardar({ n, c, c2, col, imagenId, imagenId2 })}>
             Guardar
           </button>
         </>
       }
     >
+      <div className="field">
+        <label htmlFor="e-n">Nombre</label>
+        <input id="e-n" type="text" value={n} onChange={(e) => setN(e.target.value)} />
+      </div>
+
+      {perfiles.length > 0 && (
+        <div className="grid-list" style={{ marginBottom: 16 }}>
+          {perfiles.map((p) => {
+            const m = mazoUltimo(p)
+            const opciones: OpcionDesplegable[] = p.mazos.map((mazo) => ({
+              valor: mazo.id,
+              titulo: dosComandantes(mazo.c, mazo.c2),
+              icono: <Pips identidad={mazo.col} />,
+              buscar: `${mazo.c} ${mazo.c2} ${p.nombre}`,
+              marca: p.ultimo === mazo.id ? 'último' : undefined,
+            }))
+            return (
+              <div key={p.id}>
+                <div className="line">
+                  <span className="txt">
+                    <Icono nombre="persona" tamano={22} />
+                    <div>
+                      <b>{p.nombre}</b>
+                      <span>
+                        {m ? (
+                          <>
+                            <Pips identidad={m.col} /> {dosComandantes(m.c, m.c2)}
+                          </>
+                        ) : (
+                          'Sin mazos guardados'
+                        )}
+                      </span>
+                    </div>
+                  </span>
+                  {m && (
+                    <button className="btn small" onClick={() => elegirMazo(m)}>
+                      Usar
+                    </button>
+                  )}
+                </div>
+                {p.mazos.length > 1 && (
+                  <Desplegable
+                    titulo={`Elegir otro de sus ${p.mazos.length} mazos`}
+                    marcador="Buscar mazo por comandante"
+                    opciones={opciones}
+                    onElegir={(valor) => {
+                      const mazo = p.mazos.find((x) => x.id === valor)
+                      if (mazo) elegirMazo(mazo)
+                    }}
+                  />
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      <p className="hint" style={{ marginTop: 0 }}>
+        O escribe un comandante para esta partida, sin guardarlo como mazo:
+      </p>
       <div className="row2">
         <div className="field">
-          <label htmlFor="e-n">Nombre</label>
-          <input id="e-n" type="text" value={n} onChange={(e) => setN(e.target.value)} />
+          <label htmlFor="e-c">Comandante</label>
+          <input
+            id="e-c"
+            type="text"
+            value={c}
+            onChange={(e) => {
+              setC(e.target.value)
+              setImagenId('')
+            }}
+          />
         </div>
         <div className="field">
-          <label htmlFor="e-c">Comandante</label>
-          <input id="e-c" type="text" value={c} onChange={(e) => setC(e.target.value)} />
+          <label htmlFor="e-c2">Compañero (opcional)</label>
+          <input
+            id="e-c2"
+            type="text"
+            value={c2}
+            placeholder="Solo si lleva dos comandantes"
+            onChange={(e) => {
+              setC2(e.target.value)
+              setImagenId2('')
+            }}
+          />
         </div>
-      </div>
-      <div className="field">
-        <label htmlFor="e-c2">Compañero (opcional)</label>
-        <input
-          id="e-c2"
-          type="text"
-          value={c2}
-          placeholder="Solo si lleva dos comandantes"
-          onChange={(e) => setC2(e.target.value)}
-        />
       </div>
       <div className="field" style={{ margin: 0 }}>
         <label>Identidad de color</label>

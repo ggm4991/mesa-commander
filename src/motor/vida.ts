@@ -204,6 +204,10 @@ export interface CambiosJugador {
   c?: string
   c2?: string
   col?: string
+  /** Al cambiar de mazo guardado se fijan a la vez que `c`/`c2`, para no dejar
+   * la edición de referencia de un comandante que ya no es (ver ADR 0027). */
+  imagenId?: string
+  imagenId2?: string
 }
 
 /** Cambiar nombre/comandante/colores a media partida tampoco pasa por `foto()` ni
@@ -216,6 +220,8 @@ export function editarJugador(juego: Juego, i: number, cambios: CambiosJugador):
     c: cambios.c !== undefined ? cambios.c.trim() : j.c,
     c2: cambios.c2 !== undefined ? cambios.c2.trim() : j.c2,
     col: cambios.col ?? j.col,
+    imagenId: cambios.imagenId !== undefined ? cambios.imagenId : j.imagenId,
+    imagenId2: cambios.imagenId2 !== undefined ? cambios.imagenId2 : j.imagenId2,
   }
   const jugadores = juego.j.map((x, idx) => (idx === i ? jActualizado : x))
   return { ...juego, j: jugadores }
