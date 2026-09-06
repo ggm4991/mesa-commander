@@ -61,4 +61,18 @@ describe('Hub', () => {
     render(<Hub juego={juego} ahora={juego.tIni + 320_000} onDeshacer={() => {}} onPausa={() => {}} onPasar={() => {}} onMenu={() => {}} />)
     expect(screen.getByLabelText('Pasar turno')).toHaveClass('over')
   })
+
+  it('el reloj gira según la rotación de quien tiene el turno, para que lo pueda leer sin girar el móvil', () => {
+    const juego = juegoDePrueba()
+    render(
+      <Hub juego={juego} ahora={juego.tIni} rotacionTurno={180} onDeshacer={() => {}} onPausa={() => {}} onPasar={() => {}} onMenu={() => {}} />,
+    )
+    expect(screen.getByLabelText('Pasar turno')).toHaveAttribute('data-rot', '180')
+  })
+
+  it('sin rotación indicada, el reloj se queda como está', () => {
+    const juego = juegoDePrueba()
+    render(<Hub juego={juego} ahora={juego.tIni} onDeshacer={() => {}} onPausa={() => {}} onPasar={() => {}} onMenu={() => {}} />)
+    expect(screen.getByLabelText('Pasar turno')).toHaveAttribute('data-rot', '0')
+  })
 })

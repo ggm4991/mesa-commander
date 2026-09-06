@@ -123,6 +123,15 @@ describe('Tablero', () => {
     expect(screen.getByLabelText('Pasar turno')).toHaveTextContent('Beto')
   })
 
+  it('el reloj gira con la rotación de quien tiene el turno', () => {
+    // con 2 jugadores y sin disposición guardada, la de emergencia (LAYOUTS)
+    // rota al primer asiento (Ana) 180° y deja el segundo (Beto) sin girar
+    renderTablero()
+    expect(screen.getByLabelText('Pasar turno')).toHaveAttribute('data-rot', '180')
+    fireEvent.click(screen.getByLabelText('Pasar turno'))
+    expect(screen.getByLabelText('Pasar turno')).toHaveAttribute('data-rot', '0')
+  })
+
   it('el menú de asiento sube un contador visible en la ficha', () => {
     renderTablero()
     fireEvent.click(screen.getAllByLabelText(/Opciones de/)[0])

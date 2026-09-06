@@ -1100,10 +1100,12 @@ textarea {
 .board {
   flex: 1;
   display: grid;
-  /* Hueco bastante más ancho que el de siempre: dentro es donde vive el reloj
-     central, para que no le haga falta flotar encima de ningún asiento (ver
-     ADR 0023). */
-  gap: 44px;
+  /* Separación solo entre filas (arriba/abajo): ahí es donde vive la barra del
+     reloj, de lado a lado, para que no le haga falta flotar encima de ningún
+     asiento (ver ADR 0023 y ADR 0024). Entre columnas (jugadores del mismo
+     lado) se deja el hueco mínimo de siempre. */
+  row-gap: 44px;
+  column-gap: 6px;
   padding: 6px;
   position: relative;
   min-height: 0;
@@ -1580,18 +1582,22 @@ textarea {
   background: rgba(255, 255, 255, 0.16);
 }
 
+/* Barra de lado a lado en el hueco vertical entre los asientos de abajo y los
+   de arriba (ver ADR 0024) — ya no es una burbuja flotando sobre el asiento. */
 .hub {
   position: absolute;
-  left: 50%;
+  left: 0;
+  right: 0;
   top: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateY(-50%);
   z-index: 5;
   display: flex;
+  justify-content: center;
   gap: 6px;
   align-items: center;
   background: rgba(16, 12, 21, 0.92);
-  border: 1px solid var(--line);
-  border-radius: 99px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   padding: 5px 6px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
@@ -1646,6 +1652,12 @@ textarea {
 }
 .hub .pass.pausa small {
   opacity: 0.75;
+}
+/* El reloj gira hacia quien tiene el turno, igual que el resto de su asiento
+   (`.seat[data-rot]`), para que pueda leer su propio tiempo sin girar el
+   móvil (ver ADR 0024). */
+.hub .pass[data-rot='180'] {
+  transform: rotate(180deg);
 }
 .hub .ico.activo {
   background: var(--steel);

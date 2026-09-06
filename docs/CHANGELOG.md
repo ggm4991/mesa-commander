@@ -24,6 +24,22 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Undécimo commit de la Fase 4: el hub deja de ser una burbuja flotante y pasa
+  a ser una barra que ocupa todo el ancho, en el hueco vertical entre los
+  asientos de arriba y los de abajo:
+  - `.board` separa su `gap` en `row-gap: 44px` (solo entre filas) y
+    `column-gap: 6px` (entre columnas, sin separación extra).
+  - `.hub` pasa de centrarse en ambos ejes con esquinas redondeadas a
+    ocupar todo el ancho (`left:0;right:0`) con un borde superior e
+    inferior en vez de pastilla.
+  - El reloj (nombre y tiempo de quien tiene el turno) gira 180° cuando le
+    toca a alguien sentado "boca abajo", con el mismo mecanismo
+    `data-rot` que ya orienta el contenido de cada asiento (`Hub` recibe
+    una nueva prop `rotacionTurno`). Ver ADR 0024.
+- 4 pruebas nuevas, más verificación con un navegador real en mesas de 2 y
+  de 4: sin separación horizontal entre asientos del mismo lado, la barra
+  ocupa todo el ancho del hueco vertical, y el reloj se lee recto o girado
+  según a quién le toque el turno.
 - Décimo commit de la Fase 4, con cuatro ajustes tras probar el hub
   central en mesa real:
   - El número de vida crece de `clamp(38px, 11cqh, 84px)` a
