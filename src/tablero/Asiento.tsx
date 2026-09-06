@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Icono } from '../componentes/icono/Icono'
 import { fondoAsiento } from '../componentes/comunes/fondo'
 import { CONTADORES, comandantesAgrupadosPorJugador } from '../motor/vida'
@@ -72,6 +72,24 @@ export function Asiento({
   const cerrarSector = useCallback(() => setSectorAbierto(null), [])
   const fuenteAbierta = sectorAbierto ? (gruposDano.flat().find((c) => c.clave === sectorAbierto) ?? null) : null
 
+  // El cuadrado de daño ya no ocupa sitio fijo en el asiento: se abre como un
+  // pequeño popup con el botón de debajo de la vida, y solo se cierra al tocar
+  // fuera de él (ver ADR 0025).
+  const [mostrarDano, setMostrarDano] = useState(false)
+  const popupDanoRef = useRef<HTMLDivElement>(null)
+  const cerrarPopupDano = useCallback(() => {
+    setMostrarDano(false)
+    setSectorAbierto(null)
+  }, [])
+  useEffect(() => {
+    if (!mostrarDano) return
+    const cerrarSiEsFuera = (e: PointerEvent) => {
+      if (!popupDanoRef.current?.contains(e.target as Node)) cerrarPopupDano()
+    }
+    document.addEventListener('pointerdown', cerrarSiEsFuera)
+    return () => document.removeEventListener('pointerdown', cerrarSiEsFuera)
+  }, [mostrarDano, cerrarPopupDano])
+
   const menosVida = useMantenerPulsado(() => onCambiarVida(-1))
   const masVida = useMantenerPulsado(() => onCambiarVida(1))
   const imagenComandante = useImagenComandante(j.c, j.imagenId)
@@ -93,8 +111,8 @@ export function Asiento({
         className="bg"
         style={{ backgroundImage: fondoAsiento(j.col, imagenComandante), backgroundSize: 'cover', backgroundPosition: 'center' }}
       />
-      {delta !== 0 && <div className="delta">{delta > 0 ? `+${delta}` : delta}</div>}
       <div className="inner">
+        {delta !== 0 && <div className="delta">{delta > 0 ? `+${delta}` : delta}</div>}
         <div className="seat-top" style={estiloFila(borde?.arriba ?? null, borde?.hueco ?? '')}>
           {esTurno && <span className="badge turn">Su turno</span>}
           {juego.iniciativa === indice && (
@@ -139,6 +157,12 @@ export function Asiento({
           </button>
         </div>
 
+        {juego.j.length > 1 && (
+          <button type="button" className="dano-boton" onClick={() => setMostrarDano(true)}>
+            <Icono nombre="espadas" tamano={16} /> Daño de comandante
+          </button>
+        )}
+
         {esperandoInicio && (
           <button className="empiezo" onClick={onElegirInicio}>
             <Icono nombre="bandera" tamano={22} /> Empiezo yo
@@ -149,8 +173,8 @@ export function Asiento({
           <Icono nombre="retirada" tamano={16} /> {j.rehacer}
         </button>
 
-        {juego.j.length > 1 && (
-          <div className="fila-dano">
+        {juego.j.length > 1 && mostrarDano && (
+          <div className="dano-popup" ref={popupDanoRef}>
             <div
               className="dano-cuadrado"
               style={{ gridTemplateColumns: `repeat(${columnasDano}, 1fr)`, gridTemplateRows: `repeat(${filasDano}, 1fr)` }}

@@ -8,6 +8,14 @@ en el que se convierte en una versión con fecha.
 
 ### Fixed
 
+- El hub (ADR 0024) se desbordaba sobre los asientos de arriba y de abajo:
+  su altura real (62px) superaba el hueco vertical que se le había dejado
+  (44px). El `row-gap` de `.board` sube a 64px para que quepa entero.
+- El indicador flotante de cambio de vida (`+N`/`-N`) no giraba con el
+  resto del contenido en los asientos de arriba, y quedaba tapado por el
+  cuadrado de daño de comandante: pasa a ser hijo de `.inner` (antes lo era
+  de `.seat`), así que ahora gira igual que todo lo demás, con un
+  `z-index` que lo deja siempre por delante. Ver ADR 0025.
 - El panel ampliado de daño de comandante (ADR 0020) se cerraba tras un
   único toque de sumar o restar: ahora esos toques solo reinician el
   temporizador de autocierre, así que una serie de pulsaciones seguidas
@@ -24,6 +32,18 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- Duodécimo commit de la Fase 4: el cuadrado de daño de comandante deja de
+  estar siempre visible en el asiento. En su lugar, un botón ("Daño de
+  comandante", debajo de la vida) lo abre como un popup pequeño, centrado
+  sobre el propio asiento, que solo se cierra al tocar fuera de él (mismo
+  mecanismo de `PanelDanoExpandido`, un nivel más arriba). Ya no hace falta
+  ocultarlo por completo en asientos muy bajos, porque deja de competir por
+  sitio con el resto del contenido. Ver ADR 0025.
+- 5 pruebas nuevas (abrir/cerrar el popup, y el resto de pruebas de daño de
+  comandante actualizadas para abrirlo primero), más verificación con un
+  navegador real: el hub ya no invade ningún asiento, el indicador de vida
+  aparece girado y por delante del resto en los asientos de arriba, y el
+  popup de daño se abre centrado y se cierra al tocar fuera.
 - Undécimo commit de la Fase 4: el hub deja de ser una burbuja flotante y pasa
   a ser una barra que ocupa todo el ancho, en el hueco vertical entre los
   asientos de arriba y los de abajo:

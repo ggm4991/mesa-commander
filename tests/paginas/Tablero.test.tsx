@@ -148,6 +148,7 @@ describe('Tablero', () => {
     // dentro del primer asiento (Ana), el segundo sector de daño es el de Beto
     // (el primero es el suyo propio, por si se lo roban)
     const primerAsiento = document.querySelectorAll('.seat')[0]
+    fireEvent.click(primerAsiento.querySelector('.dano-boton') as HTMLElement)
     const toqueDeBeto = primerAsiento.querySelectorAll('.dano-cmd')[1].querySelector('.dano-toque') as HTMLElement
     for (let i = 0; i < 21; i++) {
       fireEvent.pointerDown(toqueDeBeto)
@@ -159,7 +160,9 @@ describe('Tablero', () => {
 
   it('mantener pulsado un sector de daño cubre el cuadrado entero; restar lo quita', () => {
     renderTablero(juegoDePrueba(3))
-    const cuadrado = document.querySelectorAll('.seat')[0].querySelector('.dano-cuadrado') as HTMLElement
+    const primerAsiento = document.querySelectorAll('.seat')[0]
+    fireEvent.click(primerAsiento.querySelector('.dano-boton') as HTMLElement)
+    const cuadrado = primerAsiento.querySelector('.dano-cuadrado') as HTMLElement
     const sectorDeBeto = cuadrado.querySelectorAll('.dano-cmd')[1] as HTMLElement
     const toque = sectorDeBeto.querySelector('.dano-toque') as HTMLElement
 
@@ -176,7 +179,10 @@ describe('Tablero', () => {
     expect(cuadrado.querySelector('.dano-expandido')).not.toBeNull() // restar ya no cierra el panel
 
     fireEvent.pointerDown(document.body)
-    expect(cuadrado.querySelector('.dano-expandido')).toBeNull()
+    // el popup entero se cierra (no solo el panel expandido de dentro), así que
+    // hay que mirar en el documento vivo: `cuadrado` queda como una referencia
+    // a un nodo ya desmontado, que conserva su contenido aunque ya no esté
+    expect(primerAsiento.querySelector('.dano-popup')).toBeNull()
   })
 
   it('salir sin terminar no borra la partida guardada', async () => {

@@ -117,6 +117,12 @@ describe('Asiento', () => {
     expect(screen.getByText('-2')).toBeInTheDocument()
   })
 
+  it('el delta flotante vive dentro de .inner, para que gire con el resto del asiento en los de arriba', () => {
+    renderAsiento(props({ delta: 3 }))
+    const inner = document.querySelector('.inner') as Element
+    expect(inner.querySelector('.delta')).not.toBeNull()
+  })
+
   it('la corona solo aparece en el asiento del monarca', () => {
     const juego = juegoDePrueba()
     juego.monarca = 0
@@ -138,6 +144,7 @@ describe('Asiento', () => {
     const juego = juegoDePrueba()
     juego.j = [juego.j[0]]
     renderAsiento(props({ juego }))
+    expect(screen.queryByText('Daño de comandante')).toBeNull()
     expect(document.querySelectorAll('.dano-cmd')).toHaveLength(0)
   })
 
@@ -187,9 +194,21 @@ describe('Asiento', () => {
     expect(onAbrirMenu).toHaveBeenCalledOnce()
   })
 
+  it('el botón de debajo de la vida abre el cuadrado de daño como un popup, que se cierra al tocar fuera', () => {
+    renderAsiento(props())
+    expect(document.querySelector('.dano-popup')).toBeNull()
+
+    fireEvent.click(screen.getByText('Daño de comandante'))
+    expect(document.querySelector('.dano-popup')).not.toBeNull()
+
+    fireEvent.pointerDown(document.body)
+    expect(document.querySelector('.dano-popup')).toBeNull()
+  })
+
   it('tocar el sector de un comandante suma daño directamente', () => {
     const onCambiarDano = vi.fn()
     renderAsiento(props({ onCambiarDano }))
+    fireEvent.click(screen.getByText('Daño de comandante'))
     const toque = document.querySelector('.dano-cmd .dano-toque') as Element
 
     fireEvent.pointerDown(toque)
@@ -201,6 +220,7 @@ describe('Asiento', () => {
     vi.useFakeTimers()
     const onCambiarDano = vi.fn()
     renderAsiento(props({ onCambiarDano }))
+    fireEvent.click(screen.getByText('Daño de comandante'))
     const cuadrado = document.querySelector('.dano-cuadrado') as Element
     const toque = cuadrado.querySelector('.dano-cmd .dano-toque') as Element
 
@@ -220,6 +240,7 @@ describe('Asiento', () => {
   it('el cuadrado expandido se cierra solo pasados unos segundos sin tocarlo', () => {
     vi.useFakeTimers()
     renderAsiento(props())
+    fireEvent.click(screen.getByText('Daño de comandante'))
     const cuadrado = document.querySelector('.dano-cuadrado') as Element
     const toque = cuadrado.querySelector('.dano-cmd .dano-toque') as Element
 
@@ -233,12 +254,14 @@ describe('Asiento', () => {
 
   it('hay un icono por cada comandante en la mesa, propio incluido por si se lo roban', () => {
     renderAsiento(props())
+    fireEvent.click(screen.getByText('Daño de comandante'))
     // Ana (2 comandantes) + Beto (1, sin nombre) = 3 fuentes de daño posibles
     expect(document.querySelectorAll('.dano-cmd')).toHaveLength(3)
   })
 
   it('el cuadrado tiene un hueco general por jugador, no por comandante: un compañero no añade uno nuevo', () => {
     renderAsiento(props())
+    fireEvent.click(screen.getByText('Daño de comandante'))
     // 2 jugadores (Ana y Beto) = 2 huecos generales, aunque Ana lleve 2 comandantes
     const grupos = document.querySelectorAll('.dano-grupo')
     expect(grupos).toHaveLength(2)

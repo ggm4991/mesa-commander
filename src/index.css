@@ -1101,10 +1101,13 @@ textarea {
   flex: 1;
   display: grid;
   /* Separación solo entre filas (arriba/abajo): ahí es donde vive la barra del
-     reloj, de lado a lado, para que no le haga falta flotar encima de ningún
-     asiento (ver ADR 0023 y ADR 0024). Entre columnas (jugadores del mismo
-     lado) se deja el hueco mínimo de siempre. */
-  row-gap: 44px;
+     reloj, de lado a lado (ver ADR 0023 y ADR 0024). El alto tiene que ser al
+     menos el de la propia barra (dos bordes de 1px + su relleno de 5px arriba
+     y abajo + los 50px de sus botones = 62px): si el hueco fuera más pequeño
+     que la barra que vive dentro, esta se saldría sobre los asientos en vez
+     de ser de verdad la separación entre ellos (ver ADR 0025). Entre columnas
+     (jugadores del mismo lado) se deja el hueco mínimo de siempre. */
+  row-gap: 64px;
   column-gap: 6px;
   padding: 6px;
   position: relative;
@@ -1322,11 +1325,16 @@ textarea {
 .tap:active {
   background: rgba(255, 255, 255, 0.09);
 }
+/* Hijo de `.inner` (no de `.seat`) a propósito: así gira con el resto del
+   contenido en los asientos de arriba, en vez de quedarse siempre en la misma
+   esquina de la pantalla y acabar debajo de lo que gira encima suyo (ver ADR
+   0025). El z-index lo deja por delante de cualquier otra cosa del asiento. */
 .delta {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -160%);
+  z-index: 7;
   font-weight: 700;
   font-size: 19px;
   color: var(--brass);
@@ -1383,9 +1391,35 @@ textarea {
 }
 
 /* ============ daño de comandante: un cuadrado partido en sectores ============ */
-.fila-dano {
-  display: flex;
-  justify-content: center;
+/* El cuadrado ya no ocupa sitio fijo en el asiento: este botón, debajo de la
+   vida, es lo único que se ve siempre; al tocarlo aparece como un popup
+   pequeño que solo se cierra al tocar fuera de él (ver ADR 0025). */
+.dano-boton {
+  align-self: center;
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 99px;
+  color: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  min-height: 34px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  touch-action: manipulation;
+}
+.dano-boton:active {
+  background: rgba(255, 255, 255, 0.16);
+}
+.dano-popup {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.4);
 }
 .dano-cuadrado {
   position: relative;
@@ -1551,10 +1585,10 @@ textarea {
   .dano-expandido-titulo {
     font-size: 9.5px;
   }
-}
-@container (max-height: 150px) {
-  .fila-dano {
-    display: none;
+  .dano-boton {
+    font-size: 11px;
+    padding: 5px 10px;
+    min-height: 28px;
   }
 }
 
