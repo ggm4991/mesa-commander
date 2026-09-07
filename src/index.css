@@ -1879,19 +1879,6 @@ textarea {
   }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .hub .pass.over {
-    animation: latido 0.9s ease-in-out infinite;
-  }
-  @keyframes latido {
-    50% {
-      background: #8e3527;
-      /* Con solo `scale()` aquí, la animación sustituye el `transform` entero
-         del botón y el reloj girado (ver `--rot` más arriba) volvía a 0° en
-         cada pulso, dando la sensación de que giraba solo — combinando la
-         misma rotación con la escala no se pierde (ver ADR 0034). */
-      transform: rotate(var(--rot)) scale(1.04);
-    }
-  }
   tbody tr {
     transition: background 0.12s ease;
   }

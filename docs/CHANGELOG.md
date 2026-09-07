@@ -8,6 +8,11 @@ en el que se convierte en una versión con fecha.
 
 ### Fixed
 
+- Cuando se pasaba el límite de turno, el botón del reloj crecía y
+  encogía de forma continua (`@keyframes latido`, pensada como aviso
+  llamativo): quitada del todo — el fondo en rojo de `.hub .pass.over` ya
+  avisa por sí solo, sin animación.
+
 - La medición dinámica del hub (ADR 0026) leía el alto de `.hub` ya
   ajustado por ella misma en la vuelta anterior, así que una vez que subía
   (por ejemplo al girar el reloj a 90°/270°, ADR 0033) no podía volver a
