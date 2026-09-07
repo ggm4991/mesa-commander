@@ -13,6 +13,7 @@ describe('pausar no cierra el turno', () => {
       cfg: { vida: 40, limite: 300, dispo: null },
       j,
       turno: 0,
+      numeroTurno: 1,
       tIni: t,
       acum: 0,
       pausado: false,
@@ -40,6 +41,7 @@ describe('pausar no cierra el turno', () => {
     expect(a.tMax).toBeCloseTo(7, 1)
     expect(a.tTotal).toBeCloseTo(7, 1)
     expect(juego.turno).toBe(1)
+    expect(juego.numeroTurno).toBe(2)
     expect(juego.acum).toBe(0)
   })
 })

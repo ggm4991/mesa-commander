@@ -18,7 +18,11 @@ export function migrarJuego(g: Record<string, unknown>): Juego {
     const imagenId2 = (p.imagenId2 as string) || ''
     return { ...p, c2, mana, dmg, imagenId, imagenId2 }
   })
-  return { ...g, j: jugadores } as Juego
+  // Partidas guardadas antes de que existiera este contador: no hay forma de
+  // saber cuántos turnos llevaban de verdad, así que se asume que van por el
+  // primero si ya hay alguien jugando, o que aún no ha arrancado si no.
+  const numeroTurno = typeof g.numeroTurno === 'number' ? g.numeroTurno : g.turno == null ? 0 : 1
+  return { ...g, j: jugadores, numeroTurno } as Juego
 }
 
 /** Perfiles de versiones anteriores: tenían un solo comandante suelto en vez de `mazos`. */

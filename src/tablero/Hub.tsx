@@ -62,6 +62,7 @@ export const Hub = forwardRef<HTMLDivElement, Props>(function Hub(
         <Icono nombre={estado.pausado ? 'play' : 'pausa'} tamano={18} />
       </button>
       <button className={clasesPass} aria-label="Pasar turno" onClick={onPasar} data-rot={rotacionTurno}>
+        {juego.numeroTurno > 0 && <i className="turno-num">{juego.numeroTurno}</i>}
         <span>{estado.quien}</span>
         {estado.crono && <small>{estado.crono}</small>}
         {estado.estado && <span>{estado.estado}</span>}

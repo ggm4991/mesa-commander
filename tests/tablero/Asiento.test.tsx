@@ -29,6 +29,7 @@ function juegoDePrueba(): Juego {
       nuevoJugador({ nombre: 'Beto' }, 40),
     ],
     turno: 0,
+    numeroTurno: 1,
     tIni: Date.now(),
     acum: 0,
     pausado: false,
@@ -54,6 +55,7 @@ const props = (over: Record<string, unknown> = {}) => ({
   onAjustarMana: vi.fn(),
   onElegirInicio: vi.fn(),
   onRetirada: vi.fn(),
+  onLanzarComandante: vi.fn(),
   onEmpezarArrastreCorona: vi.fn(),
   seatRef: vi.fn(),
   ...over,
@@ -184,6 +186,25 @@ describe('Asiento', () => {
     renderAsiento(props({ juego }))
     expect(screen.queryByText('Daño de comandante')).toBeNull()
     expect(document.querySelectorAll('.dano-cmd')).toHaveLength(0)
+  })
+
+  it('el botón de comandante lanzado suma 2 al impuesto por toque, y no cuenta como contador suelto', () => {
+    const juego = juegoDePrueba()
+    juego.j[0].tax = 4
+    const onLanzarComandante = vi.fn()
+    renderAsiento(props({ juego, onLanzarComandante }))
+    expect(screen.getByText('Comandante ×2')).toBeInTheDocument()
+    // El impuesto ya no aparece como contador suelto: tiene su propio botón.
+    expect(screen.queryByTitle('Impuesto de comandante')).toBeNull()
+    fireEvent.click(screen.getByText('Comandante ×2'))
+    expect(onLanzarComandante).toHaveBeenCalledOnce()
+  })
+
+  it('el botón de comandante lanzado aparece incluso en partidas de un solo jugador', () => {
+    const juego = juegoDePrueba()
+    juego.j = [juego.j[0]]
+    renderAsiento(props({ juego }))
+    expect(screen.getByText('Comandante ×0')).toBeInTheDocument()
   })
 
   it('muestra los contadores activos y los oculta cuando están a cero', () => {

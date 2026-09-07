@@ -90,6 +90,7 @@ describe('juego', () => {
       cfg: { vida: 40, limite: 0, dispo: null },
       j: [nuevoJugador({ nombre: 'Ana' }, 40)],
       turno: 0,
+      numeroTurno: 1,
       tIni: 111,
       acum: 0,
       pausado: false,

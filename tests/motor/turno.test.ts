@@ -10,11 +10,13 @@ describe('inicio de partida', () => {
     expect(juego.turno).toBe(2)
     expect(juego.j[juego.turno as number].n).toBe('Cris')
     expect(juego.log.some((e) => /Empieza Cris/.test(e.txt))).toBe(true)
+    expect(juego.numeroTurno).toBe(1)
   })
 
   it('sin sorteo, la partida queda esperando a que alguien toque su asiento', () => {
     const juego = empezarPartida({ asientos, vidaInicial: 40, limiteTurno: 0, dispo: null, turnoInicial: null })
     expect(juego.turno).toBeNull()
+    expect(juego.numeroTurno).toBe(0)
   })
 
   it('pasar turno antes de empezar no hace nada', () => {
@@ -28,6 +30,7 @@ describe('inicio de partida', () => {
     juego = elegirInicio(juego, 1)
     expect(juego.turno).toBe(1)
     expect(juego.log.some((e) => /Empieza Beto/.test(e.txt))).toBe(true)
+    expect(juego.numeroTurno).toBe(1)
 
     const antes = juego.turno
     juego = elegirInicio(juego, 3)
@@ -35,6 +38,7 @@ describe('inicio de partida', () => {
 
     juego = pasarTurno(juego)
     expect(juego.turno).toBe(2)
+    expect(juego.numeroTurno).toBe(2)
   })
 
   it('pasar el turno vacía el maná de todos, no solo el de quien lo pasa (regla 500.4)', () => {

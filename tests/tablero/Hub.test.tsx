@@ -13,6 +13,7 @@ function juegoDePrueba(): Juego {
     cfg: { vida: 40, limite: 300, dispo: null },
     j: [nuevoJugador({ nombre: 'Ana' }, 40)],
     turno: 0,
+    numeroTurno: 3,
     tIni: t,
     acum: 0,
     pausado: false,
@@ -31,6 +32,13 @@ describe('Hub', () => {
     render(<Hub juego={juego} ahora={juego.tIni + 5000} onDeshacer={() => {}} onPausa={() => {}} onPasar={() => {}} onMenu={() => {}} />)
     expect(screen.getByText('Ana')).toBeInTheDocument()
     expect(screen.getByText('0:05')).toBeInTheDocument()
+    expect(screen.getByText('3')).toBeInTheDocument()
+  })
+
+  it('sin turno todavía, no muestra número de turno', () => {
+    const juego = { ...juegoDePrueba(), turno: null, numeroTurno: 0 }
+    render(<Hub juego={juego} ahora={juego.tIni} onDeshacer={() => {}} onPausa={() => {}} onPasar={() => {}} onMenu={() => {}} />)
+    expect(screen.queryByText('3')).not.toBeInTheDocument()
   })
 
   it('deshacer, pausa, pasar y menú llaman a sus callbacks', () => {

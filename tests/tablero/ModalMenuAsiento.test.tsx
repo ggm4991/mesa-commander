@@ -12,6 +12,7 @@ function juegoDePrueba(): Juego {
     cfg: { vida: 40, limite: 0, dispo: null },
     j: [nuevoJugador({ nombre: 'Ana', comandante: 'X', colores: 'R' }, 40)],
     turno: 0,
+    numeroTurno: 1,
     tIni: Date.now(),
     acum: 0,
     pausado: false,

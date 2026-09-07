@@ -31,6 +31,7 @@ function partidaDePrueba(): Juego {
     cfg: { vida: 100, limite: 0, dispo: null },
     j,
     turno: 0,
+    numeroTurno: 1,
     tIni: Date.now(),
     acum: 0,
     pausado: false,

@@ -6,6 +6,15 @@ en el que se convierte en una versión con fecha.
 
 ## [Unreleased]
 
+### Added
+
+- Número de turno visible junto al reloj (insignia pequeña en la esquina del
+  botón de pasar turno), y un botón nuevo bajo la vida, "Comandante ×N", que
+  suma 2 al impuesto de comandante en cada toque — un lanzamiento, un toque,
+  sin entrar al menú del asiento. El impuesto ya no se repite también como
+  contador suelto en la fila de abajo, para no mostrar el mismo dato dos
+  veces en el mismo asiento. Ver ADR 0038.
+
 ### Fixed
 
 - Cuando se pasaba el límite de turno, el botón del reloj crecía y

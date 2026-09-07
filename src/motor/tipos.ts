@@ -63,6 +63,10 @@ export interface Juego {
   j: Jugador[]
   /** null = la partida espera a que alguien toque su asiento para arrancar. */
   turno: number | null
+  /** Cuenta global de turnos jugados (0 mientras `turno` es null): el primero en
+   * jugar deja esto en 1, y cada `pasarTurno()` lo sube en uno más. Es solo para
+   * que el hub pueda enseñarlo; ninguna otra regla del motor lo consulta. */
+  numeroTurno: number
   tIni: number
   /** Segundos de turno acumulados a través de las pausas; pausar no cierra el turno. */
   acum: number

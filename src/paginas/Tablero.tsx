@@ -238,6 +238,7 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
             onAjustarMana={(color, delta) => mutarSinFoto((j) => ajustarMana(j, i, color, delta))}
             onElegirInicio={() => mutarSinFoto((j) => elegirInicio(j, i))}
             onRetirada={() => mutar((j) => retirada(j, i, 1))}
+            onLanzarComandante={() => mutar((j) => contador(j, i, 'tax', 2))}
             onEmpezarArrastreCorona={(e) => empezarArrastreCorona(i, e)}
             seatRef={(el) => {
               asientoRefs.current[i] = el

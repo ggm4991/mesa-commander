@@ -7,6 +7,21 @@ describe('migrarJuego', () => {
     expect(migrado.j[0].dmg).toEqual({ '1:0': 7 })
     expect(migrado.j[0].c2).toBe('')
   })
+
+  it('una partida guardada sin número de turno (anterior a este contador) se asume en el turno 1 si ya hay alguien jugando', () => {
+    const migrado = migrarJuego({ j: [], turno: 0 })
+    expect(migrado.numeroTurno).toBe(1)
+  })
+
+  it('sin nadie jugando todavía, se asume que no ha empezado ningún turno', () => {
+    const migrado = migrarJuego({ j: [], turno: null })
+    expect(migrado.numeroTurno).toBe(0)
+  })
+
+  it('un número de turno ya guardado se conserva tal cual', () => {
+    const migrado = migrarJuego({ j: [], turno: 0, numeroTurno: 12 })
+    expect(migrado.numeroTurno).toBe(12)
+  })
 })
 
 describe('migrarPerfiles', () => {

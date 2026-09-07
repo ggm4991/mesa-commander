@@ -11,6 +11,7 @@ function juegoDePrueba(limite: number): Juego {
     cfg: { vida: 40, limite, dispo: null },
     j: [nuevoJugador({ nombre: 'Ana' }, 40), nuevoJugador({ nombre: 'Beto' }, 40)],
     turno: 0,
+    numeroTurno: 1,
     tIni: t,
     acum: 0,
     pausado: false,

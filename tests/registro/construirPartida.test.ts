@@ -12,6 +12,7 @@ function juegoDePrueba(): Juego {
     cfg: { vida: 40, limite: 0, dispo: null },
     j: [ana, beto],
     turno: 0,
+    numeroTurno: 1,
     tIni: new Date('2026-08-01T10:00:00.000Z').getTime(),
     acum: 0,
     pausado: false,

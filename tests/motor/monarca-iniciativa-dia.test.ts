@@ -10,6 +10,7 @@ function partidaDePrueba(): Juego {
     cfg: { vida: 40, limite: 0, dispo: null },
     j: [nuevoJugador({ nombre: 'Ana' }, 40), nuevoJugador({ nombre: 'Beto' }, 40)],
     turno: 0,
+    numeroTurno: 1,
     tIni: Date.now(),
     acum: 0,
     pausado: false,

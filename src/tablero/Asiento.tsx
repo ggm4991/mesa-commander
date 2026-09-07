@@ -30,6 +30,7 @@ interface Props {
   onAjustarMana: (color: keyof Identidad, delta: number) => void
   onElegirInicio: () => void
   onRetirada: () => void
+  onLanzarComandante: () => void
   onEmpezarArrastreCorona: (e: React.PointerEvent) => void
   seatRef: (el: HTMLDivElement | null) => void
 }
@@ -50,6 +51,7 @@ export function Asiento({
   onAjustarMana,
   onElegirInicio,
   onRetirada,
+  onLanzarComandante,
   onEmpezarArrastreCorona,
   seatRef,
 }: Props) {
@@ -96,7 +98,10 @@ export function Asiento({
   const masVida = useMantenerPulsado(() => onCambiarVida(1))
   const imagenComandante = useImagenComandante(j.c, j.imagenId)
 
-  const contadoresActivos = CONTADORES.filter((c) => j[c.clave] > 0)
+  // El impuesto de comandante no aparece aquí: tiene su propio botón siempre
+  // visible junto al de daño (más abajo), porque a diferencia del resto de
+  // contadores es el único que se toca casi todos los turnos.
+  const contadoresActivos = CONTADORES.filter((c) => c.clave !== 'tax' && j[c.clave] > 0)
   const manaActivo = MANA.filter((m) => (j.mana || {})[m] > 0)
   // "Fuera" (veces que se pasó de tiempo) no cuenta aquí: vive en su propia
   // esquina, siempre visible igual que las jugadas retiradas, no en esta fila.
@@ -160,11 +165,21 @@ export function Asiento({
           </button>
         </div>
 
-        {juego.j.length > 1 && (
-          <button type="button" className="dano-boton" onClick={() => setMostrarDano(true)}>
-            <Icono nombre="espadas" tamano={16} /> Daño de comandante
+        <div className="acciones-rapidas">
+          {juego.j.length > 1 && (
+            <button type="button" className="dano-boton" onClick={() => setMostrarDano(true)}>
+              <Icono nombre="espadas" tamano={16} /> Daño de comandante
+            </button>
+          )}
+          <button
+            type="button"
+            className="dano-boton"
+            title="Toca cada vez que lo lances desde la zona de mando: sube el impuesto en 2 (regla 903.9a)"
+            onClick={onLanzarComandante}
+          >
+            <Icono nombre={ICONO_CONTADOR.tax} tamano={16} /> Comandante ×{Math.floor(j.tax / 2)}
           </button>
-        )}
+        </div>
 
         {esperandoInicio && (
           <button className="empiezo" onClick={onElegirInicio}>

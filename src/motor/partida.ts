@@ -37,6 +37,7 @@ export function empezarPartida(opciones: OpcionesEmpezarPartida): Juego {
     cfg,
     j,
     turno,
+    numeroTurno: turno != null ? 1 : 0,
     tIni: ahora,
     acum: 0,
     pausado: false,
@@ -76,7 +77,7 @@ export function alternarPausa(juego: Juego, ahora: number = Date.now()): Juego {
 /** Sin sorteo previo, la partida espera a que alguien toque su asiento. */
 export function elegirInicio(juego: Juego, i: number, ahora: number = Date.now()): Juego {
   if (juego.turno != null) return juego
-  const siguiente = { ...juego, turno: i, tIni: ahora, acum: 0, pausado: false }
+  const siguiente = { ...juego, turno: i, numeroTurno: 1, tIni: ahora, acum: 0, pausado: false }
   return registrar(siguiente, `Empieza ${siguiente.j[i].n}`, ahora)
 }
 
@@ -107,7 +108,7 @@ export function pasarTurno(juego: Juego, ahora: number = Date.now()): Juego {
     n = (n + 1) % siguiente.j.length
     if (!siguiente.j[n].out) break
   }
-  return { ...siguiente, turno: n, tIni: ahora, acum: 0, pausado: false }
+  return { ...siguiente, turno: n, numeroTurno: siguiente.numeroTurno + 1, tIni: ahora, acum: 0, pausado: false }
 }
 
 /** Arrastrar la corona de un asiento a otro (menú de partida → "Cambiar" tiene su
