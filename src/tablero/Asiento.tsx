@@ -4,7 +4,7 @@ import { fondoAsiento } from '../componentes/comunes/fondo'
 import { CONTADORES, comandantesAgrupadosPorJugador } from '../motor/vida'
 import { useImagenComandante } from '../red/scryfall/useImagenComandante'
 import type { Identidad, Juego } from '../motor/tipos'
-import { type BordeAsiento, estiloBotonEnFila, estiloFila } from './bordes'
+import { type BordeAsiento, estiloBotonEnFila, estiloEsquinas, estiloFila } from './bordes'
 import { ICONO_CONTADOR, MANA } from './constantesUI'
 import { IconoDanoComandante } from './IconoDanoComandante'
 import { PanelDanoExpandido } from './PanelDanoExpandido'
@@ -123,22 +123,48 @@ export function Asiento({
       <div className="inner">
         <div className="seat-top" style={estiloFila(borde?.arriba ?? null, borde?.hueco ?? '')}>
           {juego.iniciativa === indice && (
-            <span className="badge">
-              <Icono nombre="bandera" tamano={13} /> Iniciativa
+            <span className="badge" aria-label="Iniciativa">
+              <Icono nombre="bandera" tamano={13} /> <span className="badge-texto">Iniciativa</span>
             </span>
           )}
           {j.out && (
-            <span className="badge">
-              <Icono nombre="calavera" tamano={13} /> Fuera
+            <span className="badge" aria-label="Fuera">
+              <Icono nombre="calavera" tamano={13} /> <span className="badge-texto">Fuera</span>
             </span>
           )}
           <button
             className="more solo"
-            style={estiloBotonEnFila(borde?.arriba ?? null, 'auto')}
+            style={estiloBotonEnFila(borde?.arriba ?? null)}
             aria-label={`Opciones de ${j.n}`}
             onClick={onAbrirMenu}
           >
             <Icono nombre="puntos" tamano={20} />
+          </button>
+        </div>
+
+        {/* Solo el icono: con el texto de antes ("Daño de comandante", "Comandante
+         * ×N") ya no cabían arriba junto al resto de controles fijos. El texto
+         * sigue en el DOM, visualmente oculto, para quien usa lector de pantalla y
+         * para no reescribir las pruebas que buscan este texto. En flujo normal,
+         * no superpuesto como `.esquinas-fijas`: con cuatro controles fijos más
+         * estos dos no cabían ya ni en un asiento de 4 jugadores, no solo en los
+         * más estrechos de 6 (ver ADR 0042). */}
+        <div className="acciones-arriba">
+          {juego.j.length > 1 && (
+            <button type="button" className="accion-arriba accion-dano" onClick={() => setMostrarDano(true)}>
+              <Icono nombre="espadas" tamano={20} />
+              <span className="visualmente-oculto">Daño de comandante</span>
+            </button>
+          )}
+          <button
+            type="button"
+            className="accion-arriba accion-impuesto"
+            title="Toca cada vez que lo lances desde la zona de mando: sube el impuesto en 2 (regla 903.9a)"
+            onClick={onLanzarComandante}
+          >
+            <Icono nombre={ICONO_CONTADOR.tax} tamano={20} />
+            <span className="visualmente-oculto">Comandante ×{Math.floor(j.tax / 2)}</span>
+            <i className="accion-num">×{Math.floor(j.tax / 2)}</i>
           </button>
         </div>
 
@@ -165,29 +191,13 @@ export function Asiento({
           </button>
         </div>
 
-        <div className="acciones-rapidas">
-          {juego.j.length > 1 && (
-            <button type="button" className="dano-boton" onClick={() => setMostrarDano(true)}>
-              <Icono nombre="espadas" tamano={16} /> Daño de comandante
-            </button>
-          )}
-          <button
-            type="button"
-            className="dano-boton"
-            title="Toca cada vez que lo lances desde la zona de mando: sube el impuesto en 2 (regla 903.9a)"
-            onClick={onLanzarComandante}
-          >
-            <Icono nombre={ICONO_CONTADOR.tax} tamano={16} /> Comandante ×{Math.floor(j.tax / 2)}
-          </button>
-        </div>
-
         {esperandoInicio && (
           <button className="empiezo" onClick={onElegirInicio}>
             <Icono nombre="bandera" tamano={22} /> Empiezo yo
           </button>
         )}
 
-        <div className="esquinas-fijas">
+        <div className="esquinas-fijas" style={estiloEsquinas(borde?.arriba ?? null)}>
           <span className={`tiempo-esquina${j.fuera > 0 ? ' warn' : ''}`} title="Veces que se pasó de tiempo">
             <Icono nombre="reloj" tamano={16} /> {j.fuera}
           </span>

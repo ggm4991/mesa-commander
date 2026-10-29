@@ -8,6 +8,60 @@ en el que se convierte en una versión con fecha.
 
 ### Added
 
+- La vista previa de la mesa (pantalla de inicio) muestra un adelanto de la
+  ilustración del comandante de cada asiento ocupado, detrás del degradado
+  de identidad de color de siempre — se nota tanto con arte oscuro como
+  claro. Ver ADR 0045, 0046, 0047 y 0048.
+- En esa misma vista previa, el nombre del jugador y la línea de comandante
+  llevan ahora una insignia de fondo oscuro (letra también algo más
+  grande) para seguir leyéndose bien con la ilustración detrás. Ver ADR
+  0049.
+- La disposición "Uno en cada lado" de 4 jugadores da ahora su propia fila
+  al hub (en vez de compartirla con los dos asientos laterales), dejando
+  los tres bloques de jugador a la misma altura — como en la disposición
+  equivalente de LifeTap. Ver ADR 0050 (reemplazada) y 0051.
+- El hub ocupa ahora todo el ancho disponible en cualquier disposición con
+  fila propia para él (`4b`, `5a`-`5d`, `6b`), no solo una píldora
+  centrada con hueco vacío a los lados. Ver ADR 0052.
+
+### Changed
+
+- Daño de comandante e impuesto de comandante pasan a botones circulares
+  más grandes, solo con icono, en una fila propia justo debajo de la parte
+  de arriba del asiento (antes, una píldora con texto bajo la vida). El
+  texto sigue disponible para lectores de pantalla. Ver ADR 0042.
+- El botón de impuesto de comandante lleva su número actual ("×N") siempre
+  visible en una insignia en la esquina, igual que el número de turno sobre
+  el botón de pasar turno — al quitarle el texto fijo (ADR 0042) no podía
+  quedar sin verse. Ver ADR 0043 y 0044.
+
+### Fixed
+
+- Los botones de +/- vida se desalinearon del número de vida al añadir la
+  fila de arriba de la ADR 0042 (el ajuste que los alineaba estaba en
+  porcentaje del alto del botón, que cambió). Ahora en píxeles fijos, no
+  depende de cuánto ocupen las filas de alrededor. Ver ADR 0043.
+- Las esquinas fijas (tiempo pasado, jugadas rehechas) se solapaban con la
+  insignia de iniciativa o "fuera" y con el botón de opciones del asiento en
+  cuanto una de esas insignias aparecía — reportado con una captura real de
+  una partida de 4 jugadores. Ver ADR 0042.
+- En el asiento más estrecho que existe (6 jugadores, disposición "6a", 3
+  columnas), el botón de opciones ("...") se solapaba con las esquinas
+  fijas de tiempo pasado y jugadas rehechas — 38×32px medidos con un
+  navegador real. Ahora se encogen juntos lo justo para caber sin tapar
+  nada. Ver ADR 0041.
+- El hub (deshacer, pausa, pasar turno, menú) se solapaba con los asientos
+  de la fila del medio en toda disposición de 5 jugadores y en "6b" de 6 —
+  las únicas con 3 filas de asientos, verificado con un navegador real.
+  Ahora reserva su propia fila de grid, igual que ya hacían las de 3/4
+  jugadores con asiento central. Ver ADR 0039.
+
+### Added
+
+- Nueva disposición de mesa para 5 jugadores, "Cuatro esquinas y uno en
+  medio" (`5d`), inspirada en la de LifeTap: dos parejas en las esquinas y
+  el quinto asiento en su propia fila entre ellas, sin superponerse a
+  ningún otro. Ver ADR 0040.
 - Número de turno visible junto al reloj (insignia pequeña en la esquina del
   botón de pasar turno), y un botón nuevo bajo la vida, "Comandante ×N", que
   suma 2 al impuesto de comandante en cada toque — un lanzamiento, un toque,

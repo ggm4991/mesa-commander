@@ -139,8 +139,9 @@ Específico de cada app:
    variables de diseño y los mismos *container queries* para la rotación de
    asientos).
 
-`src/red/` y `src/sync/` no existen todavía: llegan en la Fase 4 (Scryfall)
-y la Fase 6 (Supabase), respectivamente.
+`src/red/` ya existe (Fase 4, Scryfall). `src/sync/` de momento solo tiene el
+esbozo de la Fase 6 (`src/sync/README.md`); el código de sincronización en
+sí llega cuando se aborde esa fase.
 
 ## Estructura de `app.html` (la app antigua, sin cambios)
 
@@ -229,9 +230,11 @@ de aquí y no se ha tocado.
   build de release de verdad (el de depuración de hoy sirve para instalar a
   mano, no para publicar), iOS (hace falta un Mac con Xcode, no disponible
   todavía) y decidir cuándo se retiran `app.html` y `pruebas/`.
-- **Fase 6** — sincronización multi-dispositivo con Supabase (privado por
-  usuario con Row Level Security; esbozo en `src/sync/README.md` cuando
-  exista).
+- **Fase 6** — sincronización multi-dispositivo con Supabase (Postgres + Auth
+  + Row Level Security): ya no es solo el sync privado por dispositivo que
+  planteaba la ADR 0001, sino cuentas de verdad, amistad entre ellas y ligas
+  administradas con sus propios ajustes. Esbozo completo en
+  `src/sync/README.md`.
 - Planechase y Archenemy, cargando planos y esquemas desde la API de Scryfall
   en vez de copiar el texto de las cartas, que es propiedad de Wizards.
 - Quién elimina a quién, para poder mirar rivalidades en el registro.

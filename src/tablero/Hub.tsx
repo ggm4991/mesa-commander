@@ -44,7 +44,12 @@ export const Hub = forwardRef<HTMLDivElement, Props>(function Hub(
       className="hub"
       style={
         areaCentro
-          ? { position: 'static', transform: 'none', gridArea: areaCentro, justifySelf: 'center', alignSelf: 'center' }
+          ? // `justifySelf` sin fijar (por defecto `stretch`): ocupa todo el ancho de
+            // su celda, igual que ya hace de lado a lado cuando flota centrado por
+            // `position:absolute` (ADR 0024) — antes se quedaba centrada y compacta
+            // dentro de la celda, dejando libre el ancho de sobra que dejan los
+            // asientos de al lado (ver ADR 0052).
+            { position: 'static', transform: 'none', gridArea: areaCentro, alignSelf: 'center' }
           : altoBarra
             ? { height: altoBarra }
             : undefined

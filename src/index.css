@@ -1015,12 +1015,41 @@ textarea {
   outline: 2px solid var(--brass);
   outline-offset: 2px;
 }
+/* `.pbg`, `.pbg-comandante` y `.pinner` se apilan con `z-index` positivo
+   (1/2/3), ninguno negativo — se intentó con negativos (`.pbg` y
+   `.pinner` sin `z-index` propio, de forma implícita) y en algún navegador
+   real no pintaba donde tocaba (verificado: ni con `mix-blend-mode` ni
+   después con `filter` se veía nada en un móvil concreto, mientras que en
+   escritorio sí). Un `z-index` negativo combinado con `position:absolute`
+   dentro de un contenedor con `container-type` (las *container queries* de
+   `.pseat`) es justo la clase de combinación con la que distintos
+   navegadores tienen fama de no comportarse igual; positivos y explícitos
+   en los tres evita depender de esa zona gris (ver ADR 0048). */
 .pseat .pbg {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 1;
+}
+/* Un asomo de la ilustración del comandante sobre el degradado de identidad de
+   `.pbg`, no en su lugar: aquí lo que se quiere ver de un vistazo es el color
+   del mazo, la imagen es solo un adelanto de lo que se verá en el tablero (que
+   sí la usa a toda opacidad como fondo, ver `fondoAsiento`). */
+.pbg-comandante {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.55;
+  /* Aclara la ilustración antes de mezclarla por opacidad normal, en vez de
+   * `mix-blend-mode` (ver ADR 0047): no depende de cómo compone el
+   * navegador esta capa con lo que tiene detrás, solo cambia los píxeles de
+   * la imagen en sí. */
+  filter: brightness(1.7) saturate(1.15);
 }
 .pinner {
+  position: relative;
+  z-index: 3;
   width: 100%;
   height: 100%;
   display: flex;
@@ -1049,24 +1078,37 @@ textarea {
 .pseat[data-rot='270'] .pinner {
   transform: translate(-50%, -50%) rotate(270deg);
 }
+/* Insignia de fondo negro semitransparente, igual que `.badge` y el resto de
+   avisos fijos del asiento de juego: con el asomo de comandante detrás (ver
+   ADR 0045-0048) el texto solo no siempre contrasta lo bastante, y el
+   problema no se arregla solo con letra más grande si lo que falla es el
+   contraste, no el tamaño. */
 .pinner b {
-  font-size: 14.5px;
+  font-size: 16px;
   font-weight: 600;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 99px;
+  padding: 3px 13px;
 }
 .pinner .det {
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.66);
-  display: flex;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.8);
+  display: inline-flex;
   align-items: center;
   gap: 5px;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 99px;
+  padding: 3px 13px;
 }
 .pinner .rot {
   background: rgba(0, 0, 0, 0.45);
@@ -1258,6 +1300,15 @@ textarea {
 .seat-top {
   display: flex;
   align-items: center;
+  /* Por defecto todo el contenido (insignias de iniciativa/fuera incluidas) se
+     agrupa al lado contrario de `.esquinas-fijas`, que vive siempre a la
+     izquierda salvo que `estiloFila` la mande expresamente a la izquierda con
+     `lado === 'ini'` (ver `estiloEsquinas` en bordes.ts). Antes el hueco libre
+     solo lo reclamaba el botón de opciones con su propio `margin-left:auto`,
+     dejando las insignias ancladas al borde de inicio por defecto — chocaban
+     con `.esquinas-fijas` en cuanto había una iniciativa o un "fuera" que
+     mostrar, verificado con un navegador real (ver ADR 0042). */
+  justify-content: flex-end;
   gap: 8px;
   font-size: 13px;
   min-height: 22px;
@@ -1358,8 +1409,13 @@ textarea {
   /* Sube el signo un poco del centro exacto del botón, para que quede a la
      altura del número de vida y no por debajo (el botón entero se queda del
      mismo alto y sigue siendo igual de fácil de tocar: solo se mueve dónde
-     se centra el signo dentro de él). */
-  padding-bottom: 10%;
+     se centra el signo dentro de él). En píxeles fijos, no en porcentaje del
+     alto del botón: ese alto cambia según cuánto ocupen las demás filas del
+     asiento (p. ej. al añadir `.acciones-arriba`, ver ADR 0042), y un
+     porcentaje se desajustaba cada vez que lo hacía — el número de vida no
+     se movía por eso, así que el desplazamiento que hace falta tampoco
+     debería. */
+  padding-bottom: 32px;
   user-select: none;
   touch-action: manipulation;
 }
@@ -1443,34 +1499,78 @@ textarea {
 /* El cuadrado ya no ocupa sitio fijo en el asiento: este botón, debajo de la
    vida, es lo único que se ve siempre; al tocarlo aparece como un popup
    pequeño que solo se cierra al tocar fuera de él (ver ADR 0025). */
-/* Fila de accesos rápidos bajo la vida: el popup de daño de comandante y el
-   toque a toque de "lo acabo de lanzar" (impuesto de comandante, regla
-   903.9a) comparten el mismo estilo de píldora, por eso van juntos aquí en
-   vez de cada uno con su propio bloque de reglas. */
-.acciones-rapidas {
-  align-self: center;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
+/* Oculta visualmente sin quitar del DOM — para el lector de pantalla, y para
+   que las pruebas que buscan este texto (`getByText`) lo sigan encontrando
+   aunque ya no se vea (ver ADR 0042). */
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
-.dano-boton {
-  align-self: center;
+/* El disparador del popup de daño de comandante y el toque a toque de "lo
+   acabo de lanzar" (impuesto, regla 903.9a) suben junto a `.seat-top`, en vez
+   de en su propia fila bajo la vida: solo el icono, en un botón más grande
+   que el resto de controles fijos porque estos dos se tocan mucho, no son
+   solo un dato. En flujo normal, no en posición absoluta como
+   `.esquinas-fijas` — meterlos ahí (con los otros cuatro controles fijos que
+   ya comparten esquina) no cabía ni en un asiento de 4 jugadores, verificado
+   con un navegador real; en flujo normal empujan el resto del asiento hacia
+   abajo en vez de competir por el mismo hueco flotante (ver ADR 0042). */
+.acciones-arriba {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  /* `.inner` no deja hueco entre filas (`justify-content:space-between`, sin
+     `gap`): la insignia de `.accion-num` sobresale un poco por encima de su
+     botón (ver más abajo) y sin este margen llegaba a tocar el botón de
+     opciones de `.seat-top` en los asientos más altos y estrechos —
+     verificado con un navegador real (ver ADR 0044). */
+  margin-top: 4px;
+}
+.accion-arriba {
+  position: relative;
   background: rgba(0, 0, 0, 0.42);
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 99px;
   color: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
-  padding: 7px 14px;
-  min-height: 34px;
-  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  cursor: pointer;
   touch-action: manipulation;
 }
-.dano-boton:active {
+/* El número de veces lanzado (`Comandante ×N`) tiene que verse todo el
+   rato, no solo al tocar — el botón de impuesto es solo icono (ver más
+   arriba), así que va en una insignia en la esquina, mismo planteamiento
+   que `.hub .pass .turno-num` para el número de turno (ver ADR 0044). */
+.accion-num {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: rgba(16, 12, 21, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 99px;
+  font-style: normal;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--brass);
+  min-width: 16px;
+  padding: 1px 4px;
+  line-height: 1.3;
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.accion-arriba:active {
   background: rgba(255, 255, 255, 0.16);
 }
 .dano-popup {
@@ -1645,10 +1745,10 @@ textarea {
   .dano-expandido-titulo {
     font-size: 9.5px;
   }
-  .dano-boton {
-    font-size: 11px;
-    padding: 5px 10px;
-    min-height: 28px;
+  .accion-arriba {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
   }
 }
 
@@ -1691,6 +1791,93 @@ textarea {
 .tiempo-esquina.warn {
   border-color: var(--rust);
   color: #ffc3b6;
+}
+/* `.esquinas-fijas` (arriba-izquierda, posición absoluta) y `.seat-top`
+   (arriba-derecha por defecto, ver más arriba) no se conocen entre sí:
+   comparten la misma franja de arriba del asiento confiando en que, sumados
+   a lo ancho, quepan en el ancho disponible. Se quedan sin sitio en dos
+   casos distintos, los dos verificados con un navegador real y
+   `getBoundingClientRect()`:
+   - En los asientos más estrechos (6 jugadores a 3 columnas, ~130px), ni el
+     botón de opciones ni las dos insignias fijas caben ya.
+   - En cualquier asiento (incluido uno de 4 jugadores, ~200px) en el que
+     además haya una insignia de iniciativa o "fuera" en `.seat-top`: el
+     texto "Iniciativa" por sí solo ya ronda los 80px, y sumado al botón de
+     opciones supera el ancho que queda libre aunque las esquinas fijas estén
+     en su tamaño normal.
+   Ni moverlas más abajo ni apilarlas en vertical funciona: en un asiento
+   estrecho el alto también escasea (`.seat-top` y `.life-row` se tocan sin
+   hueco entre ellos, y los botones de +/- vida ocupan todo el alto de
+   `.life-row` pegados al mismo borde), así que cualquier desplazamiento
+   vertical choca con uno de los dos en vez del otro. La única dimensión con
+   margen de verdad es compactar: insignias de ambos lados y botón de
+   opciones se encogen juntos lo justo para caber, igual que ya se encogen
+   por alto en `@container (max-height:210px)` de más arriba. Esta regla
+   tiene que ir después de la base de `.esquinas-fijas`/`.more`/`.badge` de
+   arriba: misma especificidad, así que gana la última en el archivo, y
+   `@container` no cambia eso (ver ADR 0041 y 0042). */
+@container (max-width: 260px) {
+  .esquinas-fijas {
+    gap: 3px;
+  }
+  .retirada-esquina,
+  .tiempo-esquina {
+    padding: 4px 6px;
+    gap: 3px;
+    font-size: 10.5px;
+    min-height: 26px;
+  }
+  .retirada-esquina .ic,
+  .tiempo-esquina .ic {
+    width: 13px;
+    height: 13px;
+  }
+  .more.solo {
+    width: 34px;
+  }
+  .seat-top {
+    gap: 5px;
+  }
+  .seat-top .badge {
+    font-size: 9.5px;
+    padding: 1px 5px;
+  }
+}
+/* Último recurso en el caso más extremo: asiento de 6 jugadores a 3 columnas
+   (~130px) Y con un lado que esquivar (`lado === 'ini'`, ver `estiloFila`) Y
+   con una insignia de iniciativa o "fuera" puestas — compactar ya no basta
+   (verificado con un navegador real), así que la insignia se queda solo con
+   el icono. El texto sigue accesible por `aria-label` en el propio `.badge`
+   (no solo `.badge-texto`, que es lo único que se oculta aquí) y para quien
+   lo necesite al tacto (ver ADR 0042). */
+@container (max-width: 145px) {
+  .seat-top .badge-texto {
+    display: none;
+  }
+  .seat-top {
+    gap: 3px;
+  }
+  .seat-top .badge {
+    padding: 3px;
+  }
+  .seat-top .badge .ic {
+    width: 11px;
+    height: 11px;
+  }
+  .esquinas-fijas {
+    gap: 2px;
+  }
+  .retirada-esquina,
+  .tiempo-esquina {
+    padding: 3px 4px;
+    gap: 2px;
+    font-size: 9.5px;
+  }
+  .retirada-esquina .ic,
+  .tiempo-esquina .ic {
+    width: 11px;
+    height: 11px;
+  }
 }
 
 /* Barra de lado a lado en el hueco vertical entre los asientos de abajo y los

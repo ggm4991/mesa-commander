@@ -32,6 +32,7 @@ import {
 import type { ContadorClave, Identidad, Juego } from '../motor/tipos'
 import { construirPartida } from '../registro/construirPartida'
 import { validar } from '../registro/validar'
+import { conFilaHub } from '../componentes/mesa/disposiciones'
 import { Asiento } from '../tablero/Asiento'
 import { Hub } from '../tablero/Hub'
 import { dispoTablero } from '../tablero/layouts'
@@ -220,7 +221,16 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
       <div
         className="board"
         ref={tableroRef}
-        style={{ gridTemplateColumns: dispo.cols, gridTemplateRows: dispo.rows, rowGap: altoHub }}
+        style={{
+          gridTemplateColumns: dispo.cols,
+          // Con `filaHub`, el hub ya tiene su propia fila medida a su alto real
+          // (ver más abajo): el hueco entre el resto de filas vuelve al tamaño
+          // pequeño de siempre, en vez de duplicar el alto del hub en cada fila
+          // de la rejilla, que es lo que lo hacía solaparse con la fila del medio
+          // en las disposiciones de 3 filas (5 jugadores y "6b", ver ADR 0039).
+          gridTemplateRows: conFilaHub(dispo.rows, dispo.filaHub, `${altoHub}px`),
+          rowGap: dispo.filaHub != null ? 6 : altoHub,
+        }}
       >
         {juego.j.map((_, i) => (
           <Asiento

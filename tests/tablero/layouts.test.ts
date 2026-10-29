@@ -16,9 +16,20 @@ describe('dispoTablero', () => {
   it('sin disposición (o con forma inválida), cae al reparto genérico', () => {
     const d = dispoTablero(4, null)
     expect(d.cols).toBe('repeat(2,1fr)')
-    expect(d.rows).toBe('repeat(2,1fr)')
+    expect(d.rows).toBe('1fr 1fr')
     // LAYOUTS[4].rot = [0,1]: los asientos 0 y 1 quedan a 180°, el resto a 0°
     expect(d.rot).toEqual([180, 180, 0, 0])
+  })
+
+  it('con 5 o 6 jugadores, reserva una fila propia para el hub en vez de duplicar su alto en cada hueco', () => {
+    // Con 3 filas de asientos, centrar el hub por `row-gap` (como hacen 1-4
+    // jugadores) cae sobre la fila del medio en vez de un hueco de verdad —
+    // de ahí que el reparto genérico de 5 y 6 también necesite `filaHub`
+    // (ver ADR 0039), igual que ya tenían 3 y 4 con `centro`.
+    expect(dispoTablero(5, null).filaHub).toBe(1)
+    expect(dispoTablero(5, null).centro).toBe('2 / 1 / 3 / 3')
+    expect(dispoTablero(6, null).filaHub).toBe(1)
+    expect(dispoTablero(6, null).centro).toBe('2 / 1 / 3 / 3')
   })
 
   it('rechaza una disposición sin `cols` o con `rot` que no es un array', () => {
@@ -28,7 +39,13 @@ describe('dispoTablero', () => {
 
   it('para 3 y 5 jugadores, aplica el área especial del asiento central', () => {
     expect(dispoTablero(3, null).areas).toEqual(['1 / 1 / 2 / 3', '2 / 2 / 3 / 3', '2 / 1 / 3 / 2'])
-    expect(dispoTablero(5, null).areas).toEqual([null, null, '2 / 2 / 3 / 3', '3 / 1 / 4 / 3', '2 / 1 / 3 / 2'])
+    expect(dispoTablero(5, null).areas).toEqual([
+      '1 / 1 / 2 / 2',
+      '1 / 2 / 2 / 3',
+      '3 / 2 / 4 / 3',
+      '4 / 1 / 5 / 3',
+      '3 / 1 / 4 / 2',
+    ])
   })
 
   it('el orden de los asientos va en el sentido de las agujas del reloj (regla 103.1), no el de la rejilla', () => {

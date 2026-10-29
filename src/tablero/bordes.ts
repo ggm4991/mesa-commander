@@ -62,9 +62,24 @@ export function estiloFila(lado: Lado, hueco: string): CSSProperties | undefined
 }
 
 /** El botón de menú de esa fila se adelanta al principio cuando los controles se
- * apartan hacia el lado "ini"; `margenPorDefecto` es el que lleva cuando no hay
- * nada que esquivar (el original solo lo da por hecho en `.seat-top`). */
-export function estiloBotonEnFila(lado: Lado, margenPorDefecto?: string | number): CSSProperties {
-  if (!lado) return margenPorDefecto === undefined ? {} : { marginLeft: margenPorDefecto }
+ * apartan hacia el lado "ini"; sin nada que esquivar no hace falta mover nada —
+ * `.seat-top` ya agrupa su contenido al lado de fin por defecto (ver abajo). */
+export function estiloBotonEnFila(lado: Lado): CSSProperties {
+  if (!lado) return {}
   return { marginLeft: 0, order: lado === 'ini' ? -1 : undefined }
+}
+
+/** `.esquinas-fijas` vive en posición absoluta, ajena a `estiloFila`/
+ * `estiloBotonEnFila` — por defecto a la izquierda, igual que siempre.
+ * `.seat-top` agrupa su contenido (insignias de iniciativa/fuera incluidas)
+ * al lado de fin por defecto, dejando libre la izquierda donde vive
+ * `.esquinas-fijas` — salvo cuando `lado === 'ini'`, que manda a `.seat-top`
+ * entero (insignias incluidas) justo al lado contrario, donde chocaban con
+ * las esquinas fijas sin que ninguna de las dos supiera de la otra —
+ * verificado con un asiento real. Solo en ese caso cruzan a la derecha; con
+ * `lado === 'fin'` o sin nada que esquivar, `.seat-top` ya cae al lado
+ * contrario de forma natural y no hace falta mover nada (ver ADR 0042). */
+export function estiloEsquinas(lado: Lado): CSSProperties | undefined {
+  if (lado !== 'ini') return undefined
+  return { left: 'auto', right: 8 }
 }

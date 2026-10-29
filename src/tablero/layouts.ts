@@ -6,6 +6,11 @@ export interface LayoutGenerico {
   r: number
   rot: number[]
   area?: Record<number, string>
+  centro?: string
+  /** Igual que `Dispo.filaHub` en `disposiciones.ts`: sin ella, el hub flota
+   * centrado sobre el hueco entre filas, que con 3 o más filas de asientos cae
+   * sobre la fila del medio en vez de un hueco de verdad (ver ADR 0039). */
+  filaHub?: number
 }
 
 // Los `area` de más de un asiento (a partir de 3 jugadores) están para que el
@@ -17,8 +22,29 @@ export const LAYOUTS: Record<number, LayoutGenerico> = {
   2: { c: 1, r: 2, rot: [0] },
   3: { c: 2, r: 2, rot: [0], area: { 0: '1 / 1 / 2 / 3', 1: '2 / 2 / 3 / 3', 2: '2 / 1 / 3 / 2' } },
   4: { c: 2, r: 2, rot: [0, 1], area: { 2: '2 / 2 / 3 / 3', 3: '2 / 1 / 3 / 2' } },
-  5: { c: 2, r: 3, rot: [0, 1], area: { 2: '2 / 2 / 3 / 3', 3: '3 / 1 / 4 / 3', 4: '2 / 1 / 3 / 2' } },
-  6: { c: 2, r: 3, rot: [0, 1], area: { 2: '2 / 2 / 3 / 3', 3: '3 / 2 / 4 / 3', 4: '3 / 1 / 4 / 2', 5: '2 / 1 / 3 / 2' } },
+  5: {
+    c: 2,
+    r: 3,
+    rot: [0, 1],
+    area: { 0: '1 / 1 / 2 / 2', 1: '1 / 2 / 2 / 3', 2: '3 / 2 / 4 / 3', 3: '4 / 1 / 5 / 3', 4: '3 / 1 / 4 / 2' },
+    centro: '2 / 1 / 3 / 3',
+    filaHub: 1,
+  },
+  6: {
+    c: 2,
+    r: 3,
+    rot: [0, 1],
+    area: {
+      0: '1 / 1 / 2 / 2',
+      1: '1 / 2 / 2 / 3',
+      2: '3 / 2 / 4 / 3',
+      3: '4 / 2 / 5 / 3',
+      4: '4 / 1 / 5 / 2',
+      5: '3 / 1 / 4 / 2',
+    },
+    centro: '2 / 1 / 3 / 3',
+    filaHub: 1,
+  },
 }
 
 export interface DispoTablero {
@@ -27,6 +53,7 @@ export interface DispoTablero {
   areas: (string | null)[]
   rot: number[]
   centro?: string
+  filaHub?: number
 }
 
 interface DispoGuardada {
@@ -35,6 +62,7 @@ interface DispoGuardada {
   areas?: (string | null)[]
   rot?: number[]
   centro?: string
+  filaHub?: number
 }
 
 /** La disposición elegida en la pantalla previa si sigue teniendo forma válida
@@ -43,13 +71,22 @@ interface DispoGuardada {
 export function dispoTablero(numJugadores: number, guardada: unknown): DispoTablero {
   const d = guardada as DispoGuardada | null | undefined
   if (d && Array.isArray(d.rot) && d.cols) {
-    return { cols: d.cols, rows: d.rows ?? '1fr', areas: d.areas ?? [], rot: d.rot, centro: d.centro }
+    return {
+      cols: d.cols,
+      rows: d.rows ?? '1fr',
+      areas: d.areas ?? [],
+      rot: d.rot,
+      centro: d.centro,
+      filaHub: d.filaHub,
+    }
   }
   const L = LAYOUTS[numJugadores] ?? LAYOUTS[1]
   return {
     cols: `repeat(${L.c},1fr)`,
-    rows: `repeat(${L.r},1fr)`,
+    rows: Array.from({ length: L.r }, () => '1fr').join(' '),
     areas: Array.from({ length: numJugadores }, (_, i) => L.area?.[i] ?? null),
     rot: Array.from({ length: numJugadores }, (_, i) => (L.rot.includes(i) ? 180 : 0)),
+    centro: L.centro,
+    filaHub: L.filaHub,
   }
 }

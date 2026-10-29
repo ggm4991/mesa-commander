@@ -148,7 +148,7 @@ describe('Tablero', () => {
     // dentro del primer asiento (Ana), el segundo sector de daño es el de Beto
     // (el primero es el suyo propio, por si se lo roban)
     const primerAsiento = document.querySelectorAll('.seat')[0]
-    fireEvent.click(primerAsiento.querySelector('.dano-boton') as HTMLElement)
+    fireEvent.click(primerAsiento.querySelector('.accion-dano') as HTMLElement)
     const toqueDeBeto = primerAsiento.querySelectorAll('.dano-cmd')[1].querySelector('.dano-toque') as HTMLElement
     for (let i = 0; i < 21; i++) {
       fireEvent.pointerDown(toqueDeBeto)
@@ -161,7 +161,7 @@ describe('Tablero', () => {
   it('mantener pulsado un sector de daño cubre el cuadrado entero; restar lo quita', () => {
     renderTablero(juegoDePrueba(3))
     const primerAsiento = document.querySelectorAll('.seat')[0]
-    fireEvent.click(primerAsiento.querySelector('.dano-boton') as HTMLElement)
+    fireEvent.click(primerAsiento.querySelector('.accion-dano') as HTMLElement)
     const cuadrado = primerAsiento.querySelector('.dano-cuadrado') as HTMLElement
     const sectorDeBeto = cuadrado.querySelectorAll('.dano-cmd')[1] as HTMLElement
     const toque = sectorDeBeto.querySelector('.dano-toque') as HTMLElement

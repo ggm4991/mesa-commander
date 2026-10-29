@@ -1,20 +1,33 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { HttpResponse, http } from 'msw'
+import { setupServer } from 'msw/node'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { crearAlmacenMemoria } from '../../src/almacenamiento/adaptadorMemoria'
 import { AlmacenContexto } from '../../src/contextos/AlmacenContexto'
 import { AvisoProvider } from '../../src/componentes/comunes/AvisoProvider'
 import { Previa } from '../../src/paginas/Previa'
 import type { Juego } from '../../src/motor/tipos'
+import { ProveedorQueryDePrueba } from '../ayudantes/queryDePrueba'
+
+// VistaMesa pide la imagen del comandante de cada asiento ocupado (ver
+// AsientoPrevia): sin comandante en Scryfall por defecto, igual que en
+// tests/tablero/Asiento.test.tsx, para no depender de la red de verdad.
+const servidor = setupServer(http.get('https://api.scryfall.com/cards/named', () => new HttpResponse(null, { status: 404 })))
+beforeAll(() => servidor.listen({ onUnhandledRequest: 'error' }))
+afterEach(() => servidor.resetHandlers())
+afterAll(() => servidor.close())
 
 function renderPrevia(onIrAlTablero = vi.fn()) {
   const almacen = crearAlmacenMemoria()
   render(
-    <AlmacenContexto.Provider value={almacen}>
-      <AvisoProvider>
-        <Previa onIrAlTablero={onIrAlTablero} />
-      </AvisoProvider>
-    </AlmacenContexto.Provider>,
+    <ProveedorQueryDePrueba>
+      <AlmacenContexto.Provider value={almacen}>
+        <AvisoProvider>
+          <Previa onIrAlTablero={onIrAlTablero} />
+        </AvisoProvider>
+      </AlmacenContexto.Provider>
+    </ProveedorQueryDePrueba>,
   )
   return { almacen, onIrAlTablero }
 }

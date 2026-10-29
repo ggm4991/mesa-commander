@@ -52,6 +52,15 @@ describe('orden de los asientos: sentido horario (regla 103.1)', () => {
     const d = DISPOS[6].find((x) => x.id === '6b')!
     expect(d.rot).toEqual([180, 180, 270, 0, 0, 90])
   })
+
+  it('"Cuatro esquinas y uno en medio" de 5 (5d): el hub tiene fila propia y no solapa al asiento central', () => {
+    const d = DISPOS[5].find((x) => x.id === '5d')!
+    expect(d.filaHub).toBe(1)
+    expect(d.centro).toBe('2/1/3/3')
+    // El asiento central (índice 2) vive en su propia fila (la 3ª, tras la del
+    // hub), a lo ancho de las dos columnas — no en la misma celda que el hub.
+    expect(d.areas?.[2]).toBe('3/1/4/3')
+  })
 })
 
 describe('conDisposicionGuardada', () => {
