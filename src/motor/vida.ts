@@ -39,10 +39,17 @@ export function nombreComandante(juego: Juego, clave: string): string {
  * tablero reparte el espacio general según el número de *jugadores*, no de
  * comandantes — así un compañero no descuadra la rejilla general, solo parte en dos
  * el hueco de quien lo lleva (ver ADR 0019).
+ *
+ * `orden` decide en qué secuencia salen los grupos — por defecto, el orden de
+ * asiento de siempre (0, 1, 2...). Quien llama puede pasar el orden en que un
+ * jugador concreto ve a los demás alrededor de la mesa (ver
+ * `ordenEspacialDesde` en `tablero/layouts.ts` y la ADR 0056): esta función no
+ * sabe nada de disposiciones ni de geometría, solo reordena.
  */
-export function comandantesAgrupadosPorJugador(juego: Juego): ComandanteEnMesa[][] {
+export function comandantesAgrupadosPorJugador(juego: Juego, orden?: number[]): ComandanteEnMesa[][] {
   const plana = comandantesEnMesa(juego)
-  return juego.j.map((_, k) => plana.filter((c) => c.k === k))
+  const secuencia = orden ?? juego.j.map((_, k) => k)
+  return secuencia.map((k) => plana.filter((c) => c.k === k))
 }
 
 export function revisar(juego: Juego, i: number, ahora: number = Date.now()): Juego {

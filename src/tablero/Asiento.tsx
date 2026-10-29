@@ -7,6 +7,7 @@ import type { Identidad, Juego } from '../motor/tipos'
 import { type BordeAsiento, estiloBotonEnFila, estiloEsquinas, estiloFila } from './bordes'
 import { ICONO_CONTADOR, MANA } from './constantesUI'
 import { IconoDanoComandante } from './IconoDanoComandante'
+import { type DispoTablero, ordenEspacialDesde } from './layouts'
 import { PanelDanoExpandido } from './PanelDanoExpandido'
 import { useMantenerPulsado } from './useMantenerPulsado'
 
@@ -21,6 +22,10 @@ interface Props {
   indice: number
   rotacion: number
   areaGrid?: string | null
+  /** Para ordenar el cuadrado de daño de comandante como lo ve este asiento en
+   * concreto, no en el orden de índice fijo (ver `ordenEspacialDesde`, ADR
+   * 0056). */
+  dispo: DispoTablero
   delta: number
   borde: BordeAsiento | null
   esDestinoDeCorona: boolean
@@ -42,6 +47,7 @@ export function Asiento({
   indice,
   rotacion,
   areaGrid,
+  dispo,
   delta,
   borde,
   esDestinoDeCorona,
@@ -63,9 +69,15 @@ export function Asiento({
   // la rejilla sale siempre igual de cuadrada tenga o no compañeros la mesa (ver
   // ADR 0019). Para los 4 jugadores de un pod normal, sqrt dos columnas da la
   // rejilla de 2x2 con la que se pensó el diseño.
-  const gruposDano = comandantesAgrupadosPorJugador(juego)
+  const ordenVisor = ordenEspacialDesde(dispo, indice, juego.j.length)
+  const gruposDano = comandantesAgrupadosPorJugador(juego, ordenVisor)
   const columnasDano = Math.max(1, Math.ceil(Math.sqrt(gruposDano.length)))
   const filasDano = Math.max(1, Math.ceil(gruposDano.length / columnasDano))
+  // Con exactamente 4 jugadores, `ordenEspacialDesde` ya coloca cada asiento
+  // en la celda que le toca (arriba-izq., arriba-der., abajo-izq.,
+  // abajo-der., el mismo orden en que una rejilla 2×2 se rellena sola) — es
+  // un mini-mapa real de la mesa, girado como el propio asiento (ver ADR
+  // 0056).
 
   // Mantener pulsado un sector no lo abre a él mismo: pide que el cuadrado entero
   // (por eso el estado vive aquí y no en `IconoDanoComandante`) muestre el panel
@@ -94,8 +106,10 @@ export function Asiento({
     return () => document.removeEventListener('pointerdown', cerrarSiEsFuera)
   }, [mostrarDano, cerrarPopupDano])
 
-  const menosVida = useMantenerPulsado(() => onCambiarVida(-1))
-  const masVida = useMantenerPulsado(() => onCambiarVida(1))
+  // Pasado un segundo manteniendo pulsado, cada toque sube o baja la vida de 10
+  // en 10 en vez de 1 en 1 (ver useMantenerPulsado y ADR 0054).
+  const menosVida = useMantenerPulsado((acelerado) => onCambiarVida(acelerado ? -10 : -1))
+  const masVida = useMantenerPulsado((acelerado) => onCambiarVida(acelerado ? 10 : 1))
   const imagenComandante = useImagenComandante(j.c, j.imagenId)
 
   // El impuesto de comandante no aparece aquí: tiene su propio botón siempre

@@ -23,6 +23,15 @@ en el que se convierte en una versión con fecha.
 - El hub ocupa ahora todo el ancho disponible en cualquier disposición con
   fila propia para él (`4b`, `5a`-`5d`, `6b`), no solo una píldora
   centrada con hueco vacío a los lados. Ver ADR 0052.
+- El cuadrado de daño de comandante de cada jugador ahora es un mini-mapa de
+  la posición real de todos en la mesa, girado el mismo ángulo que ya gira
+  el propio asiento de quien mira (con 4 jugadores cae exactamente en la
+  celda del cuadrado 2×2 que le toca; con otros números de jugadores, o en
+  disposiciones en cruz sin esquinas limpias, en el orden de lectura
+  equivalente), en vez de un orden fijo igual para todos. Ver ADR 0053
+  (reemplazada), 0055 (reemplazada) y 0056.
+- Mantener pulsado los botones de +/- vida, pasado un segundo, sube o baja
+  la vida de 10 en 10 en vez de 1 en 1. Ver ADR 0054.
 
 ### Changed
 

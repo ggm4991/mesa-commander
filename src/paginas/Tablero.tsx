@@ -239,6 +239,7 @@ export function Tablero({ juegoInicial, onSalir, onPartidaRegistrada }: Props) {
             indice={i}
             rotacion={dispo.rot[i] || 0}
             areaGrid={dispo.areas[i]}
+            dispo={dispo}
             delta={deltasVisibles[i] || 0}
             borde={bordes[i]}
             esDestinoDeCorona={arrastre != null && arrastre.destino === i && arrastre.desde !== i}

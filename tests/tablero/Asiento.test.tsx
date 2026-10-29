@@ -46,6 +46,9 @@ const props = (over: Record<string, unknown> = {}) => ({
   juego: juegoDePrueba(),
   indice: 0,
   rotacion: 0,
+  // Sin `areas`, `ordenEspacialDesde` cae al orden de índice de siempre — las
+  // pruebas de aquí no van de la geometría de la mesa (ver layouts.test.ts).
+  dispo: { cols: '1fr 1fr', rows: '1fr', areas: [], rot: [0, 0] },
   delta: 0,
   borde: null,
   esDestinoDeCorona: false,
@@ -122,6 +125,19 @@ describe('Asiento', () => {
     fireEvent.pointerDown(screen.getByLabelText('Quitar vida'))
     expect(onCambiarVida).toHaveBeenNthCalledWith(1, 1)
     expect(onCambiarVida).toHaveBeenNthCalledWith(2, -1)
+  })
+
+  it('pasado un segundo manteniendo pulsado +, cada repetición sube de 10 en 10', () => {
+    vi.useFakeTimers()
+    const onCambiarVida = vi.fn()
+    renderAsiento(props({ onCambiarVida }))
+    fireEvent.pointerDown(screen.getByLabelText('Sumar vida'))
+    act(() => vi.advanceTimersByTime(1500))
+    fireEvent.pointerUp(screen.getByLabelText('Sumar vida'))
+    const llamadas = onCambiarVida.mock.calls.map((c) => c[0])
+    expect(llamadas[0]).toBe(1) // el primer toque, siempre de 1
+    expect(llamadas).toContain(10) // alguna repetición ya acelerada
+    expect(llamadas.every((v) => v === 1 || v === 10)).toBe(true)
   })
 
   it('muestra el delta flotante solo cuando no es cero', () => {
@@ -347,6 +363,44 @@ describe('Asiento', () => {
     expect(grupos).toHaveLength(2)
     expect(grupos[0].querySelectorAll('.dano-cmd')).toHaveLength(2) // el hueco de Ana se parte en dos
     expect(grupos[1].querySelectorAll('.dano-cmd')).toHaveLength(1) // el de Beto se queda entero
+  })
+
+  it('con "Dos y dos" (4a) real, el cuadrado es un mini-mapa de la mesa girado con el propio asiento', () => {
+    // Disposición real de disposiciones.ts: 0 arriba-izq., 1 arriba-der.,
+    // 2 abajo-der., 3 abajo-izq. Datos exactos confirmados por el usuario
+    // para los visores 3 (sin girar) y 1 (girado 180°, ver ADR 0056).
+    const dosYDos = {
+      cols: '1fr 1fr',
+      rows: '1fr 1fr',
+      areas: ['1/1/2/2', '1/2/2/3', '2/2/3/3', '2/1/3/2'],
+      rot: [180, 180, 0, 0],
+    }
+    const juego: Juego = {
+      ...juegoDePrueba(),
+      j: [
+        nuevoJugador({ nombre: 'Jugador1', comandante: 'Marchesa' }, 40),
+        nuevoJugador({ nombre: 'Jugador2', comandante: 'Oloro' }, 40),
+        nuevoJugador({ nombre: 'Jugador3', comandante: 'Yuriko' }, 40),
+        nuevoJugador({ nombre: 'Jugador4', comandante: 'Kenrith' }, 40),
+      ],
+    }
+    const comandantePorCelda = () =>
+      Array.from(document.querySelectorAll('.dano-grupo')).map(
+        (g) => (g.querySelector('.dano-cmd .dano-toque') as HTMLElement).title.split(',')[0].split(' de ')[0],
+      )
+
+    // Visor = jugador 3 (índice 2, abajo-der., sin girar): copia exacta de la
+    // mesa real — arriba-izq.=1, arriba-der.=2, abajo-izq.=4, abajo-der.=3(yo).
+    const { unmount } = renderAsiento(props({ juego, indice: 2, dispo: dosYDos }))
+    fireEvent.click(screen.getByText('Daño de comandante'))
+    expect(comandantePorCelda()).toEqual(['Marchesa', 'Oloro', 'Kenrith', 'Yuriko'])
+    unmount()
+
+    // Visor = jugador 1 (índice 0, arriba-izq., girado 180°): la mesa real
+    // girada 180° — arriba-izq.=3, arriba-der.=4, abajo-izq.=2, abajo-der.=1(yo).
+    renderAsiento(props({ juego, indice: 0, dispo: dosYDos }))
+    fireEvent.click(screen.getByText('Daño de comandante'))
+    expect(comandantePorCelda()).toEqual(['Yuriko', 'Kenrith', 'Oloro', 'Marchesa'])
   })
 
   it('sin comandante en Scryfall (o sin red), el fondo se queda en el degradado de color', async () => {

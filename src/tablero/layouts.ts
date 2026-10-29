@@ -90,3 +90,100 @@ export function dispoTablero(numJugadores: number, guardada: unknown): DispoTabl
     filaHub: L.filaHub,
   }
 }
+
+interface Centro {
+  fila: number
+  col: number
+}
+
+/** Centro (en líneas de grid, no en píxeles — basta para comparar posiciones
+ * relativas) de cada `areas[i]`, o `null` si a alguno le falta (algunas
+ * disposiciones, como las de una sola columna, no necesitan `areas` porque el
+ * propio orden del DOM ya coloca cada asiento donde toca). */
+function centrosDeAsientos(areas: (string | null)[], n: number): Centro[] | null {
+  if (areas.length < n) return null
+  const centros: Centro[] = []
+  for (let i = 0; i < n; i++) {
+    const area = areas[i]
+    if (!area) return null
+    const [filaIni, colIni, filaFin, colFin] = area.split('/').map((x) => Number(x.trim()))
+    if ([filaIni, colIni, filaFin, colFin].some(Number.isNaN)) return null
+    centros.push({ fila: (filaIni + filaFin) / 2, col: (colIni + colFin) / 2 })
+  }
+  return centros
+}
+
+/**
+ * Orden en el que `indiceVisor` ve a los demás asientos en su cuadrado de
+ * daño: no una secuencia relativa a quien mira, sino un mini-mapa de la mesa
+ * entera (posiciones reales de `dispo.areas`) girado el mismo ángulo que ya
+ * gira el propio asiento del visor (`dispo.rot[indiceVisor]`) — el cuadrado
+ * gira con todo lo demás de ese asiento, así que lo que se ve dentro tiene
+ * que girar con él (ver ADR 0056, que sustituye a la 0055: la 0055 ordenaba
+ * por ángulo relativo al visor sin aplicar su giro, razonando que girar un
+ * punto de vista no cambia el orden cíclico — cierto para una secuencia, pero
+ * la pieza real que se pedía era una posición de rejilla, no una secuencia).
+ *
+ * Verificado con el usuario celda a celda sobre "Dos y dos" (4a): el visor 3
+ * (abajo-der., sin girar) ve una copia exacta de la mesa real; el visor 1
+ * (arriba-izq., girado 180°) ve la mesa real girada 180° — con 1 arriba-izq.
+ * acabando abajo-der., es decir en su propio hueco, por simple coincidencia
+ * geométrica de esa disposición, no por ninguna regla de "uno mismo siempre
+ * ahí".
+ *
+ * Sin `areas` completas para calcularlo, cae al orden de índice llano (sin
+ * geometría que girar, no hay mini-mapa que trazar).
+ */
+export function ordenEspacialDesde(dispo: DispoTablero, indiceVisor: number, n: number): number[] {
+  const centros = centrosDeAsientos(dispo.areas, n)
+  if (!centros) return Array.from({ length: n }, (_, i) => i)
+
+  const centroMesa = {
+    col: centros.reduce((s, c) => s + c.col, 0) / n,
+    fila: centros.reduce((s, c) => s + c.fila, 0) / n,
+  }
+  const rad = ((dispo.rot[indiceVisor] ?? 0) * Math.PI) / 180
+  const coseno = Math.cos(rad)
+  const seno = Math.sin(rad)
+
+  const girado = (k: number): Centro => {
+    const dCol = centros[k].col - centroMesa.col
+    const dFila = centros[k].fila - centroMesa.fila
+    return { col: dCol * coseno - dFila * seno, fila: dCol * seno + dFila * coseno }
+  }
+
+  const indices = Array.from({ length: n }, (_, k) => k)
+  const posiciones = indices.map(girado)
+
+  const angulo = (p: Centro): number => {
+    const a = Math.atan2(p.fila, p.col)
+    return a < 0 ? a + 2 * Math.PI : a
+  }
+  const porAngulo = () => [...indices].sort((a, b) => angulo(posiciones[a]) - angulo(posiciones[b]))
+
+  if (n === 4) {
+    // Con exactamente 4, el cuadrado es 2×2 de verdad: cada asiento va a la
+    // celda que le toca (arriba/abajo, izquierda/derecha) según el signo de
+    // su posición ya girada — en el mismo orden [arriba-izq., arriba-der.,
+    // abajo-izq., abajo-der.] con el que una rejilla CSS se rellena sola. Solo
+    // vale cuando los 4 asientos están de verdad en las 4 esquinas: en una
+    // disposición en cruz (como "Uno en cada lado", 4b) dos de ellos quedan
+    // justo en el centro de un eje y empatan a la misma celda — ahí se cae al
+    // orden por ángulo, igual que con el resto de números de jugadores.
+    const celda = (p: Centro) => (p.fila < 0 ? 0 : 2) + (p.col < 0 ? 0 : 1)
+    const celdas = posiciones.map(celda)
+    if (new Set(celdas).size === 4) {
+      const orden = [0, 0, 0, 0]
+      indices.forEach((k) => {
+        orden[celdas[k]] = k
+      })
+      return orden
+    }
+  }
+
+  // Con otros números de jugadores (o un 4 sin forma de esquinas limpia) el
+  // cuadrado no tiene forma de brújula, así que se ordena por el ángulo de la
+  // posición ya girada — sigue siendo el mini-mapa real, solo que leído en
+  // vuelta en vez de por celdas.
+  return porAngulo()
+}

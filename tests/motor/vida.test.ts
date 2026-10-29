@@ -78,6 +78,16 @@ describe('comandantesAgrupadosPorJugador', () => {
     expect(grupos[0]).toHaveLength(2) // el grupo de Ana lleva sus dos comandantes
     expect(grupos[1]).toHaveLength(1) // el de Beto, solo el suyo
   })
+
+  it('sin `orden`, usa el orden de asiento de siempre (0, 1, 2...)', () => {
+    expect(comandantesAgrupadosPorJugador(partidaDePrueba())[0][0].dueno).toBe('Ana')
+  })
+
+  it('con `orden`, los grupos salen en esa secuencia exacta — no sabe nada de mesas ni de geometría', () => {
+    const desdeBeto = comandantesAgrupadosPorJugador(partidaDePrueba(), [1, 0])
+    expect(desdeBeto[0][0].dueno).toBe('Beto')
+    expect(desdeBeto[1][0].dueno).toBe('Ana')
+  })
 })
 
 describe('revisar / eliminación', () => {
